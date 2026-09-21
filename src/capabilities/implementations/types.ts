@@ -8,6 +8,7 @@ export type AdapterReasonCode =
   | "SOURCE_POLICY_MISSING"
   | "SOURCE_STALE"
   | "OBJECT_VERSION_CONFLICT"
+  | "IDEMPOTENCY_KEY_CONFLICT"
   | "CAPABILITY_INPUT_INVALID";
 
 export interface SyntheticAdapterContext {
@@ -44,4 +45,3 @@ export class SyntheticAdapterError extends Error {
     this.name = "SyntheticAdapterError";
   }
 }
-

@@ -41,6 +41,7 @@ export class SyntheticCapabilityExecutor {
   readonly #store: SyntheticCapabilityStore;
   readonly #now: () => Date;
   readonly #idFactory: () => string;
+  readonly #idempotencyOutcomes = new Map<string, CapabilityExecutionOutcome>();
   #implementationCallCount = 0;
 
   constructor(options: SyntheticCapabilityExecutorOptions) {
@@ -118,6 +119,53 @@ export class SyntheticCapabilityExecutor {
       );
     }
 
+    let parsedInput: Record<string, unknown>;
+    try {
+      parsedInput = parseCapabilityInput(capability.inputSchemaRef, request.inputEnvelope) as Record<string, unknown>;
+    } catch {
+      return this.#recordedFailure(
+        request,
+        admission,
+        capability,
+        registration.binding.bindingRef,
+        "FAILED",
+        "CAPABILITY_INPUT_INVALID",
+        startedAt,
+        false,
+        admission.auditRef ?? "gateway-audit-unavailable"
+      );
+    }
+
+    const idempotencyKey = this.#idempotencyKey(request, capability, parsedInput);
+    const inputPayloadDigest = (request.inputEnvelope as { inputPayloadDigest: string }).inputPayloadDigest;
+    const previousOutcome = this.#idempotencyOutcomes.get(idempotencyKey);
+    if (
+      previousOutcome !== undefined &&
+      previousOutcome.envelope.inputPayloadDigest !== inputPayloadDigest
+    ) {
+      return this.#recordedFailure(
+        request,
+        admission,
+        capability,
+        registration.binding.bindingRef,
+        "FAILED",
+        "IDEMPOTENCY_KEY_CONFLICT",
+        startedAt,
+        false,
+        admission.auditRef ?? "gateway-audit-unavailable"
+      );
+    }
+    if (previousOutcome !== undefined) {
+      return this.#duplicateOutcome(
+        request,
+        admission,
+        capability,
+        registration.binding.bindingRef,
+        previousOutcome,
+        startedAt
+      );
+    }
+
     const startAuditRef = this.#idFactory();
     const started = this.#auditSink.append(this.#auditEvent(
       request,
@@ -139,23 +187,6 @@ export class SyntheticCapabilityExecutor {
         startedAt,
         false,
         admission.auditRef ?? "gateway-audit-unavailable"
-      );
-    }
-
-    let parsedInput: Record<string, unknown>;
-    try {
-      parsedInput = parseCapabilityInput(capability.inputSchemaRef, request.inputEnvelope) as Record<string, unknown>;
-    } catch {
-      return this.#recordedFailure(
-        request,
-        admission,
-        capability,
-        registration.binding.bindingRef,
-        "FAILED",
-        "CAPABILITY_INPUT_INVALID",
-        startedAt,
-        false,
-        startAuditRef
       );
     }
 
@@ -212,7 +243,7 @@ export class SyntheticCapabilityExecutor {
         );
       }
       const outputDigest = digestCapabilityPayload(outputResult.data);
-      return capabilityExecutionOutcomeSchema.parse({
+      const outcome = capabilityExecutionOutcomeSchema.parse({
         envelope: {
           schemaVersion: "1",
           capabilityResultId: this.#idFactory(),
@@ -248,6 +279,8 @@ export class SyntheticCapabilityExecutor {
         implementationInvoked: true,
         externalSideEffect: false
       });
+      this.#idempotencyOutcomes.set(idempotencyKey, structuredClone(outcome));
+      return outcome;
     } catch (error) {
       if (error instanceof SyntheticAdapterError) {
         return this.#recordedFailure(
@@ -264,6 +297,107 @@ export class SyntheticCapabilityExecutor {
       }
       throw error;
     }
+  }
+
+  #duplicateOutcome(
+    request: CapabilityGatewayRequest,
+    admission: CapabilityGatewayResult,
+    capability: CapabilityEntry,
+    bindingRef: string,
+    cached: CapabilityExecutionOutcome,
+    startedAt: Date
+  ): CapabilityExecutionOutcome {
+    const completedAt = this.#now();
+    const auditRef = this.#idFactory();
+    const recorded = this.#auditSink.append(this.#auditEvent(
+      request,
+      capability,
+      bindingRef,
+      auditRef,
+      "capability_implementation_duplicate_suppressed",
+      [],
+      completedAt,
+      cached.envelope.resultStatus
+    ));
+    if (!recorded) {
+      return this.#failure(
+        request,
+        admission,
+        capability,
+        bindingRef,
+        "FAILED",
+        "AUDIT_UNAVAILABLE",
+        startedAt,
+        false,
+        admission.auditRef ?? "gateway-audit-unavailable"
+      );
+    }
+    const context = request.requestContext as {
+      requestId: string;
+      correlationId: string;
+      integrityRef: string;
+      tenantId: string;
+      dataSpaceId: string;
+    };
+    return capabilityExecutionOutcomeSchema.parse({
+      envelope: {
+        ...cached.envelope,
+        capabilityResultId: this.#idFactory(),
+        capabilityRequestRef: request.capabilityRequestId,
+        requestId: context.requestId,
+        taskId: request.taskId,
+        attemptId: request.attemptId,
+        correlationId: context.correlationId,
+        requestContextRef: context.integrityRef,
+        authorizationDecisionRef: request.authorizationDecision.decisionId,
+        tenantId: context.tenantId,
+        dataSpaceId: context.dataSpaceId,
+        resourceRefs: request.resourceRefs.map((resource) => resource.resourceId),
+        inputPayloadDigest: (request.inputEnvelope as { inputPayloadDigest: string }).inputPayloadDigest,
+        auditRef,
+        startedAt: startedAt.toISOString(),
+        completedAt: completedAt.toISOString()
+      },
+      outputPayload: structuredClone(cached.outputPayload),
+      implementationInvoked: false,
+      externalSideEffect: false
+    });
+  }
+
+  #idempotencyKey(
+    request: CapabilityGatewayRequest,
+    capability: CapabilityEntry,
+    parsedInput: Record<string, unknown>
+  ): string {
+    const context = request.requestContext as {
+      tenantId: string;
+      dataSpaceId: string;
+      actorId: string;
+      roles: string[];
+      scopeGrantRefs: string[];
+      authorityGrantRefs: string[];
+    };
+    const explicitDeduplicationKey = typeof parsedInput.deduplicationKey === "string"
+      ? parsedInput.deduplicationKey
+      : request.capabilityRequestId;
+    return [
+      context.tenantId,
+      context.dataSpaceId,
+      context.actorId,
+      request.purpose,
+      request.authorizationDecision.grantVersion,
+      digestCapabilityPayload({
+        roles: context.roles,
+        scopeGrantRefs: context.scopeGrantRefs,
+        authorityGrantRefs: context.authorityGrantRefs
+      }),
+      capability.capabilityId,
+      capability.capabilityVersion,
+      capability.idempotencyProfile,
+      digestCapabilityPayload(request.resourceRefs),
+      digestCapabilityPayload(request.collectionAdmission ?? null),
+      explicitDeduplicationKey
+    ].join("|");
   }
 
   #recordedFailure(

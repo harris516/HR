@@ -64,6 +64,12 @@ const intakeHandoffRead: SyntheticCapabilityAdapter = (context) => {
   if (input.handoffRef !== handoff.handoffRef) {
     throw new SyntheticAdapterError("WAITING", "SOURCE_UNAVAILABLE");
   }
+  if (handoff.freshnessStatus === "unavailable") {
+    throw new SyntheticAdapterError("WAITING", "SOURCE_UNAVAILABLE");
+  }
+  if (handoff.freshnessStatus !== "fresh") {
+    throw new SyntheticAdapterError("WAITING", "SOURCE_STALE");
+  }
   if (input.expectedSourceVersion !== undefined && input.expectedSourceVersion !== handoff.sourceVersion) {
     throw new SyntheticAdapterError("FAILED", "OBJECT_VERSION_CONFLICT");
   }
@@ -432,6 +438,16 @@ function readinessResult(context: SyntheticAdapterContext, revalidation: boolean
     requirement.caseRef === record.caseRef && isVisible(requirement, context)
   );
   const risks = context.store.risks.filter((risk) => risk.caseRef === record.caseRef && isVisible(risk, context));
+  if (context.store.policies.sourcePolicyVersion.length === 0) {
+    throw new SyntheticAdapterError("INDETERMINATE", "SOURCE_POLICY_MISSING");
+  }
+  if (
+    record.freshness !== "fresh" ||
+    requirements.some((requirement) => requirement.freshnessStatus !== "fresh") ||
+    risks.some((risk) => risk.sourceFreshnessSummary !== "fresh")
+  ) {
+    throw new SyntheticAdapterError("INDETERMINATE", "SOURCE_STALE");
+  }
   const blockingRequirementRefs = requirements
     .filter((requirement) => requirement.formalStatus !== "completed")
     .map((requirement) => requirement.requirementRef);

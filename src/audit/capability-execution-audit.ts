@@ -1,7 +1,8 @@
 export type CapabilityExecutionAuditEventType =
   | "capability_implementation_started"
   | "capability_implementation_completed"
-  | "capability_implementation_failed";
+  | "capability_implementation_failed"
+  | "capability_implementation_duplicate_suppressed";
 
 export interface CapabilityExecutionAuditEvent {
   auditRef: string;
@@ -44,4 +45,3 @@ export class InMemoryCapabilityExecutionAuditSink implements CapabilityExecution
     return structuredClone(this.#events);
   }
 }
-

@@ -14,7 +14,7 @@ export interface SyntheticCaseRecord {
   confirmationStatus: "pending";
   knowledgeState: "KNOWN";
   sourceRefs: string[];
-  freshness: "fresh";
+  freshness: "fresh" | "stale" | "unavailable" | "unknown";
   policyVersionRefs: string[];
 }
 
@@ -28,7 +28,7 @@ export interface SyntheticCapabilityStore {
     offerStatus: "accepted";
     plannedStartDateCandidate: string;
     sourceRecordRefs: string[];
-    freshnessStatus: "fresh";
+    freshnessStatus: "fresh" | "stale" | "unavailable" | "unknown";
     qualityStatus: "valid";
     sourcePolicyVersion: string;
     sourceVersion: string;
@@ -48,7 +48,7 @@ export interface SyntheticCapabilityStore {
     completionCandidateStatus: "COMPLETE_CANDIDATE" | "NOT_COMPLETE" | "INDETERMINATE";
     criteriaVersionRef: string;
     evidenceSetVersionRef: string;
-    freshnessStatus: "fresh";
+    freshnessStatus: "fresh" | "stale" | "unavailable" | "unknown";
     reasonCodes: string[];
     criteriaResultRefs: string[];
     evidenceValidationRefs: string[];
@@ -65,7 +65,7 @@ export interface SyntheticCapabilityStore {
     effectivePHC: "PHC_2";
     reasonCodes: ["REVIEW_REQUIRED"];
     affectedObjectRefs: string[];
-    sourceFreshnessSummary: "fresh";
+    sourceFreshnessSummary: "fresh" | "stale" | "unavailable" | "unknown";
   }>;
   observations: Array<{
     tenantId: string;
@@ -78,7 +78,7 @@ export interface SyntheticCapabilityStore {
     sourceRecordRef: string;
     sourceVersion: string;
     observedAt: string;
-    freshnessStatus: "fresh";
+    freshnessStatus: "fresh" | "stale" | "unavailable" | "unknown";
     qualityStatus: "valid";
     policyVersion: string;
     redactionApplied: true;

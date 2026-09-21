@@ -22,6 +22,7 @@
 - Read / Analyze Adapters：S3 local implemented；13 synthetic test implementations；default runtime disabled
 - Draft Adapters：S4 local implemented；5 synthetic test implementations；DRAFT / NOT_SENT only
 - Skill Orchestrators：S5 local implemented；6 synthetic Skill contracts；child Capability independent admission/audit
+- Security Matrix：S6 local passed；NEG-001—NEG-012 plus version/schema/binding/idempotency isolation
 
 ## 目录
 
@@ -45,6 +46,7 @@ workspace-template/     OpenClaw Agent Workspace 模板
 pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm test
+pnpm test:security
 pnpm validate:config
 pnpm validate:capabilities
 pnpm smoke:gateway
@@ -65,6 +67,8 @@ S3已经实现13个Read/Analyze Synthetic Adapter及严格执行器，覆盖Inta
 S4已经实现5个Draft Synthetic Adapter。所有输出都经过`DraftArtifactResultV1`校验，并固定为`DRAFT / NOT_SENT / formalStateChanged=false / externalSideEffect=false`；PHC-3/4路径必须先满足Review Gate，且不存在正式决策或发送字段。
 
 S5已经实现6个合成Skill Orchestrator合同与12条受控Workflow。每个Child Capability都使用独立Request、Gateway Admission、Authorization Decision和Audit；任一步骤拒绝、等待、Review或失败都会停止后续步骤，不继承前一步Allow，也不使用Generic Tool Fallback。Practice路径只生成Handoff Candidate，不创建正式Review或专业决定。
+
+S6已经把NEG-001—NEG-012固化为可执行安全矩阵，覆盖Reserved Side Effect、Tenant/DataSpace与同租户Scope隔离、Cursor/Count/Field泄漏、Readiness注入、Version/Schema、Idempotency、Binding、Audit和Prompt/Tool Injection。所有负向路径保持零正式写入、零发送和零外部副作用。
 
 ## 云服务器位置
 

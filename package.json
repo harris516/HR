@@ -10,6 +10,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:security": "vitest run tests/security-negative.test.ts",
     "validate:config": "tsx src/cli/validate-config.ts config/runtime.test.json",
     "validate:capabilities": "tsx src/cli/validate-capability-registry.ts",
     "smoke:navigation": "tsx src/cli/smoke-navigation.ts",
