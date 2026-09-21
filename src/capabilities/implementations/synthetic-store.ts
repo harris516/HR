@@ -146,6 +146,15 @@ export interface SyntheticCapabilityStore {
     redactionPolicyRef: string;
     redactionPolicyVersion: string;
   };
+  draftControls: {
+    intakeCompletenessEvaluationRef: string;
+    readinessEvaluationRef: string;
+    approvedFactRefs: string[];
+    sourceEvidenceRefs: string[];
+    templateRefs: string[];
+    audienceRoleRefs: string[];
+    reviewerTypeRefs: string[];
+  };
 }
 
 const actorId = "hr-user-demo-001";
@@ -335,5 +344,24 @@ export const syntheticCapabilityStore: SyntheticCapabilityStore = {
     sourcePolicyVersion: "source-policy-v1",
     redactionPolicyRef: "audit-redaction-policy-001",
     redactionPolicyVersion: "audit-redaction-policy-v1"
+  },
+  draftControls: {
+    intakeCompletenessEvaluationRef: "evaluation-intake-complete-001",
+    readinessEvaluationRef: "evaluation-readiness-001",
+    approvedFactRefs: [
+      "fact-offer-accepted-001",
+      "fact-start-date-001",
+      "fact-equipment-pending-001"
+    ],
+    sourceEvidenceRefs: ["evidence-offer-001", "evidence-equipment-001"],
+    templateRefs: [
+      "template-intake-v1",
+      "template-reminder-v1",
+      "template-escalation-v1",
+      "template-ready-card-v1",
+      "template-review-request-v1"
+    ],
+    audienceRoleRefs: ["it_onboarding_owner", "onboarding_hr_operations"],
+    reviewerTypeRefs: ["authorized_hr_reviewer", "professional_practice_reviewer"]
   }
 };

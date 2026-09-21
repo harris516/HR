@@ -28,7 +28,8 @@ const contractsSchema = z.object({
   capabilitySchemas: z.literal("v1"),
   capabilityReasonCodes: z.literal("v1"),
   capabilityGateway: z.literal("v1"),
-  readAnalyzeAdapters: z.literal("v1")
+  readAnalyzeAdapters: z.literal("v1"),
+  draftAdapters: z.literal("v1")
 }).strict();
 
 const defaultsSchema = z.object({

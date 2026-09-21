@@ -20,14 +20,14 @@ import {
   capabilityPayloadSchemas,
   parseCapabilityInput
 } from "../schema-registry.js";
-import { SyntheticReadAnalyzeImplementationRegistry } from "./implementation-registry.js";
+import type { SyntheticImplementationRegistryPort } from "./implementation-registry.js";
 import { syntheticCapabilityStore, type SyntheticCapabilityStore } from "./synthetic-store.js";
 import { SyntheticAdapterError, type AdapterReasonCode } from "./types.js";
 
 type ExecutionReasonCode = AdapterReasonCode | "AUDIT_UNAVAILABLE" | "CAPABILITY_OUTPUT_INVALID" | "IMPLEMENTATION_NOT_AVAILABLE" | "CAPABILITY_INPUT_INVALID";
 
 export interface SyntheticCapabilityExecutorOptions {
-  implementationRegistry: SyntheticReadAnalyzeImplementationRegistry;
+  implementationRegistry: SyntheticImplementationRegistryPort;
   auditSink: CapabilityExecutionAuditSink;
   store?: SyntheticCapabilityStore;
   now?: () => Date;
@@ -36,7 +36,7 @@ export interface SyntheticCapabilityExecutorOptions {
 }
 
 export class SyntheticCapabilityExecutor {
-  readonly #implementationRegistry: SyntheticReadAnalyzeImplementationRegistry;
+  readonly #implementationRegistry: SyntheticImplementationRegistryPort;
   readonly #auditSink: CapabilityExecutionAuditSink;
   readonly #store: SyntheticCapabilityStore;
   readonly #now: () => Date;
@@ -385,4 +385,3 @@ export class SyntheticCapabilityExecutor {
     };
   }
 }
-

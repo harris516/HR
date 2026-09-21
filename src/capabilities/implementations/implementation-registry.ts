@@ -13,12 +13,19 @@ export interface SyntheticImplementationRegistration {
   adapter: SyntheticCapabilityAdapter;
 }
 
+export interface SyntheticImplementationRegistryPort {
+  get(capabilityId: CapabilityId): SyntheticImplementationRegistration | undefined;
+}
+
 export interface SyntheticImplementationRegistryOptions {
   adapterOverrides?: ReadonlyMap<CapabilityId, SyntheticCapabilityAdapter>;
   allowSyntheticTestAdapterOverrides?: boolean;
 }
 
-function bindingFor(entry: CapabilityEntry): CapabilityImplementationBinding {
+export function syntheticBindingFor(
+  entry: CapabilityEntry,
+  approvalRef = "approval://synthetic/s3-local-test-only"
+): CapabilityImplementationBinding {
   return {
     bindingRef: `implementation://synthetic/${entry.capabilityId}/1.0.0`,
     implementedCapabilityId: entry.capabilityId,
@@ -39,7 +46,7 @@ function bindingFor(entry: CapabilityEntry): CapabilityImplementationBinding {
     healthStatus: "HEALTHY",
     featureFlagRef: entry.featureFlag.key,
     approvedBy: "root",
-    approvalRef: "approval://synthetic/s3-local-test-only"
+    approvalRef
   };
 }
 
@@ -61,7 +68,7 @@ export class SyntheticReadAnalyzeImplementationRegistry {
       }
       this.#registrations.set(entry.capabilityId, {
         capabilityId: entry.capabilityId,
-        binding: bindingFor(entry),
+        binding: syntheticBindingFor(entry),
         adapter
       });
     }

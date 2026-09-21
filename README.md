@@ -20,6 +20,7 @@
 - Capability Registry：18 planned、0 enabled；12 reserved、0 registered
 - Capability Gateway：S2 local implemented；default all denied；0 implementation invoked
 - Read / Analyze Adapters：S3 local implemented；13 synthetic test implementations；default runtime disabled
+- Draft Adapters：S4 local implemented；5 synthetic test implementations；DRAFT / NOT_SENT only
 
 ## 目录
 
@@ -47,6 +48,7 @@ pnpm validate:config
 pnpm validate:capabilities
 pnpm smoke:gateway
 pnpm smoke:adapters
+pnpm smoke:drafts
 pnpm smoke:navigation
 ```
 
@@ -57,6 +59,8 @@ S1已经把12的18个业务Capability建立为严格的代码合同，但它们�
 S2已经增加Capability Candidate Resolution与统一Gateway：对Registry、版本、环境、Tenant/DataSpace、Authorization、PHC、Review、Schema/Digest、Collection Cursor和Implementation/Tool/Connector Binding执行固定顺序的Default Deny检查。默认运行态仍拒绝全部18项业务Capability；S2本身不调用任何实现。
 
 S3已经实现13个Read/Analyze Synthetic Adapter及严格执行器，覆盖Intake、Case、Requirement、Risk、Evidence、Responsibility、Readiness、Artifact和Audit。它们只在显式Test Harness中可注入；默认Runtime Config、正式Registry和OpenClaw均保持0个业务Capability启用。
+
+S4已经实现5个Draft Synthetic Adapter。所有输出都经过`DraftArtifactResultV1`校验，并固定为`DRAFT / NOT_SENT / formalStateChanged=false / externalSideEffect=false`；PHC-3/4路径必须先满足Review Gate，且不存在正式决策或发送字段。
 
 ## 云服务器位置
 
