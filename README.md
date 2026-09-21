@@ -15,7 +15,7 @@
 - Real Customer Data：禁止
 - Formal Commit / External Side Effect：禁止
 - Task Navigation Contract：`v0.3 reviewed`
-- Task Navigation Runtime：N1—N6 implemented；N7 Test Harness verified
+- Task Navigation Runtime：N1—N7 server verified；10—11 Runtime Cross-check passed
 
 ## 目录
 

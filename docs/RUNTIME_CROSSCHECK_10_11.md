@@ -9,7 +9,10 @@ local_typecheck: PASSED
 local_tests: 35/35 PASSED
 local_config_validation: PASSED
 local_navigation_smoke: PASSED
-server_revalidation: PENDING
+server_revalidation: PASSED
+workspace_agents_sync: PASSED
+openclaw_navigation_rules_smoke: PASSED
+openclaw_prohibited_action_smoke: PASSED
 openclaw_tool_binding: INTENTIONALLY_PENDING_12
 agent_engineering_ready: NOT_YET
 ```
@@ -44,9 +47,9 @@ agent_engineering_ready: NOT_YET
 6. 空Channel Binding下只允许合成`test_harness`；
 7. 增加弱姓名线索的跨租户不干扰测试和强标识跨DataSpace Hard Block测试。
 
-## Server Closure条件
+## Server Closure结果
 
-服务器拉取本次Cross-check修复提交后必须再次通过：
+云服务器已在提交`7bc6238`执行并通过：
 
 ```bash
 corepack pnpm typecheck
@@ -55,4 +58,11 @@ corepack pnpm validate:config
 corepack pnpm smoke:navigation
 ```
 
-通过后可标记`runtime_crosscheck_10_11_passed`并进入12；这仍不代表整体Agent Engineering Ready或允许真实数据、飞书、Connector、正式Commit与外部副作用。
+验证结果为35/35测试通过、Config Accepted、Navigation Smoke为`READ / all_completed`、Capability调用1次且`externalSideEffect: false`。Workspace `AGENTS.md`已与模板一致；OpenClaw Agent能够复述固定导航顺序、Child Task隔离和Audit Fail Closed，并拒绝跳过Authorization Precheck、正式READY与飞书发送。
+
+```text
+runtime_crosscheck_10_11_passed
+task_navigation_runtime_verified
+```
+
+本结论允许进入12，但仍不代表整体Agent Engineering Ready，也不允许真实数据、飞书、Connector、正式Commit与外部副作用。

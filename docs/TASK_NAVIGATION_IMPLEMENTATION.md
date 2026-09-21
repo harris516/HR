@@ -11,6 +11,8 @@ n4_subject_resolution_stub: implemented
 n5_deterministic_route_engine: implemented
 n6_lifecycle_audit: implemented
 n7_test_harness: verified
+n7_server_runtime: verified
+n7_workspace_rules: verified
 n7_openclaw_tool_binding: intentionally_pending_12
 real_customer_data: disabled
 external_side_effects: disabled
@@ -53,8 +55,6 @@ pnpm smoke:navigation
 
 ## 下一Gate
 
-1. 将本版本同步到云服务器仓库；
-2. 在服务器执行四项验证命令；
-3. 执行10—11 Runtime Cross-check；
-4. 进入12 Skill Pack，冻结正式Capability ID、Version、Input/Output Schema和Tool Binding规则；
-5. 12批准前不把导航模块暴露给Agent作为可调用Tool。
+1. 进入12 Skill Pack，冻结正式Capability ID、Version、Input/Output Schema和Tool Binding规则；
+2. 12批准前不把导航模块暴露给Agent作为可调用Tool；
+3. 继续保持Channel、Connector、真实数据和外部副作用关闭。
