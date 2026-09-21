@@ -1,0 +1,17 @@
+{
+  "synthetic": true,
+  "tenantId": "tenant-demo-001",
+  "dataSpaceId": "dataspace-demo-hr",
+  "actor": {
+    "actorType": "human",
+    "actorId": "hr-user-demo-001",
+    "roles": ["onboarding_hr_operations"]
+  },
+  "onboardingCase": {
+    "caseId": "case-demo-001",
+    "candidateRef": "candidate-demo-001",
+    "offerRef": "offer-demo-001",
+    "lifecycle": "offer_accepted",
+    "formalReadiness": "not_confirmed"
+  }
+}

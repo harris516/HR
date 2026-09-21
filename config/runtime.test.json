@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "v1",
+  "agent": {
+    "id": "aibang-hr-onboarding-agent",
+    "displayName": "hr-onboarding",
+    "domain": "hr_employment_onboarding",
+    "primaryUser": "onboarding_hr_operations",
+    "canonicalObject": "OnboardingCase",
+    "heroTask": "offer_accepted_to_day1_ready",
+    "automationCeiling": "A2_DRAFT"
+  },
+  "runtime": {
+    "mode": "test",
+    "openclawVersion": "2026.9.4",
+    "nodeVersion": "24.21.0"
+  },
+  "contracts": {
+    "identity": "v0.3",
+    "requestContext": "v1",
+    "subjectResolution": "v0.3",
+    "authorization": "v0.3",
+    "sessionMemory": "v0.3"
+  },
+  "defaults": {
+    "authorization": "deny",
+    "unknownData": "visible",
+    "authorityUncertain": "deny",
+    "subjectResolution": "deterministic_only"
+  },
+  "capabilities": [
+    "health",
+    "validate_context",
+    "resolve_subject_stub",
+    "read_stub",
+    "draft_stub"
+  ],
+  "bindings": {
+    "channels": [],
+    "connectors": []
+  },
+  "featureFlags": {
+    "realCustomerData": false,
+    "formalInternalCommit": false,
+    "externalSideEffects": false,
+    "outboundMessaging": false,
+    "sensitiveExport": false,
+    "growthWrite": false,
+    "productionMemory": false,
+    "mockCapabilities": true
+  }
+}
