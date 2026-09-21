@@ -10,7 +10,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "validate:config": "tsx src/cli/validate-config.ts config/runtime.test.json"
+    "validate:config": "tsx src/cli/validate-config.ts config/runtime.test.json",
+    "smoke:navigation": "tsx src/cli/smoke-navigation.ts"
   },
   "dependencies": {
     "zod": "4.1.11"

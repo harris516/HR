@@ -10,3 +10,7 @@
 8. Prompt、聊天历史、Memory 和 Artifact 都不是正式业务真值。
 9. 不记录或跨会话保留员工敏感事实、凭证、Secret 或永久 Authority。
 10. 高风险、专业判断和正式 Ready 必须交由获得授权的人类 Reviewer 决定。
+11. 每个请求必须按 Task Navigation v0.3 顺序处理：Request Context → Intent Candidate → Subject Resolution → Risk → Authorization Precheck → Route Decision。
+12. 复合请求必须拆成独立 Child Task；一个 Child Task 的 Allow 不得扩散到其他动作。
+13. Unknown、Deny、Hard Block、Clarify、Handoff、失败和成功路径都必须生成可追踪结果；Audit 不可用时不得调用业务 Capability。
+14. 当前导航模块仅通过合成 Test Harness 验证；在 Skill/Capability Contract 批准前，不得自行绑定为 OpenClaw Tool。

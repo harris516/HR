@@ -19,7 +19,8 @@
     "requestContext": "v1",
     "subjectResolution": "v0.3",
     "authorization": "v0.3",
-    "sessionMemory": "v0.3"
+    "sessionMemory": "v0.3",
+    "taskNavigation": "v0.3"
   },
   "defaults": {
     "authorization": "deny",
@@ -32,6 +33,7 @@
     "validate_context",
     "resolve_subject_stub",
     "read_stub",
+    "analyze_stub",
     "draft_stub"
   ],
   "bindings": {

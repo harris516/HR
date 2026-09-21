@@ -14,6 +14,8 @@
 - Channel / Connector：全部关闭
 - Real Customer Data：禁止
 - Formal Commit / External Side Effect：禁止
+- Task Navigation Contract：`v0.3 reviewed`
+- Task Navigation Runtime：N1—N6 implemented；N7 Test Harness verified
 
 ## 目录
 
@@ -22,6 +24,8 @@ config/                 安全启动配置
 docs/                   工程决策与部署说明
 fixtures/synthetic/     合成测试数据
 src/contracts/          配置和运行时契约
+src/navigation/         Intent、Subject、Authorization、Route 与生命周期
+src/audit/              合成导航审计接口和内存测试实现
 src/validation/         启动前确定性校验
 src/cli/                本地校验入口
 tests/                  安全边界测试
@@ -35,7 +39,10 @@ pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm test
 pnpm validate:config
+pnpm smoke:navigation
 ```
+
+当前导航实现支持合成环境中的P0 Intent分类、复合请求拆分、Tenant/DataSpace Gate、确定性Subject Resolution、显式Scope Grant预检、Read/Analyze/Draft Mock Capability、Default Deny、全出口Audit和幂等抑制。它不会连接真实业务系统，也不会产生外部副作用。
 
 ## 云服务器位置
 
@@ -49,4 +56,4 @@ Agent Dir: /home/xb/.openclaw/agents/aibang-hr-onboarding-agent/agent
 
 ## 当前不代表
 
-完成本骨架不代表 Agent Engineering Ready、Pilot Ready 或 Production Ready。真实员工数据、飞书绑定、业务系统 Connector、正式状态提交和对外发送必须等待后续设计与 Gate。
+完成本骨架和Task Navigation Test Harness不代表整体Agent Engineering Ready、Pilot Ready或Production Ready。导航模块尚未注册为OpenClaw Tool；真实员工数据、飞书绑定、业务系统Connector、正式状态提交和对外发送必须等待12—16及后续Gate。

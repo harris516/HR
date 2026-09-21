@@ -21,7 +21,8 @@ const contractsSchema = z.object({
   requestContext: z.literal("v1"),
   subjectResolution: z.literal("v0.3"),
   authorization: z.literal("v0.3"),
-  sessionMemory: z.literal("v0.3")
+  sessionMemory: z.literal("v0.3"),
+  taskNavigation: z.literal("v0.3")
 }).strict();
 
 const defaultsSchema = z.object({
@@ -36,6 +37,7 @@ const capabilitySchema = z.enum([
   "validate_context",
   "resolve_subject_stub",
   "read_stub",
+  "analyze_stub",
   "draft_stub"
 ]);
 
