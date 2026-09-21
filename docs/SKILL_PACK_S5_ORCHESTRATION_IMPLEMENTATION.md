@@ -64,4 +64,4 @@ default_runtime_enabled_count: 0
 
 ## Current boundary and next slice
 
-S5 is local-only. GitHub push, server pull, server validation and OpenClaw runtime verification remain intentionally deferred for the planned unified sync. The next slice is S6 Security and Negative Tests, including reserved side-effect denial, isolation, cursor/field leakage, injection, audit failure and version/schema attacks. S7 may only prepare a runtime packaging candidate after S6 passes; it must not enable Tool Binding.
+S5 is local-only. GitHub push, server pull, server validation and OpenClaw runtime verification remain intentionally deferred for the planned unified sync. The next and final Capability engineering slice is S6 Security and Negative Tests, including reserved side-effect denial, isolation, cursor/field leakage, injection, audit failure and version/schema attacks. After S6, S1-S6 must be synchronized and pass server validation plus the stage-12 Runtime Cross-check. Runtime packaging is a separate downstream activity and must not enable Tool Binding without later gates and explicit approval.

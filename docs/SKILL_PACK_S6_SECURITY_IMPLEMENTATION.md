@@ -67,4 +67,4 @@ external_side_effect: false
 
 S6 is local-only. GitHub push, server pull, server validation and OpenClaw runtime verification remain deferred for the planned unified sync. No Capability status, feature flag or binding was enabled.
 
-The next slice is S7 Runtime Packaging Candidate: verify the installed OpenClaw 2026.9.4 extension mechanism and prepare a reviewable package candidate while keeping Tool, Connector and Channel bindings disabled. Runtime activation still requires the later 12–16 gates and a separate approval.
+S6 completes the approved S1-S6 Capability engineering implementation. The next step is the planned unified GitHub/server synchronization, full server validation and the stage-12 Runtime Cross-check. Runtime packaging is a separate downstream activity, not another Capability engineering slice; Tool, Connector and Channel bindings remain disabled and any later activation still requires the remaining 12–16 gates plus separate approval.
