@@ -90,21 +90,40 @@ export const requestContextSchema = z.object({
   expiresAt: z.string().datetime(),
   dataAccessPurpose: z.enum(["onboarding_operation", "review", "audit"]),
   environment: z.enum(["design", "test"]),
+  clientContext: z.record(
+    z.string(),
+    z.union([z.string(), z.number(), z.boolean()])
+  ).optional(),
+  riskSignals: z.array(z.string().min(1)).optional(),
   contextVersion: z.literal("1"),
   integrityRef: z.string().min(1),
   synthetic: z.literal(true)
 }).strict();
 
 export const subjectClueSchema = z.object({
-  type: z.enum(["case_id", "offer_id", "candidate_id", "employee_id", "name"]),
+  type: z.enum(["case_id", "offer_id", "candidate_id", "employee_id", "email", "name"]),
   value: z.string().min(1)
+}).strict();
+
+export const selectedCaseRefSchema = z.object({
+  tenantId: z.string().min(1),
+  dataSpaceId: z.string().min(1),
+  caseId: z.string().min(1),
+  resolutionResultId: z.string().min(1),
+  actorId: z.string().min(1),
+  purpose: z.enum(["onboarding_operation", "review", "audit"]),
+  sessionId: z.string().min(1),
+  selectedAt: z.string().datetime(),
+  expiresAt: z.string().datetime(),
+  caseVersionHint: z.string().min(1)
 }).strict();
 
 export const navigationRequestSchema = z.object({
   context: z.unknown(),
   input: z.object({
     text: z.string().min(1),
-    subjectClues: z.array(subjectClueSchema).default([])
+    subjectClues: z.array(subjectClueSchema).default([]),
+    selectedCaseRef: selectedCaseRefSchema.optional()
   }).strict()
 }).strict();
 
@@ -116,6 +135,7 @@ export type SubjectRequirement = z.infer<typeof subjectRequirementSchema>;
 export type NavigationStatus = z.infer<typeof navigationStatusSchema>;
 export type RouteType = z.infer<typeof routeTypeSchema>;
 export type SubjectClue = z.infer<typeof subjectClueSchema>;
+export type SelectedCaseRef = z.infer<typeof selectedCaseRefSchema>;
 export type NavigationRequest = z.infer<typeof navigationRequestSchema>;
 
 export interface IntentCandidate {

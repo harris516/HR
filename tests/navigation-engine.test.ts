@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InMemoryNavigationAuditSink } from "../src/audit/navigation-audit.js";
-import type { RequestContext, SubjectClue } from "../src/contracts/navigation.js";
+import type { RequestContext, SelectedCaseRef, SubjectClue } from "../src/contracts/navigation.js";
 import type { ScopeGrant } from "../src/navigation/authorization.js";
 import { InvalidNavigationTransitionError, transitionTask } from "../src/navigation/lifecycle.js";
 import { NavigationEngine } from "../src/navigation/navigation-engine.js";
@@ -80,9 +80,33 @@ function createEngine(options: {
 function request(
   text: string,
   context: unknown = baseContext(),
-  subjectClues: SubjectClue[] = [{ type: "case_id", value: "case-demo-001" }]
+  subjectClues: SubjectClue[] = [{ type: "case_id", value: "case-demo-001" }],
+  selectedCaseRef?: SelectedCaseRef
 ): unknown {
-  return { context, input: { text, subjectClues } };
+  return {
+    context,
+    input: {
+      text,
+      subjectClues,
+      ...(selectedCaseRef === undefined ? {} : { selectedCaseRef })
+    }
+  };
+}
+
+function baseSelectedCaseRef(overrides: Partial<SelectedCaseRef> = {}): SelectedCaseRef {
+  return {
+    tenantId: "tenant-demo-001",
+    dataSpaceId: "dataspace-demo-hr",
+    caseId: "case-demo-001",
+    resolutionResultId: "resolution-synthetic-001",
+    actorId: "hr-user-demo-001",
+    purpose: "onboarding_operation",
+    sessionId: "session-synthetic-001",
+    selectedAt: "2026-09-21T01:59:00.000Z",
+    expiresAt: "2030-09-21T02:00:00.000Z",
+    caseVersionHint: "case-v1",
+    ...overrides
+  };
 }
 
 describe("task navigation N1-N7 acceptance", () => {
@@ -231,6 +255,95 @@ describe("task navigation N1-N7 acceptance", () => {
     const result = engine.navigate(request("查询 case 状态", baseContext(), [{ type: "name", value: "张三" }]));
     expect(result.childResults[0]).toMatchObject({ routeType: "READ", capabilityCalled: true });
     expect(result.childResults[0]?.resultPayload).toMatchObject({ caseRef: "case-demo-001" });
+  });
+
+  it("accepts reviewed optional client context and risk signals", () => {
+    const context = baseContext({
+      clientContext: { locale: "zh-CN", trustedDevice: true },
+      riskSignals: ["synthetic_low_risk"]
+    });
+    const { engine } = createEngine();
+    const result = engine.navigate(request("查询 case-demo-001 状态", context));
+    expect(result.childResults[0]).toMatchObject({ routeType: "READ", capabilityCalled: true });
+  });
+
+  it("requires step-up when the trusted context carries that risk signal", () => {
+    const context = baseContext({ riskSignals: ["step_up_required"] });
+    const { engine } = createEngine();
+    const result = engine.navigate(request("查询 case-demo-001 状态", context));
+    expect(result.childResults[0]).toMatchObject({ routeType: "HUMAN_HANDOFF", capabilityCalled: false });
+    expect(result.childResults[0]?.reasonCodes).toContain("STEP_UP_REQUIRED");
+  });
+
+  it("rejects an unbound channel even when the request claims a valid actor", () => {
+    const context = baseContext({ channel: "approved_im" });
+    const { engine } = createEngine();
+    const result = engine.navigate(request("查询 case-demo-001 状态", context));
+    expect(result.aggregateStatus).toBe("all_denied");
+    expect(result.childResults[0]?.reasonCodes).toContain("REQUEST_CONTEXT_INVALID");
+    expect(engine.capabilityCallCount).toBe(0);
+  });
+
+  it("resolves an approved synthetic email clue deterministically", () => {
+    const cases = baseCases().map((record) => ({ ...record, emailRef: "synthetic@example.test" }));
+    const { engine } = createEngine({ cases });
+    const result = engine.navigate(request(
+      "查询 case 状态",
+      baseContext(),
+      [{ type: "email", value: "synthetic@example.test" }]
+    ));
+    expect(result.childResults[0]).toMatchObject({ routeType: "READ", capabilityCalled: true });
+  });
+
+  it.each([
+    ["identity_conflict", "HUMAN_HANDOFF", "waiting_for_human", "IDENTITY_CONFLICT"],
+    ["mapping_unknown", "RESOLVE_SUBJECT", "waiting_for_source", "MAPPING_UNKNOWN"],
+    ["stale_mapping", "RESOLVE_SUBJECT", "waiting_for_source", "MAPPING_STALE"]
+  ] as const)("routes subject resolution state %s safely", (resolutionState, routeType, status, reasonCode) => {
+    const cases = baseCases().map((record) => ({ ...record, resolutionState }));
+    const { engine } = createEngine({ cases });
+    const result = engine.navigate(request("查询 case-demo-001 状态"));
+    expect(result.childResults[0]).toMatchObject({ routeType, status, capabilityCalled: false });
+    expect(result.childResults[0]?.reasonCodes).toContain(reasonCode);
+  });
+
+  it("revalidates a valid selectedCaseRef instead of trusting conversation memory", () => {
+    const { engine } = createEngine();
+    const result = engine.navigate(request("查询 case 状态", baseContext(), [], baseSelectedCaseRef()));
+    expect(result.childResults[0]).toMatchObject({ routeType: "READ", capabilityCalled: true });
+    expect(result.childResults[0]?.resultPayload).toMatchObject({ caseRef: "case-demo-001" });
+  });
+
+  it("hard-blocks a selectedCaseRef from another session", () => {
+    const { engine } = createEngine();
+    const result = engine.navigate(request(
+      "查询 case 状态",
+      baseContext(),
+      [],
+      baseSelectedCaseRef({ sessionId: "session-other" })
+    ));
+    expect(result.aggregateStatus).toBe("hard_blocked");
+    expect(result.childResults[0]?.capabilityCalled).toBe(false);
+  });
+
+  it("requires source revalidation when selectedCaseRef version is stale", () => {
+    const { engine } = createEngine();
+    const result = engine.navigate(request(
+      "查询 case 状态",
+      baseContext(),
+      [],
+      baseSelectedCaseRef({ caseVersionHint: "case-old" })
+    ));
+    expect(result.childResults[0]).toMatchObject({ routeType: "RESOLVE_SUBJECT", status: "waiting_for_source" });
+    expect(result.childResults[0]?.reasonCodes).toContain("MAPPING_STALE");
+  });
+
+  it("maps context refresh authorization without calling a capability", () => {
+    const { engine } = createEngine({ grants: [allowGrant({ result: "context_refresh_required" })] });
+    const result = engine.navigate(request("查询 case-demo-001 状态"));
+    expect(result.childResults[0]).toMatchObject({ routeType: "HUMAN_HANDOFF", status: "waiting_for_human" });
+    expect(result.childResults[0]?.reasonCodes).toContain("CONTEXT_REFRESH_REQUIRED");
+    expect(engine.capabilityCallCount).toBe(0);
   });
 
   it("keeps draft generation at A2 with no send or formal state change", () => {

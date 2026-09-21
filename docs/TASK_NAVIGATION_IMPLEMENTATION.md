@@ -37,13 +37,15 @@ pnpm validate:config
 pnpm smoke:navigation
 ```
 
-本地验收结果：2个Test File、24项测试通过；Smoke Test产生`READ / all_completed`，Capability调用1次，外部副作用为`false`。
+本地验收结果：2个Test File、35项测试通过；Smoke Test产生`READ / all_completed`，Capability调用1次，外部副作用为`false`。
 
 ## 安全边界
 
 - 只接受`synthetic: true`且Environment为design/test的Request Context；
 - Context无效时不把用户声明的Tenant/DataSpace记录为可信边界；
 - 强标识符只命中其他DataSpace时Hard Block；姓名等弱线索不会搜索或暴露其他Tenant候选；
+- `identity_conflict / mapping_unknown / stale_mapping`和`selectedCaseRef`跨Session、过期、版本变化均走受控路径；
+- Authorization Precheck显式携带Capability Version、Resource、Sensitivity、Expected Version和Risk；
 - 正式READY、Requirement Commit、外部发送、敏感导出和雇佣决定不可执行；
 - Audit不可用时Capability调用计数保持0；
 - Mock结果始终标记`formalStateChanged: false`和`externalSideEffect: false`；

@@ -6,6 +6,7 @@ import type {
   NavigationTask,
   RequestContext,
   RouteType,
+  SelectedCaseRef,
   SubjectClue
 } from "../contracts/navigation.js";
 import { navigationRequestSchema } from "../contracts/navigation.js";
@@ -116,7 +117,13 @@ export class NavigationEngine {
     const results: ChildNavigationResult[] = [];
 
     for (const intent of intents) {
-      const result = this.processIntent(context, intent, request.input.subjectClues, requestPlanId);
+      const result = this.processIntent(
+        context,
+        intent,
+        request.input.subjectClues,
+        request.input.selectedCaseRef,
+        requestPlanId
+      );
       results.push(result);
       if (result.routeType === "SYSTEM_HARD_BLOCK") break;
     }
@@ -139,6 +146,7 @@ export class NavigationEngine {
     context: RequestContext,
     intent: IntentCandidate,
     clues: SubjectClue[],
+    selectedCaseRef: SelectedCaseRef | undefined,
     requestPlanId: string | undefined
   ): ChildNavigationResult {
     const task: NavigationTask = {
@@ -164,7 +172,7 @@ export class NavigationEngine {
 
     let caseRecord: SyntheticCaseRecord | undefined;
     if (intent.subjectRequirement === "unique_case" || intent.subjectRequirement === "related_object") {
-      const resolution = resolveSubject(context, clues, this.options.cases);
+      const resolution = resolveSubject(context, clues, this.options.cases, selectedCaseRef, this.now());
       this.auditForTask(`subject_${resolution.status}`, context, task, []);
       if (resolution.status === "context_mismatch") {
         return this.finalize(context, task, {
@@ -179,6 +187,22 @@ export class NavigationEngine {
           routeType: "DENY",
           status: "completed",
           reasonCodes: ["SUBJECT_ACCESS_DENIED"],
+          mayCallCapability: false
+        }, false);
+      }
+      if (resolution.status === "identity_conflict") {
+        return this.finalize(context, task, {
+          routeType: "HUMAN_HANDOFF",
+          status: "waiting_for_human",
+          reasonCodes: ["IDENTITY_CONFLICT"],
+          mayCallCapability: false
+        }, false);
+      }
+      if (resolution.status === "mapping_unknown" || resolution.status === "stale_mapping") {
+        return this.finalize(context, task, {
+          routeType: "RESOLVE_SUBJECT",
+          status: "waiting_for_source",
+          reasonCodes: [resolution.status === "mapping_unknown" ? "MAPPING_UNKNOWN" : "MAPPING_STALE"],
           mayCallCapability: false
         }, false);
       }
@@ -206,10 +230,25 @@ export class NavigationEngine {
 
     const resourceId = caseRecord?.caseId ?? "*";
     const authorization = authorizationPrecheck(
-      context,
-      intent,
-      resourceId,
-      this.options.grants,
+      {
+        context,
+        intent,
+        resource: {
+          resourceType: caseRecord === undefined ? "OnboardingCaseCollection" : "OnboardingCase",
+          resourceId,
+          sensitivity: "synthetic",
+          ...(caseRecord === undefined ? {} : { expectedVersion: caseRecord.version })
+        },
+        capability: {
+          capabilityId: capability,
+          capabilityVersion: "stub-v1"
+        },
+        risk: {
+          phc: "PHC_1",
+          prohibition: "none"
+        },
+        grants: this.options.grants
+      },
       () => this.id()
     );
     this.auditForTask(`authorization_${authorization.result}`, context, task, authorization.reasonCode === undefined ? [] : [authorization.reasonCode]);

@@ -24,11 +24,17 @@ export function validateRequestContext(
   }
 
   const context = parsed.data;
+  if (new Date(context.receivedAt).getTime() > now.getTime()) {
+    return { ok: false, hardBlock: false, reasonCode: "REQUEST_CONTEXT_INVALID" };
+  }
   if (new Date(context.expiresAt).getTime() <= now.getTime()) {
     return { ok: false, hardBlock: false, reasonCode: "REQUEST_CONTEXT_EXPIRED" };
   }
   if (context.actorType === "user" && context.sessionId === undefined) {
     return { ok: false, hardBlock: false, reasonCode: "SESSION_BINDING_INVALID" };
+  }
+  if (context.channel !== "test_harness" || !context.authenticationLevel.startsWith("test-")) {
+    return { ok: false, hardBlock: false, reasonCode: "REQUEST_CONTEXT_INVALID" };
   }
   if (context.roles.includes("suspended")) {
     return { ok: false, hardBlock: false, reasonCode: "ACTOR_SUSPENDED" };
