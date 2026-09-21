@@ -1,8 +1,8 @@
-# S6 Security and Negative Test Local Implementation
+# S6 Security and Negative Test Implementation
 
 ## Result
 
-S6 is locally implemented and validated. The reviewed NEG-001 through NEG-012 matrix is executable against the Gateway, synthetic adapters, executor and Skill orchestrator. The suite adds twenty-two S6 tests and keeps every default business Capability disabled.
+S6 is implemented and server-validated. The reviewed NEG-001 through NEG-012 matrix is executable against the Gateway, synthetic adapters, executor and Skill orchestrator. The suite adds twenty-two S6 tests and keeps every default business Capability disabled.
 
 ## Covered controls
 
@@ -63,8 +63,8 @@ outbound_message_sent: false
 external_side_effect: false
 ```
 
-## Current boundary and next slice
+## Current boundary and next stage
 
-S6 is local-only. GitHub push, server pull, server validation and OpenClaw runtime verification remain deferred for the planned unified sync. No Capability status, feature flag or binding was enabled.
+S1-S6 passed unified server validation at commit `b367a8d`, and the stage-12 Runtime Cross-check passed. No Capability status, feature flag or binding was enabled.
 
-S6 completes the approved S1-S6 Capability engineering implementation. The next step is the planned unified GitHub/server synchronization, full server validation and the stage-12 Runtime Cross-check. Runtime packaging is a separate downstream activity, not another Capability engineering slice; Tool, Connector and Channel bindings remain disabled and any later activation still requires the remaining 12–16 gates plus separate approval.
+S6 completes the approved S1-S6 Capability engineering implementation. The project proceeds to stage 13. Runtime packaging is a separate downstream activity, not another Capability engineering slice; Tool, Connector and Channel bindings remain disabled and any later activation still requires the remaining 12–16 gates plus separate approval.

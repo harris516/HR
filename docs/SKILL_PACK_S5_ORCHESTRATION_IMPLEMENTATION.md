@@ -1,8 +1,8 @@
-# S5 Skill Orchestrator Local Implementation
+# S5 Skill Orchestrator Implementation
 
 ## Result
 
-S5 is implemented and locally validated for the synthetic test harness. Six versioned Skill contracts expose twelve reviewed workflows over the eighteen S3/S4 adapters. This does not register a Skill or Capability in OpenClaw and does not enable the default runtime.
+S5 is implemented and server-validated for the synthetic test harness. Six versioned Skill contracts expose twelve reviewed workflows over the eighteen S3/S4 adapters. This does not register a Skill or Capability in OpenClaw and does not enable the default runtime.
 
 ## Implemented Skill contracts
 
@@ -62,6 +62,6 @@ default_runtime_reason: CAPABILITY_NOT_EXECUTABLE
 default_runtime_enabled_count: 0
 ```
 
-## Current boundary and next slice
+## Current boundary and next stage
 
-S5 is local-only. GitHub push, server pull, server validation and OpenClaw runtime verification remain intentionally deferred for the planned unified sync. The next and final Capability engineering slice is S6 Security and Negative Tests, including reserved side-effect denial, isolation, cursor/field leakage, injection, audit failure and version/schema attacks. After S6, S1-S6 must be synchronized and pass server validation plus the stage-12 Runtime Cross-check. Runtime packaging is a separate downstream activity and must not enable Tool Binding without later gates and explicit approval.
+S5 and the complete S1-S6 set passed server validation at commit `b367a8d`; the stage-12 Runtime Cross-check also passed. Runtime packaging is a separate downstream activity and must not enable Tool Binding without later gates and explicit approval. The project proceeds to stage 13 while all default Capability and external-binding states remain disabled.

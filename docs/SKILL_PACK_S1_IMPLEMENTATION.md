@@ -2,7 +2,7 @@
 
 ## Status
 
-`S1_LOCAL_IMPLEMENTED / RUNTIME_NOT_ENABLED`
+`S1_SERVER_VERIFIED / RUNTIME_NOT_ENABLED`
 
 This slice implements the reviewed v0.3 contract baseline for:
 

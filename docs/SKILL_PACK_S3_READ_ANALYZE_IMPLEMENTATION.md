@@ -2,7 +2,7 @@
 
 ## Status
 
-`S3_LOCAL_IMPLEMENTED / SYNTHETIC_TEST_HARNESS_ONLY / DEFAULT_RUNTIME_DISABLED / SERVER_NOT_VERIFIED`
+`S3_SERVER_VERIFIED / SYNTHETIC_TEST_HARNESS_ONLY / DEFAULT_RUNTIME_DISABLED`
 
 S3 implements the 13 reviewed A0 Read and A1 Analyze adapters against a synthetic, tenant-scoped source store:
 
@@ -76,4 +76,3 @@ external_side_effect = false
 ## Next slice
 
 S4 may implement the five synthetic Draft adapters. It must preserve `DRAFT`, `NOT_SENT`, `formalStateChanged=false` and `externalSideEffect=false`, and must not register any OpenClaw Tool, Connector, channel or outbound-message capability.
-

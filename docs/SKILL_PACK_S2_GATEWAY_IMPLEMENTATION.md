@@ -2,7 +2,7 @@
 
 ## Status
 
-`S2_LOCAL_IMPLEMENTED / DEFAULT_ALL_DENIED / SERVER_NOT_VERIFIED`
+`S2_SERVER_VERIFIED / DEFAULT_ALL_DENIED / RUNTIME_NOT_ENABLED`
 
 S2 adds a deterministic Capability Gateway in front of any future capability implementation. It resolves a structured, versioned capability reference and evaluates the following gates in a fixed order:
 

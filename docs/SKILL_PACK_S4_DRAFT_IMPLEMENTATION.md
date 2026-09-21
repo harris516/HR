@@ -2,7 +2,7 @@
 
 ## Status
 
-`S4_LOCAL_IMPLEMENTED / SYNTHETIC_TEST_HARNESS_ONLY / DEFAULT_RUNTIME_DISABLED / SERVER_NOT_VERIFIED`
+`S4_SERVER_VERIFIED / SYNTHETIC_TEST_HARNESS_ONLY / DEFAULT_RUNTIME_DISABLED`
 
 S4 implements the five reviewed A2 Draft adapters:
 
@@ -70,4 +70,3 @@ default_runtime_reason = CAPABILITY_NOT_EXECUTABLE
 ## Next slice
 
 S5 may implement the six Skill Orchestrators over the S3/S4 adapters. Every child capability call must still receive independent Gateway admission and execution audit; Skill orchestration must not create shared or inherited authorization.
-

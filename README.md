@@ -17,12 +17,13 @@
 - Task Navigation Contract：`v0.3 reviewed`
 - Task Navigation Runtime：N1—N7 server verified；10—11 Runtime Cross-check passed
 - Skill Pack / Capability Contract：`v0.3 reviewed`
+- Skill Pack Runtime：S1—S6 server verified；Stage 12 Runtime Cross-check passed
 - Capability Registry：18 planned、0 enabled；12 reserved、0 registered
-- Capability Gateway：S2 local implemented；default all denied；0 implementation invoked
-- Read / Analyze Adapters：S3 local implemented；13 synthetic test implementations；default runtime disabled
-- Draft Adapters：S4 local implemented；5 synthetic test implementations；DRAFT / NOT_SENT only
-- Skill Orchestrators：S5 local implemented；6 synthetic Skill contracts；child Capability independent admission/audit
-- Security Matrix：S6 local passed；NEG-001—NEG-012 plus version/schema/binding/idempotency isolation
+- Capability Gateway：S2 server verified；default all denied；0 implementation invoked
+- Read / Analyze Adapters：S3 server verified；13 synthetic test implementations；default runtime disabled
+- Draft Adapters：S4 server verified；5 synthetic test implementations；DRAFT / NOT_SENT only
+- Skill Orchestrators：S5 server verified；6 synthetic Skill contracts；child Capability independent admission/audit
+- Security Matrix：S6 server verified；NEG-001—NEG-012 plus version/schema/binding/idempotency isolation
 
 ## 目录
 
