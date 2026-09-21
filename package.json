@@ -12,7 +12,8 @@
     "test": "vitest run",
     "validate:config": "tsx src/cli/validate-config.ts config/runtime.test.json",
     "validate:capabilities": "tsx src/cli/validate-capability-registry.ts",
-    "smoke:navigation": "tsx src/cli/smoke-navigation.ts"
+    "smoke:navigation": "tsx src/cli/smoke-navigation.ts",
+    "smoke:gateway": "tsx src/cli/smoke-capability-gateway.ts"
   },
   "dependencies": {
     "zod": "4.1.11"

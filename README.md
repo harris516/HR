@@ -18,6 +18,7 @@
 - Task Navigation Runtime：N1—N7 server verified；10—11 Runtime Cross-check passed
 - Skill Pack / Capability Contract：`v0.3 reviewed`
 - Capability Registry：18 planned、0 enabled；12 reserved、0 registered
+- Capability Gateway：S2 local implemented；default all denied；0 implementation invoked
 
 ## 目录
 
@@ -43,12 +44,15 @@ pnpm typecheck
 pnpm test
 pnpm validate:config
 pnpm validate:capabilities
+pnpm smoke:gateway
 pnpm smoke:navigation
 ```
 
 当前导航实现支持合成环境中的P0 Intent分类、复合请求拆分、Tenant/DataSpace Gate、确定性Subject Resolution、显式Scope Grant预检、Read/Analyze/Draft Mock Capability、Default Deny、全出口Audit和幂等抑制。它不会连接真实业务系统，也不会产生外部副作用。
 
 S1已经把12的18个业务Capability建立为严格的代码合同，但它们全部保持`PLANNED_TEST_STUB`：没有Implementation Binding、Feature Flag、OpenClaw Tool或Connector，因此当前可执行数量为0。现有`read_stub / analyze_stub / draft_stub`仍只属于11的Navigation Test Harness。
+
+S2已经增加Capability Candidate Resolution与统一Gateway：对Registry、版本、环境、Tenant/DataSpace、Authorization、PHC、Review、Schema/Digest、Collection Cursor和Implementation/Tool/Connector Binding执行固定顺序的Default Deny检查。默认运行态仍拒绝全部18项业务Capability；S2本身不调用任何实现。
 
 ## 云服务器位置
 

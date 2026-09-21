@@ -18,6 +18,7 @@ describe("runtime configuration safety gate", () => {
   it("accepts the reviewed synthetic test baseline", () => {
     const config = validateRuntimeConfig(copyBaseline());
     expect(config.agent.id).toBe("aibang-hr-onboarding-agent");
+    expect(config.contracts.capabilityGateway).toBe("v1");
     expect(config.bindings.channels).toEqual([]);
     expect(config.enabledBusinessCapabilities).toEqual([]);
   });

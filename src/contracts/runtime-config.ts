@@ -26,7 +26,8 @@ const contractsSchema = z.object({
   skillPack: z.literal("v0.3"),
   capabilityRegistry: z.literal("v1"),
   capabilitySchemas: z.literal("v1"),
-  capabilityReasonCodes: z.literal("v1")
+  capabilityReasonCodes: z.literal("v1"),
+  capabilityGateway: z.literal("v1")
 }).strict();
 
 const defaultsSchema = z.object({
