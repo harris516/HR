@@ -19,6 +19,7 @@
 - Skill Pack / Capability Contract：`v0.3 reviewed`
 - Capability Registry：18 planned、0 enabled；12 reserved、0 registered
 - Capability Gateway：S2 local implemented；default all denied；0 implementation invoked
+- Read / Analyze Adapters：S3 local implemented；13 synthetic test implementations；default runtime disabled
 
 ## 目录
 
@@ -45,6 +46,7 @@ pnpm test
 pnpm validate:config
 pnpm validate:capabilities
 pnpm smoke:gateway
+pnpm smoke:adapters
 pnpm smoke:navigation
 ```
 
@@ -53,6 +55,8 @@ pnpm smoke:navigation
 S1已经把12的18个业务Capability建立为严格的代码合同，但它们全部保持`PLANNED_TEST_STUB`：没有Implementation Binding、Feature Flag、OpenClaw Tool或Connector，因此当前可执行数量为0。现有`read_stub / analyze_stub / draft_stub`仍只属于11的Navigation Test Harness。
 
 S2已经增加Capability Candidate Resolution与统一Gateway：对Registry、版本、环境、Tenant/DataSpace、Authorization、PHC、Review、Schema/Digest、Collection Cursor和Implementation/Tool/Connector Binding执行固定顺序的Default Deny检查。默认运行态仍拒绝全部18项业务Capability；S2本身不调用任何实现。
+
+S3已经实现13个Read/Analyze Synthetic Adapter及严格执行器，覆盖Intake、Case、Requirement、Risk、Evidence、Responsibility、Readiness、Artifact和Audit。它们只在显式Test Harness中可注入；默认Runtime Config、正式Registry和OpenClaw均保持0个业务Capability启用。
 
 ## 云服务器位置
 

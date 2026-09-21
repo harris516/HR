@@ -25,7 +25,8 @@
     "capabilityRegistry": "v1",
     "capabilitySchemas": "v1",
     "capabilityReasonCodes": "v1",
-    "capabilityGateway": "v1"
+    "capabilityGateway": "v1",
+    "readAnalyzeAdapters": "v1"
   },
   "defaults": {
     "authorization": "deny",
