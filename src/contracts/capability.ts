@@ -219,6 +219,7 @@ export const capabilityRegistrySchema = z.object({
 }).strict();
 
 export type CapabilityId = z.infer<typeof capabilityIdSchema>;
+export type SkillId = z.infer<typeof skillIdSchema>;
 export type ReservedCapabilityId = z.infer<typeof reservedCapabilityIdSchema>;
 export type PayloadSchemaName = z.infer<typeof payloadSchemaNameSchema>;
 export type CapabilityRef = z.infer<typeof capabilityRefSchema>;

@@ -118,3 +118,4 @@ export const capabilityReasonCodeRegistry = capabilityReasonCodeRegistrySchema.p
 });
 
 export type CapabilityReasonCode = z.infer<typeof capabilityReasonCodeSchema>;
+export type CanonicalReasonCode = z.infer<typeof canonicalReasonCodeSchema>;

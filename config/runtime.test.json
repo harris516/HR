@@ -27,7 +27,8 @@
     "capabilityReasonCodes": "v1",
     "capabilityGateway": "v1",
     "readAnalyzeAdapters": "v1",
-    "draftAdapters": "v1"
+    "draftAdapters": "v1",
+    "skillOrchestrators": "v1"
   },
   "defaults": {
     "authorization": "deny",

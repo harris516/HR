@@ -98,7 +98,7 @@ const intakeCompletenessEvaluate: SyntheticCapabilityAdapter = (context) => {
   }
   return success(
     {
-      evaluationRef: context.idFactory(),
+      evaluationRef: context.store.draftControls.intakeCompletenessEvaluationRef,
       result: "COMPLETE_CANDIDATE",
       missingFieldCodes: [],
       conflictRefs: [],
@@ -440,7 +440,9 @@ function readinessResult(context: SyntheticAdapterContext, revalidation: boolean
     : "ELIGIBLE";
   return success(
     {
-      evaluationId: context.idFactory(),
+      evaluationId: revalidation
+        ? "evaluation-readiness-revalidation-001"
+        : context.store.draftControls.readinessEvaluationRef,
       caseRef: record.caseRef,
       caseVersion: record.caseVersion,
       authoritativeSnapshotRef: revalidation
@@ -586,4 +588,3 @@ export const syntheticReadAnalyzeAdapters: ReadonlyMap<CapabilityId, SyntheticCa
   ["hr.onboarding.artifact.list", artifactList],
   ["hr.onboarding.audit.timeline.read", auditTimelineRead]
 ]);
-

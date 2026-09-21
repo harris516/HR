@@ -21,6 +21,7 @@
 - Capability Gateway：S2 local implemented；default all denied；0 implementation invoked
 - Read / Analyze Adapters：S3 local implemented；13 synthetic test implementations；default runtime disabled
 - Draft Adapters：S4 local implemented；5 synthetic test implementations；DRAFT / NOT_SENT only
+- Skill Orchestrators：S5 local implemented；6 synthetic Skill contracts；child Capability independent admission/audit
 
 ## 目录
 
@@ -49,6 +50,7 @@ pnpm validate:capabilities
 pnpm smoke:gateway
 pnpm smoke:adapters
 pnpm smoke:drafts
+pnpm smoke:skills
 pnpm smoke:navigation
 ```
 
@@ -61,6 +63,8 @@ S2已经增加Capability Candidate Resolution与统一Gateway：对Registry、�
 S3已经实现13个Read/Analyze Synthetic Adapter及严格执行器，覆盖Intake、Case、Requirement、Risk、Evidence、Responsibility、Readiness、Artifact和Audit。它们只在显式Test Harness中可注入；默认Runtime Config、正式Registry和OpenClaw均保持0个业务Capability启用。
 
 S4已经实现5个Draft Synthetic Adapter。所有输出都经过`DraftArtifactResultV1`校验，并固定为`DRAFT / NOT_SENT / formalStateChanged=false / externalSideEffect=false`；PHC-3/4路径必须先满足Review Gate，且不存在正式决策或发送字段。
+
+S5已经实现6个合成Skill Orchestrator合同与12条受控Workflow。每个Child Capability都使用独立Request、Gateway Admission、Authorization Decision和Audit；任一步骤拒绝、等待、Review或失败都会停止后续步骤，不继承前一步Allow，也不使用Generic Tool Fallback。Practice路径只生成Handoff Candidate，不创建正式Review或专业决定。
 
 ## 云服务器位置
 
