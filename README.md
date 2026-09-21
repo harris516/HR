@@ -16,6 +16,8 @@
 - Formal Commit / External Side Effect：禁止
 - Task Navigation Contract：`v0.3 reviewed`
 - Task Navigation Runtime：N1—N7 server verified；10—11 Runtime Cross-check passed
+- Skill Pack / Capability Contract：`v0.3 reviewed`
+- Capability Registry：18 planned、0 enabled；12 reserved、0 registered
 
 ## 目录
 
@@ -24,6 +26,7 @@ config/                 安全启动配置
 docs/                   工程决策与部署说明
 fixtures/synthetic/     合成测试数据
 src/contracts/          配置和运行时契约
+src/capabilities/       Capability Registry、Profile、Schema与Reason Code
 src/navigation/         Intent、Subject、Authorization、Route 与生命周期
 src/audit/              合成导航审计接口和内存测试实现
 src/validation/         启动前确定性校验
@@ -39,10 +42,13 @@ pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm test
 pnpm validate:config
+pnpm validate:capabilities
 pnpm smoke:navigation
 ```
 
 当前导航实现支持合成环境中的P0 Intent分类、复合请求拆分、Tenant/DataSpace Gate、确定性Subject Resolution、显式Scope Grant预检、Read/Analyze/Draft Mock Capability、Default Deny、全出口Audit和幂等抑制。它不会连接真实业务系统，也不会产生外部副作用。
+
+S1已经把12的18个业务Capability建立为严格的代码合同，但它们全部保持`PLANNED_TEST_STUB`：没有Implementation Binding、Feature Flag、OpenClaw Tool或Connector，因此当前可执行数量为0。现有`read_stub / analyze_stub / draft_stub`仍只属于11的Navigation Test Harness。
 
 ## 云服务器位置
 

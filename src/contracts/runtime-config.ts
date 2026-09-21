@@ -22,7 +22,11 @@ const contractsSchema = z.object({
   subjectResolution: z.literal("v0.3"),
   authorization: z.literal("v0.3"),
   sessionMemory: z.literal("v0.3"),
-  taskNavigation: z.literal("v0.3")
+  taskNavigation: z.literal("v0.3"),
+  skillPack: z.literal("v0.3"),
+  capabilityRegistry: z.literal("v1"),
+  capabilitySchemas: z.literal("v1"),
+  capabilityReasonCodes: z.literal("v1")
 }).strict();
 
 const defaultsSchema = z.object({
@@ -43,7 +47,9 @@ const capabilitySchema = z.enum([
 
 const bindingsSchema = z.object({
   channels: z.array(z.never()).max(0),
-  connectors: z.array(z.never()).max(0)
+  connectors: z.array(z.never()).max(0),
+  tools: z.array(z.never()).max(0),
+  capabilityImplementations: z.array(z.never()).max(0)
 }).strict();
 
 const featureFlagsSchema = z.object({
@@ -54,7 +60,8 @@ const featureFlagsSchema = z.object({
   sensitiveExport: z.literal(false),
   growthWrite: z.literal(false),
   productionMemory: z.literal(false),
-  mockCapabilities: z.literal(true)
+  mockCapabilities: z.literal(true),
+  businessCapabilityExecution: z.literal(false)
 }).strict();
 
 export const runtimeConfigSchema = z.object({
@@ -67,6 +74,7 @@ export const runtimeConfigSchema = z.object({
     (values) => new Set(values).size === values.length,
     { message: "capabilities must not contain duplicates" }
   ),
+  enabledBusinessCapabilities: z.array(z.never()).max(0),
   bindings: bindingsSchema,
   featureFlags: featureFlagsSchema
 }).strict();

@@ -19,6 +19,7 @@ describe("runtime configuration safety gate", () => {
     const config = validateRuntimeConfig(copyBaseline());
     expect(config.agent.id).toBe("aibang-hr-onboarding-agent");
     expect(config.bindings.channels).toEqual([]);
+    expect(config.enabledBusinessCapabilities).toEqual([]);
   });
 
   it("rejects identity drift", () => {
@@ -42,6 +43,30 @@ describe("runtime configuration safety gate", () => {
   it("rejects connector bindings", () => {
     const config = copyBaseline();
     config.bindings.connectors = ["hris"];
+    expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
+  });
+
+  it("rejects OpenClaw tool bindings", () => {
+    const config = copyBaseline();
+    config.bindings.tools = ["business-tool"];
+    expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
+  });
+
+  it("rejects capability implementation bindings", () => {
+    const config = copyBaseline();
+    config.bindings.capabilityImplementations = ["implementation"];
+    expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
+  });
+
+  it("rejects enabled business capabilities", () => {
+    const config = copyBaseline();
+    config.enabledBusinessCapabilities = ["hr.onboarding.case.list"];
+    expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
+  });
+
+  it("rejects business capability execution", () => {
+    const config = copyBaseline();
+    config.featureFlags.businessCapabilityExecution = true;
     expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
   });
 

@@ -20,7 +20,11 @@
     "subjectResolution": "v0.3",
     "authorization": "v0.3",
     "sessionMemory": "v0.3",
-    "taskNavigation": "v0.3"
+    "taskNavigation": "v0.3",
+    "skillPack": "v0.3",
+    "capabilityRegistry": "v1",
+    "capabilitySchemas": "v1",
+    "capabilityReasonCodes": "v1"
   },
   "defaults": {
     "authorization": "deny",
@@ -36,9 +40,12 @@
     "analyze_stub",
     "draft_stub"
   ],
+  "enabledBusinessCapabilities": [],
   "bindings": {
     "channels": [],
-    "connectors": []
+    "connectors": [],
+    "tools": [],
+    "capabilityImplementations": []
   },
   "featureFlags": {
     "realCustomerData": false,
@@ -48,6 +55,7 @@
     "sensitiveExport": false,
     "growthWrite": false,
     "productionMemory": false,
-    "mockCapabilities": true
+    "mockCapabilities": true,
+    "businessCapabilityExecution": false
   }
 }
