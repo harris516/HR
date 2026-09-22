@@ -1,0 +1,23 @@
+{
+  "id": "aibang-hr-onboarding-test",
+  "name": "Aibang HR Onboarding Synthetic Test",
+  "description": "Read one synthetic onboarding case and draft a Ready review card.",
+  "categories": ["other"],
+  "contracts": {
+    "tools": ["aibang_hr_onboarding_test_ready_card"]
+  },
+  "toolMetadata": {
+    "aibang_hr_onboarding_test_ready_card": { "optional": true }
+  },
+  "activation": { "onStartup": true },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["allowedSenderId", "databasePath", "repositoryRoot"],
+    "properties": {
+      "allowedSenderId": { "type": "string", "pattern": "^ou_[A-Za-z0-9]+$" },
+      "databasePath": { "type": "string", "pattern": "^/" },
+      "repositoryRoot": { "type": "string", "pattern": "^/" }
+    }
+  }
+}

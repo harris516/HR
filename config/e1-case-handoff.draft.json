@@ -1,0 +1,712 @@
+{
+  "schemaVersion": "e1-case-handoff-draft.v1",
+  "status": "DRAFT_REVIEW_PENDING",
+  "partition": "EVAL_CANDIDATE_HANDOFF",
+  "synthetic": true,
+  "subjectCandidateRef": "e1-local-subject-candidate-20260922",
+  "generatorLineageRef": "e1-handoff-proposal-20260922",
+  "oracleLocation": "docs/E1_ORACLE_REVIEW_DRAFT.md",
+  "sharedFixtures": {
+    "baseContext": {
+      "requestId": "request-handoff-73",
+      "tenantId": "tenant-synthetic-73",
+      "dataSpaceId": "space-synthetic-73",
+      "actorType": "user",
+      "actorId": "actor-handoff-73",
+      "authenticationLevel": "test-verified",
+      "roles": [
+        "onboarding_hr_operations"
+      ],
+      "scopeGrantRefs": [
+        "scope-handoff-73"
+      ],
+      "authorityGrantRefs": [],
+      "channel": "test_harness",
+      "sessionId": "session-handoff-73",
+      "correlationId": "correlation-handoff-73",
+      "receivedAt": "2026-10-10T11:00:00.000Z",
+      "expiresAt": "2026-10-11T11:00:00.000Z",
+      "dataAccessPurpose": "onboarding_operation",
+      "environment": "test",
+      "contextVersion": "1",
+      "integrityRef": "test-integrity-handoff-73",
+      "synthetic": true
+    },
+    "baseRecord": {
+      "synthetic": true,
+      "tenantId": "tenant-synthetic-73",
+      "dataSpaceId": "space-synthetic-73",
+      "caseId": "case-handoff-73",
+      "offerRef": "offer-handoff-73",
+      "candidateRef": "candidate-handoff-73",
+      "displayName": "Synthetic Handoff Person",
+      "accessible": true,
+      "version": "case-v5"
+    },
+    "baseIntent": {
+      "intentCandidateId": "intent-handoff-73",
+      "requestContextRef": "request-handoff-73",
+      "correlationId": "correlation-handoff-73",
+      "intentId": "GET_CASE_STATUS",
+      "intentClass": "supported_p0",
+      "taskType": "CASE_STATUS_CHECK",
+      "subjectRequirement": "unique_case",
+      "requestedActionClass": "read",
+      "capabilityCandidate": "read_stub",
+      "reasonCodes": []
+    },
+    "baseTask": {
+      "taskId": "task-handoff-73",
+      "attemptId": "attempt-handoff-73",
+      "taskEnvelopeVersion": "1",
+      "requestContextRef": "request-handoff-73",
+      "tenantId": "tenant-synthetic-73",
+      "dataSpaceId": "space-synthetic-73",
+      "correlationId": "correlation-handoff-73",
+      "intent": {
+        "intentCandidateId": "intent-handoff-73",
+        "requestContextRef": "request-handoff-73",
+        "correlationId": "correlation-handoff-73",
+        "intentId": "GET_CASE_STATUS",
+        "intentClass": "supported_p0",
+        "taskType": "CASE_STATUS_CHECK",
+        "subjectRequirement": "unique_case",
+        "requestedActionClass": "read",
+        "capabilityCandidate": "read_stub",
+        "reasonCodes": []
+      },
+      "status": "validated",
+      "reasonCodes": [],
+      "transitionRecordRefs": []
+    },
+    "baseEvidence": {
+      "propositionBound": true,
+      "sourcePolicyActive": true,
+      "provenanceComplete": true,
+      "fresh": true,
+      "qualityValid": true,
+      "identityResolved": true,
+      "blockingConflict": false,
+      "validatorAuthorized": true,
+      "purposePermitted": true,
+      "versionAndAuditReady": true
+    },
+    "baseAuthority": {
+      "grantConfigured": true,
+      "grantActive": true,
+      "revisionMatched": true,
+      "tenantMatched": true,
+      "dataSpaceMatched": true,
+      "decisionMatched": true,
+      "resourceMatched": true,
+      "purposeMatched": true,
+      "withinEffectivePeriod": true,
+      "assurancePolicyConfigured": true,
+      "assuranceSatisfied": true,
+      "sodPolicyConfigured": true,
+      "relationshipFactsComplete": true,
+      "requesterRef": "requester-handoff-73",
+      "reviewerRef": "reviewer-handoff-74"
+    },
+    "baseIsolation": {
+      "synthetic": true,
+      "scope": "SYNTHETIC_GLOBAL",
+      "governanceNamespaceId": "governance-handoff-73",
+      "trainPartition": "TRAIN_AUTHORING",
+      "evalPartition": "EVAL_CANDIDATE_HANDOFF",
+      "sharedGeneratorLineage": false,
+      "expectedAnswerAccessibleToTrainingAuthor": false,
+      "scanResults": {
+        "exact": "PASS",
+        "normalized": "PASS",
+        "semantic": "PASS",
+        "template": "PASS",
+        "generatorSeed": "PASS",
+        "expectedAnswer": "PASS",
+        "reviewerAccess": "PASS"
+      }
+    }
+  },
+  "cases": [
+    {
+      "caseId": "HC-E1-001",
+      "primitiveFamily": "TENANT_DATA_SPACE_SCOPE",
+      "scenarioFamily": "HERO",
+      "boundaryClass": "NOMINAL",
+      "operation": "validateRequestContext",
+      "input": {
+        "use": "baseContext",
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-001"
+    },
+    {
+      "caseId": "HC-E1-002",
+      "primitiveFamily": "TENANT_DATA_SPACE_SCOPE",
+      "scenarioFamily": "TENANT_ISOLATION",
+      "boundaryClass": "MISSING",
+      "operation": "validateRequestContext",
+      "input": {
+        "use": "baseContext",
+        "omit": [
+          "dataSpaceId"
+        ],
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-002"
+    },
+    {
+      "caseId": "HC-E1-003",
+      "primitiveFamily": "SUBJECT_IDENTITY",
+      "scenarioFamily": "HERO",
+      "boundaryClass": "NOMINAL",
+      "operation": "resolveSubject",
+      "input": {
+        "use": [
+          "baseContext",
+          "baseRecord"
+        ],
+        "clues": [
+          {
+            "type": "candidate_id",
+            "value": "candidate-handoff-73"
+          }
+        ],
+        "selectedCaseRef": null,
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-003"
+    },
+    {
+      "caseId": "HC-E1-004",
+      "primitiveFamily": "SUBJECT_IDENTITY",
+      "scenarioFamily": "NEGATIVE",
+      "boundaryClass": "EXPIRED",
+      "operation": "resolveSubject",
+      "input": {
+        "use": [
+          "baseContext",
+          "baseRecord"
+        ],
+        "clues": [],
+        "selectedCaseRef": {
+          "tenantId": "tenant-synthetic-73",
+          "dataSpaceId": "space-synthetic-73",
+          "caseId": "case-handoff-73",
+          "resolutionResultId": "resolution-handoff-73",
+          "actorId": "actor-handoff-73",
+          "purpose": "onboarding_operation",
+          "sessionId": "session-handoff-73",
+          "selectedAt": "2026-10-10T10:00:00.000Z",
+          "expiresAt": "2026-10-10T11:30:00.000Z",
+          "caseVersionHint": "case-v5"
+        },
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-004"
+    },
+    {
+      "caseId": "HC-E1-005",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "BOUNDARY",
+      "operation": "assessSyntheticFreshness",
+      "input": {
+        "observedAt": "2026-10-10T11:00:00.000Z",
+        "sourceVersion": "source-v9",
+        "sourceAvailable": true,
+        "maxAgeMs": 3600000,
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-005"
+    },
+    {
+      "caseId": "HC-E1-006",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "MISSING",
+      "operation": "assessSyntheticFreshness",
+      "input": {
+        "observedAt": "2026-10-10T11:00:00.000Z",
+        "sourceVersion": "source-v9",
+        "sourceAvailable": true,
+        "maxAgeMs": null,
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-006"
+    },
+    {
+      "caseId": "HC-E1-007",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "MISSING",
+      "operation": "assessSyntheticEvidence",
+      "input": {
+        "use": "baseEvidence",
+        "omit": [
+          "validatorAuthorized"
+        ]
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-007"
+    },
+    {
+      "caseId": "HC-E1-008",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "BOUNDARY",
+      "operation": "assessSyntheticReadyCandidate",
+      "input": {
+        "ruleVersion": "ready-synthetic-v7",
+        "sourceFreshness": "FRESH",
+        "evidenceValid": true,
+        "identityResolved": true,
+        "openConflict": false,
+        "blockingRequirements": 1,
+        "blockingRisks": 0
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-008"
+    },
+    {
+      "caseId": "HC-E1-009",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "NOMINAL",
+      "operation": "assessSyntheticRevalidation",
+      "input": {
+        "trigger": "POLICY_VERSION_CHANGED"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-009"
+    },
+    {
+      "caseId": "HC-E1-010",
+      "primitiveFamily": "PHC_RISK_CLASSIFICATION",
+      "scenarioFamily": "HIGH_RISK",
+      "boundaryClass": "NOMINAL",
+      "operation": "resolveSyntheticProfessionalClass",
+      "input": {
+        "ruleVersion": "phc-synthetic-v7",
+        "applicableClasses": [
+          "PHC_1",
+          "PHC_2",
+          "PHC_3"
+        ],
+        "prohibition": "NONE"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-010"
+    },
+    {
+      "caseId": "HC-E1-011",
+      "primitiveFamily": "PHC_RISK_CLASSIFICATION",
+      "scenarioFamily": "HIGH_RISK",
+      "boundaryClass": "BOUNDARY",
+      "operation": "resolveSyntheticProfessionalClass",
+      "input": {
+        "ruleVersion": "phc-synthetic-v7",
+        "applicableClasses": [
+          "PHC_4"
+        ],
+        "prohibition": "NONE"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-011"
+    },
+    {
+      "caseId": "HC-E1-012",
+      "primitiveFamily": "PROHIBITION_REVIEW_ROUTING",
+      "scenarioFamily": "HIGH_RISK",
+      "boundaryClass": "NOMINAL",
+      "operation": "routeForbiddenIntent",
+      "input": {
+        "use": "baseIntent",
+        "override": {
+          "intentId": "REVIEW_DECISION_REQUEST",
+          "intentClass": "controlled_request",
+          "requestedActionClass": "decide"
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-012"
+    },
+    {
+      "caseId": "HC-E1-013",
+      "primitiveFamily": "PROHIBITION_REVIEW_ROUTING",
+      "scenarioFamily": "TENANT_ISOLATION",
+      "boundaryClass": "BOUNDARY",
+      "operation": "routeForbiddenIntent",
+      "input": {
+        "use": "baseIntent",
+        "override": {
+          "intentId": "CROSS_SCOPE_REQUEST",
+          "intentClass": "forbidden_request",
+          "requestedActionClass": "read"
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-013"
+    },
+    {
+      "caseId": "HC-E1-014",
+      "primitiveFamily": "AUTHORIZATION",
+      "scenarioFamily": "HERO",
+      "boundaryClass": "NOMINAL",
+      "operation": "authorizationPrecheck",
+      "input": {
+        "use": [
+          "baseContext",
+          "baseIntent"
+        ],
+        "resourceId": "case-handoff-73",
+        "capabilityId": "read_stub",
+        "grants": [
+          {
+            "grantRef": "scope-handoff-73",
+            "tenantId": "tenant-synthetic-73",
+            "dataSpaceId": "space-synthetic-73",
+            "actions": [
+              "read"
+            ],
+            "resourceIds": [
+              "case-handoff-73"
+            ],
+            "result": "allow"
+          }
+        ],
+        "idFactoryResult": "handoff"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-014"
+    },
+    {
+      "caseId": "HC-E1-015",
+      "primitiveFamily": "AUTHORIZATION",
+      "scenarioFamily": "TENANT_ISOLATION",
+      "boundaryClass": "CONFLICT",
+      "operation": "authorizationPrecheck",
+      "input": {
+        "use": [
+          "baseContext",
+          "baseIntent"
+        ],
+        "resourceId": "case-handoff-73",
+        "capabilityId": "read_stub",
+        "grants": [
+          {
+            "grantRef": "scope-handoff-73",
+            "tenantId": "tenant-synthetic-73",
+            "dataSpaceId": "space-other-74",
+            "actions": [
+              "read"
+            ],
+            "resourceIds": [
+              "case-handoff-73"
+            ],
+            "result": "allow"
+          }
+        ],
+        "idFactoryResult": "handoff"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-015"
+    },
+    {
+      "caseId": "HC-E1-016",
+      "primitiveFamily": "AUTHORITY_SOD_ASSURANCE",
+      "scenarioFamily": "AUTHORITY_SOD",
+      "boundaryClass": "NOMINAL",
+      "operation": "checkSyntheticHumanAuthority",
+      "input": {
+        "use": "baseAuthority"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-016"
+    },
+    {
+      "caseId": "HC-E1-017",
+      "primitiveFamily": "AUTHORITY_SOD_ASSURANCE",
+      "scenarioFamily": "AUTHORITY_SOD",
+      "boundaryClass": "EXPIRED",
+      "operation": "checkSyntheticHumanAuthority",
+      "input": {
+        "use": "baseAuthority",
+        "override": {
+          "withinEffectivePeriod": false
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-017"
+    },
+    {
+      "caseId": "HC-E1-018",
+      "primitiveFamily": "AUTHORITY_SOD_ASSURANCE",
+      "scenarioFamily": "AUTHORITY_SOD",
+      "boundaryClass": "CONFLICT",
+      "operation": "checkSyntheticHumanAuthority",
+      "input": {
+        "use": "baseAuthority",
+        "override": {
+          "reviewerRef": "requester-handoff-73"
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-018"
+    },
+    {
+      "caseId": "HC-E1-019",
+      "primitiveFamily": "REDACTION_FIELD_PROJECTION",
+      "scenarioFamily": "PRIVACY_SECRET",
+      "boundaryClass": "NOMINAL",
+      "operation": "projectSyntheticFields",
+      "input": {
+        "policyVersion": "projection-synthetic-v7",
+        "purposeAuthorized": true,
+        "permittedFieldNames": [
+          "taskStatus",
+          "contactAlias",
+          "credential"
+        ],
+        "permittedClasses": [
+          "INTERNAL",
+          "PERSONAL",
+          "CREDENTIAL_SECRET"
+        ],
+        "fields": {
+          "taskStatus": {
+            "classification": "INTERNAL",
+            "value": "pending-synthetic"
+          },
+          "contactAlias": {
+            "classification": "PERSONAL",
+            "value": "alias-synthetic-73"
+          },
+          "credential": {
+            "classification": "CREDENTIAL_SECRET",
+            "value": "secret-synthetic-test-only"
+          }
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-019"
+    },
+    {
+      "caseId": "HC-E1-020",
+      "primitiveFamily": "REDACTION_FIELD_PROJECTION",
+      "scenarioFamily": "PRIVACY_SECRET",
+      "boundaryClass": "MISSING",
+      "operation": "projectSyntheticFields",
+      "input": {
+        "policyVersion": null,
+        "purposeAuthorized": true,
+        "permittedFieldNames": [
+          "taskStatus"
+        ],
+        "permittedClasses": [
+          "INTERNAL"
+        ],
+        "fields": {
+          "taskStatus": {
+            "classification": "INTERNAL",
+            "value": "pending-synthetic"
+          }
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-020"
+    },
+    {
+      "caseId": "HC-E1-021",
+      "primitiveFamily": "DIGEST",
+      "scenarioFamily": "HERO",
+      "boundaryClass": "NOMINAL",
+      "operation": "digestCapabilityPayload",
+      "input": {
+        "payloadA": {
+          "z": 9,
+          "alpha": {
+            "b": 2,
+            "a": 1
+          }
+        },
+        "payloadB": {
+          "alpha": {
+            "a": 1,
+            "b": 2
+          },
+          "z": 9
+        },
+        "assertion": "EQUAL"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-021"
+    },
+    {
+      "caseId": "HC-E1-022",
+      "primitiveFamily": "DIGEST",
+      "scenarioFamily": "NEGATIVE",
+      "boundaryClass": "BOUNDARY",
+      "operation": "digestCapabilityPayload",
+      "input": {
+        "payloadA": {
+          "z": 9,
+          "alpha": {
+            "a": 1
+          }
+        },
+        "payloadB": {
+          "z": 9,
+          "alpha": {
+            "a": 2
+          }
+        },
+        "assertion": "DIFFERENT"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-022"
+    },
+    {
+      "caseId": "HC-E1-023",
+      "primitiveFamily": "IDEMPOTENCY",
+      "scenarioFamily": "DUPLICATE_REPLAY",
+      "boundaryClass": "NOMINAL",
+      "operation": "classifySyntheticIdempotencyReplay",
+      "input": {
+        "previousPayloadDigest": "sha256:handoff-a",
+        "currentPayloadDigest": "sha256:handoff-a"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-023"
+    },
+    {
+      "caseId": "HC-E1-024",
+      "primitiveFamily": "IDEMPOTENCY",
+      "scenarioFamily": "DUPLICATE_REPLAY",
+      "boundaryClass": "CONFLICT",
+      "operation": "classifySyntheticIdempotencyReplay",
+      "input": {
+        "previousPayloadDigest": "sha256:handoff-a",
+        "currentPayloadDigest": "sha256:handoff-b"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-024"
+    },
+    {
+      "caseId": "HC-E1-025",
+      "primitiveFamily": "STATE_TRANSITION",
+      "scenarioFamily": "STATE_TRANSITION",
+      "boundaryClass": "NOMINAL",
+      "operation": "transitionTask",
+      "input": {
+        "use": "baseTask",
+        "fromStatus": "validated",
+        "toStatus": "in_progress",
+        "triggerType": "begin-handoff",
+        "now": "2026-10-10T12:00:00.000Z",
+        "idFactoryResult": "handoff"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-025"
+    },
+    {
+      "caseId": "HC-E1-026",
+      "primitiveFamily": "STATE_TRANSITION",
+      "scenarioFamily": "STATE_TRANSITION",
+      "boundaryClass": "BOUNDARY",
+      "operation": "transitionTask",
+      "input": {
+        "use": "baseTask",
+        "fromStatus": "waiting_for_human",
+        "toStatus": "completed",
+        "triggerType": "invalid-shortcut",
+        "now": "2026-10-10T12:00:00.000Z",
+        "idFactoryResult": "handoff"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-026"
+    },
+    {
+      "caseId": "HC-E1-027",
+      "primitiveFamily": "GROWTH_TRAINING_EVAL_GOVERNANCE",
+      "scenarioFamily": "GROWTH_TRAINING_CONTAMINATION",
+      "boundaryClass": "NOMINAL",
+      "operation": "checkSyntheticEvalIsolation",
+      "input": {
+        "use": "baseIsolation"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-027"
+    },
+    {
+      "caseId": "HC-E1-028",
+      "primitiveFamily": "GROWTH_TRAINING_EVAL_GOVERNANCE",
+      "scenarioFamily": "GROWTH_TRAINING_CONTAMINATION",
+      "boundaryClass": "CONFLICT",
+      "operation": "checkSyntheticEvalIsolation",
+      "input": {
+        "use": "baseIsolation",
+        "override": {
+          "expectedAnswerAccessibleToTrainingAuthor": true
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-028"
+    },
+    {
+      "caseId": "HC-E1-029",
+      "primitiveFamily": "GROWTH_TRAINING_EVAL_GOVERNANCE",
+      "scenarioFamily": "GROWTH_TRAINING_CONTAMINATION",
+      "boundaryClass": "UNKNOWN",
+      "operation": "checkSyntheticEvalIsolation",
+      "input": {
+        "use": "baseIsolation",
+        "override": {
+          "scanResults": {
+            "semantic": "INDETERMINATE"
+          }
+        }
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-029"
+    },
+    {
+      "caseId": "HC-E1-030",
+      "primitiveFamily": "FRESHNESS_EVIDENCE_READY_REVALIDATION",
+      "scenarioFamily": "SOURCE_EVIDENCE",
+      "boundaryClass": "UNKNOWN",
+      "operation": "assessSyntheticReadyCandidate",
+      "input": {
+        "ruleVersion": "ready-synthetic-v7",
+        "sourceFreshness": "UNKNOWN",
+        "evidenceValid": true,
+        "identityResolved": true,
+        "openConflict": false,
+        "blockingRequirements": 0,
+        "blockingRisks": 0
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-030"
+    },
+    {
+      "caseId": "HC-E1-031",
+      "primitiveFamily": "TENANT_DATA_SPACE_SCOPE",
+      "scenarioFamily": "NEGATIVE",
+      "boundaryClass": "UNSUPPORTED",
+      "operation": "validateRequestContext",
+      "input": {
+        "use": "baseContext",
+        "override": { "channel": "unsupported_channel" },
+        "now": "2026-10-10T12:00:00.000Z"
+      },
+      "synthetic": true,
+      "oracleRef": "oracle-hc-e1-031"
+    }
+  ]
+}

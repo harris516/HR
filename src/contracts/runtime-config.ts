@@ -30,7 +30,13 @@ const contractsSchema = z.object({
   capabilityGateway: z.literal("v1"),
   readAnalyzeAdapters: z.literal("v1"),
   draftAdapters: z.literal("v1"),
-  skillOrchestrators: z.literal("v1")
+  skillOrchestrators: z.literal("v1"),
+  practicePack: z.literal("v0.2"),
+  connectorPlan: z.literal("v0.2"),
+  outputSpecs: z.literal("v0.2"),
+  securityHumanReview: z.literal("v0.1"),
+  engineeringBaseline: z.literal("v1"),
+  formalActionCatalog: z.literal("v1")
 }).strict();
 
 const defaultsSchema = z.object({
@@ -65,7 +71,12 @@ const featureFlagsSchema = z.object({
   growthWrite: z.literal(false),
   productionMemory: z.literal(false),
   mockCapabilities: z.literal(true),
-  businessCapabilityExecution: z.literal(false)
+  businessCapabilityExecution: z.literal(false),
+  practiceContractExecution: z.literal(false),
+  connectorContractExecution: z.literal(false),
+  outputContractExecution: z.literal(false),
+  securityControlExecution: z.literal(false),
+  customerActivation: z.literal(false)
 }).strict();
 
 export const runtimeConfigSchema = z.object({

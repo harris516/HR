@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "eval-suite-manifest.v1",
+  "suiteId": "e1-local-synthetic-primitives-candidate",
+  "suiteVersion": "0.1.0",
+  "evaluationLevel": "E1",
+  "purpose": "Draft E1 candidate for local synthetic primitive package only; no live Agent claim.",
+  "subjectProfileRequirementRef": "e1-local-subject-candidate-20260922",
+  "scenarioFamilyRefs": [
+    "HERO",
+    "NEGATIVE",
+    "HIGH_RISK",
+    "TENANT_ISOLATION",
+    "PRIVACY_SECRET",
+    "AUTHORITY_SOD",
+    "SOURCE_EVIDENCE",
+    "STATE_TRANSITION",
+    "DUPLICATE_REPLAY",
+    "GROWTH_TRAINING_CONTAMINATION"
+  ],
+  "caseSnapshotRefs": [],
+  "oraclePolicyRef": "e1-independent-oracle-review-pending",
+  "acceptanceProfileRef": "e1-blocking-profile-pending",
+  "requiredEnvironmentProfileRef": "local-synthetic-test-profile-pending",
+  "requiredRepeatPolicyRef": "e1-deterministic-three-repeats-pending",
+  "dependencyVersionRefs": [
+    "evs3-local-review-20260922"
+  ],
+  "ownerRef": "root",
+  "reviewDecisionRefs": [],
+  "createdAt": "2026-09-22T03:22:09.000Z",
+  "contentDigest": "9d66acc8901af8654cb9d160ab76fbf018a60259ea7096066d2116497d268880",
+  "status": "DRAFT"
+}

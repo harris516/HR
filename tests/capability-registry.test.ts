@@ -27,7 +27,7 @@ describe("S1 capability registry safety gate", () => {
     const registry = validateCapabilityRegistry(registryCopy());
     expect(registry.contractVersion).toBe("v0.3");
     expect(registry.capabilities).toHaveLength(18);
-    expect(registry.reservedCapabilities).toHaveLength(12);
+    expect(registry.reservedCapabilities).toHaveLength(17);
   });
 
   it("keeps every business capability planned and non-executable", () => {

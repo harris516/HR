@@ -1,0 +1,300 @@
+{
+  "schemaVersion": "e1-local-subject-candidate.v1",
+  "status": "DRAFT_UNAPPROVED",
+  "scope": "LOCAL_SYNTHETIC_PRIMITIVE_PACKAGE",
+  "synthetic": true,
+  "baseCommit": "61f6e92",
+  "worktreeDirtyAtCapture": true,
+  "hashAlgorithm": "SHA-256",
+  "fileCount": 72,
+  "files": [
+    {
+      "path": "config/engineering-baseline.test.json",
+      "sha256": "e2252079c95e2572e9bc9a4b5fad38807679f6dd7fc9608703e58bf1035bc0ac"
+    },
+    {
+      "path": "config/runtime.test.json",
+      "sha256": "730893d9f9464c5d9ee8a7ec99c588e353c3e4cdc257e620dcc4e7743e82e044"
+    },
+    {
+      "path": "package.json",
+      "sha256": "0911534da05daf3ab0b4d929307382bfa2405fb8792c3025ace116bf002ca003"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "861445fdfb35260406aa3279fe3f65591184c8aaf03c51ddcaeb1e56311e0a4c"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "ac02d96368617c760f093cfe61fdec64b6244007ab3553e0d6621f706f54a353"
+    },
+    {
+      "path": "src/audit/capability-audit.ts",
+      "sha256": "34db18769ef79e6e91829b82044cc8e3acb2637417df52ccce779baebe5f0131"
+    },
+    {
+      "path": "src/audit/capability-execution-audit.ts",
+      "sha256": "e16abc1c73d6f88f85a340897e911b3002bc8484e77ae7415343a9b3dc05a5e6"
+    },
+    {
+      "path": "src/audit/navigation-audit.ts",
+      "sha256": "96507a261bf85801e71be9f6bfe5297b7b437a64270eceffa5f224a99ccaf3ae"
+    },
+    {
+      "path": "src/audit/skill-audit.ts",
+      "sha256": "fa332ae110e71c482fbb103b87bb175da21d883631920c53425bc590137ade25"
+    },
+    {
+      "path": "src/capabilities/candidate-resolver.ts",
+      "sha256": "8939c32ad03ce81fb37200f8ce9e2033c1ba6fb90dc4a46640677b7524aaea8d"
+    },
+    {
+      "path": "src/capabilities/gateway.ts",
+      "sha256": "0f216e96ae7751d4562f3e9e0d57465556c7d6c83b675e8cf7309579ae839e6c"
+    },
+    {
+      "path": "src/capabilities/implementations/draft-adapters.ts",
+      "sha256": "1aacf7a2c94b7a4a114c115378b324548fbd26dff32e64e45be4fdcaab77613c"
+    },
+    {
+      "path": "src/capabilities/implementations/draft-implementation-registry.ts",
+      "sha256": "5478c0511002800f2de60b59f179eed749fdec3cfa6add164115749faec039c0"
+    },
+    {
+      "path": "src/capabilities/implementations/executor.ts",
+      "sha256": "f258580c5d1edeb18cc523d73296bdd067d12f0e39ca6d9c25401eac5846af1d"
+    },
+    {
+      "path": "src/capabilities/implementations/idempotency-key.ts",
+      "sha256": "1b477d2abede6c06471c61838f11d3ba110a4b789b6bfcc76ba50625c94c9b3c"
+    },
+    {
+      "path": "src/capabilities/implementations/implementation-registry.ts",
+      "sha256": "c24eebee67f5953d9c60b41e896fc17fdde34766e87fa17efdb4e3fcf13741c8"
+    },
+    {
+      "path": "src/capabilities/implementations/read-analyze-adapters.ts",
+      "sha256": "74e5834a0e7be1c6edaa2da616af6269fbc236c8ae19a3009526c6a7a3724eff"
+    },
+    {
+      "path": "src/capabilities/implementations/skill-implementation-registry.ts",
+      "sha256": "ee82861f0c894756306ac1be90a7b732212a0e770ac43d7c4e705472b3bb4b62"
+    },
+    {
+      "path": "src/capabilities/implementations/synthetic-store.ts",
+      "sha256": "03b1e7f0a6d78245ed4962df94accc44e3a49e3648b6be22bf2d3ccab5f0fd37"
+    },
+    {
+      "path": "src/capabilities/implementations/types.ts",
+      "sha256": "f36bf6880b39565a08368d086abcac84fdec6623b06c0400fe85b2c7e07126c8"
+    },
+    {
+      "path": "src/capabilities/profiles.ts",
+      "sha256": "9480f7bd709f2313d224fef9b6ab08ae6444f0a718106fa5b2e4b26f0457deab"
+    },
+    {
+      "path": "src/capabilities/reason-codes.ts",
+      "sha256": "4a6db0d42bbf98a94d48c31c408e5b528dddd70873aade15bb62844ba5c3d9f1"
+    },
+    {
+      "path": "src/capabilities/registry.ts",
+      "sha256": "2746a24f5faeaed05eb43df267727d29bb8e05a88f2bc5be59d96e5014b5f939"
+    },
+    {
+      "path": "src/capabilities/schema-registry.ts",
+      "sha256": "6a4a866ea7696267eb2968544ea1bdadb9ef31637804efa327fc5338a59e9062"
+    },
+    {
+      "path": "src/cli/smoke-capability-gateway.ts",
+      "sha256": "39bfc1262fea2ec0b876cc03154b815101fc37735967dc1e7536b88dde19331e"
+    },
+    {
+      "path": "src/cli/smoke-draft-adapters.ts",
+      "sha256": "a8b954bd50edbb8f5c70d9e47674c21aa7dc960c755bad5a47e8b8be88d3e46c"
+    },
+    {
+      "path": "src/cli/smoke-navigation.ts",
+      "sha256": "42e3a9c785cf0f471873c2435dd9acc04550eacff120525f951f3bf9efdb6654"
+    },
+    {
+      "path": "src/cli/smoke-read-analyze-adapters.ts",
+      "sha256": "05483e9e1742b075f1192c89c34e3213cee5d09a9da13d4410c4c9cbda366f88"
+    },
+    {
+      "path": "src/cli/smoke-skill-orchestrators.ts",
+      "sha256": "f0dbca8e87f41e51a2280493dcc924a7e8dfddd791e7e744ecd9597307cb9367"
+    },
+    {
+      "path": "src/cli/validate-capability-registry.ts",
+      "sha256": "95236ce5f97609589a7775afc81882d4c355a4f3493fcc0be6cbba56a68800a3"
+    },
+    {
+      "path": "src/cli/validate-config.ts",
+      "sha256": "be6c8839891e0d06a6c23d5ac314ab094a533a0af5acdb61e246227db08dd5cb"
+    },
+    {
+      "path": "src/cli/validate-e0-static-manifest.ts",
+      "sha256": "88d0a460d3d08a4ae911f5df703ac03d3a8e4c790aa26c2edb55a06491bb79ce"
+    },
+    {
+      "path": "src/cli/validate-engineering-baseline.ts",
+      "sha256": "4606715366887ca1f5b841eea3b195a1cea46fad00adc1d2bbf6061e1b9c4daa"
+    },
+    {
+      "path": "src/contracts/capability-execution.ts",
+      "sha256": "7cabd6cac206bd5fc91fcc775b7f10d5c6e9b827e8f9156c760aba04f3610b83"
+    },
+    {
+      "path": "src/contracts/capability-gateway.ts",
+      "sha256": "ad3ff8a1380f8b85722976d7ab466dcf21aa20bd3d9b613fab4c336a38e52ac8"
+    },
+    {
+      "path": "src/contracts/capability.ts",
+      "sha256": "bb0043f7fdadcba1b3ab1b39eac983286935488d14512a01ce2f33bb152fa2e2"
+    },
+    {
+      "path": "src/contracts/e0-static-manifest.ts",
+      "sha256": "bef70043a47e4d7f856a2f56068ec2cb1c34e0f4ce7b6209a03e652421c1b74e"
+    },
+    {
+      "path": "src/contracts/engineering-baseline.ts",
+      "sha256": "28ada03e7045d3d545cf9f2aad1fc1bed1db39cf6501b41da6ae690109f650b6"
+    },
+    {
+      "path": "src/contracts/eval.ts",
+      "sha256": "3b966002f630bc6cabfe76f03b72cda97478e27d01c79dd459cd6008f3508279"
+    },
+    {
+      "path": "src/contracts/navigation.ts",
+      "sha256": "c48cf7b56efd270f1373d28487ee573decfb276f51ad6f020330d053d732ea95"
+    },
+    {
+      "path": "src/contracts/runtime-config.ts",
+      "sha256": "adc78b55a86129b915a2b8d4f48b4cd326033a561e86e695cebb4097f03b3a8b"
+    },
+    {
+      "path": "src/contracts/skill-orchestration.ts",
+      "sha256": "2290e355b5a184c841a4e52a8a24d32433c483468b657e41ad32aa4ce8924dcd"
+    },
+    {
+      "path": "src/eval/e1-primitive-harness.ts",
+      "sha256": "b180e4d4fbdd8eb52736c8fa509987dcd58c52342b4ee4d0fc69824859af5438"
+    },
+    {
+      "path": "src/eval/gateway.ts",
+      "sha256": "12a224d85f4b6342fc1e60a180fb60c8c43ea4e2a32785ea8a08c15de0a0390a"
+    },
+    {
+      "path": "src/eval/registry.ts",
+      "sha256": "2e84cec7cb845c6d19abf43149c756bd6a1510dca276cb2443a7b4771397e8c3"
+    },
+    {
+      "path": "src/eval/synthetic-policy-primitives.ts",
+      "sha256": "dd45def1068795f317be4f8b996b7b6d9174362faae4d08a5a17476b6389e719"
+    },
+    {
+      "path": "src/navigation/authorization.ts",
+      "sha256": "b65dce46542a862ddaafbf6652e238a36c3f91b43462cbd3e0a2ccc2e34a1ae2"
+    },
+    {
+      "path": "src/navigation/context-gate.ts",
+      "sha256": "fde1f545ec862c57794005e0c0f5e86509621e540752bde48135f07272817cae"
+    },
+    {
+      "path": "src/navigation/intent-router.ts",
+      "sha256": "e2cd1c680b94d2a366df72c9029bdd612ca9236579d1c667320c96cb2f80c9ec"
+    },
+    {
+      "path": "src/navigation/lifecycle.ts",
+      "sha256": "5f01d8db4c00ac0b375c00b4da7d71314911f9437b062c7f3ed582bb89468e8e"
+    },
+    {
+      "path": "src/navigation/navigation-engine.ts",
+      "sha256": "052109f3ef081a26aef04ba53b0bfad76b6212eb4f0736feceea45e96561ffde"
+    },
+    {
+      "path": "src/navigation/route-engine.ts",
+      "sha256": "f53ea9fde01861101b39484a0ed872e668f58444617f93483ad1d06395235858"
+    },
+    {
+      "path": "src/navigation/subject-resolution.ts",
+      "sha256": "7c10059291cbab87e2a2a96b3e60d8f532120f78018aa3dbb76515162c87582f"
+    },
+    {
+      "path": "src/skills/orchestrator.ts",
+      "sha256": "6d6a9fb23721a6e623c3718e16c405ea47c1ffd0d9207c6388442e9ff1396deb"
+    },
+    {
+      "path": "src/skills/registry.ts",
+      "sha256": "2231796721d242572cc20a14dd4d2b7fe6753c76da72b410685b8bca7b483fbc"
+    },
+    {
+      "path": "src/validation/validate-capability-registry.ts",
+      "sha256": "41140dd480b28c3e5e61484f17a26d0e4eddd1763adcdfacfa38bf8e3735fb95"
+    },
+    {
+      "path": "src/validation/validate-e0-static-manifest.ts",
+      "sha256": "f85ac76027cf11fed6c16049be377f8bc2938cfc7233a357eef5fb92e9da2821"
+    },
+    {
+      "path": "src/validation/validate-engineering-baseline.ts",
+      "sha256": "e310ffcece1c44c2bd17135e97fa9b60c7c462fce432a38071a3c4ce8a2dc5a9"
+    },
+    {
+      "path": "src/validation/validate-runtime-config.ts",
+      "sha256": "0199acaca66789f5d197d0ddd83917f5366ed9737bdd3f7b33963bab6f811175"
+    },
+    {
+      "path": "tests/capability-gateway.test.ts",
+      "sha256": "7433c7c6f48c4a0db07e04c787fce535e03cffc7d28ae59755d01621325b4f1a"
+    },
+    {
+      "path": "tests/capability-registry.test.ts",
+      "sha256": "1575917c59cc6cc81e572d5c7e7007682025de2d8a70cd9e84b4a5de683a7d4a"
+    },
+    {
+      "path": "tests/e0-static-manifest.test.ts",
+      "sha256": "3ba27cf38bcdddaea35e2495b1019da9cbe36a2d83b23df6872c8e1231eb0c49"
+    },
+    {
+      "path": "tests/e1-primitive-harness.test.ts",
+      "sha256": "629974a6fbcf237d602577e97302ba0fbc971bca91c295a81a2eb17a4145821b"
+    },
+    {
+      "path": "tests/engineering-baseline.test.ts",
+      "sha256": "991b18f1a29e334850368d6a4812be8134718c69f007edfbe15c1b94202a1838"
+    },
+    {
+      "path": "tests/eval-foundation.test.ts",
+      "sha256": "2bc6b838275d7568c9bd74debfea4f491ebd2a41a720b5a4a085793f9c056cea"
+    },
+    {
+      "path": "tests/navigation-engine.test.ts",
+      "sha256": "4da394760c30f0c9adedd60595d097a7d9a2c2f64110351530779f73f687fc76"
+    },
+    {
+      "path": "tests/runtime-config.test.ts",
+      "sha256": "2c26b5f5d9d9436b1f7ae574edafd24cb3b5ba4701afdc1fcaffd6c2867f264f"
+    },
+    {
+      "path": "tests/security-negative.test.ts",
+      "sha256": "18a78c48326ef1240bcd5d6081e41234b55898b50963264595a507c7f0ff236b"
+    },
+    {
+      "path": "tests/skill-orchestrators.test.ts",
+      "sha256": "f227bb5272df2bf9742ac74fe7e67c4c501aa1655614289804b314156995aec4"
+    },
+    {
+      "path": "tests/synthetic-draft-adapters.test.ts",
+      "sha256": "8c116458ffc5fb2df466aad959492c2e15707119d70192cbc88f0d995704d90f"
+    },
+    {
+      "path": "tests/synthetic-read-analyze-adapters.test.ts",
+      "sha256": "1bc243476bd9960fd825236ea45ca84083b6797fc73475037609b1bfa20c8add"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "97826ce9b3d72a95cbd75f5c551dc63d6fa05135fa6c07102e96e7511909444f"
+    }
+  ]
+}

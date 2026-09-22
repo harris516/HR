@@ -8,7 +8,7 @@ S6 is implemented and server-validated. The reviewed NEG-001 through NEG-012 mat
 
 | Matrix item | Validated behavior |
 |---|---|
-| NEG-001 | All 18 planned capabilities remain default-denied; all 12 reserved Commit/Send/Export IDs remain unregistered. |
+| NEG-001 | All 18 planned capabilities remain default-denied; all 17 reserved Commit/Send/Export IDs remain unregistered. |
 | NEG-002 | Cross-Tenant and Cross-DataSpace resource references hard-block before implementation. |
 | NEG-003 | Same-Tenant out-of-scope and cross-Tenant collection records, counts and unknown fields are not disclosed. |
 | NEG-004 | Actor, Grant, Purpose and Query cursor drift returns `COLLECTION_CURSOR_INVALID`. |
@@ -51,7 +51,7 @@ s6_security_tests: 22 passed
 negative_matrix_controls: 12/12 passed
 planned_capabilities: 18
 default_enabled_capabilities: 0
-reserved_side_effect_ids: 12
+reserved_side_effect_ids: 17
 cross_tenant_result_count: 0
 cross_data_space_result_count: 0
 unauthorized_resource_result_count: 0

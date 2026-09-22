@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "eval-dataset-manifest.v1",
+  "evalDatasetId": "e1-local-synthetic-holdout-candidate",
+  "datasetVersion": "0.1.0",
+  "purpose": "INDEPENDENT_EVALUATION",
+  "coveredLevels": [
+    "E1"
+  ],
+  "scopeRef": "synthetic-global-local-e1",
+  "synthetic": true,
+  "scenarioFamilyDistribution": {},
+  "generatorLineageRefs": [],
+  "holdoutPartitionRefs": [],
+  "acceptancePartitionRefs": [],
+  "trainingRegistryDigest": "e561b103a9b4701646023d685a218527ab7b7c0034ef9c632a50bebbc4a4f405",
+  "contaminationCheckRef": "pending-independent-contamination-check",
+  "privacySecurityReviewRefs": [],
+  "retentionClassRef": "synthetic-review-pending",
+  "contentDigest": "1ce6144f3f9efa06c31e1c6e365add259a5331989d444152aecbba98f7ea8e4a",
+  "status": "DRAFT"
+}

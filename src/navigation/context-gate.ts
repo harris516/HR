@@ -33,7 +33,10 @@ export function validateRequestContext(
   if (context.actorType === "user" && context.sessionId === undefined) {
     return { ok: false, hardBlock: false, reasonCode: "SESSION_BINDING_INVALID" };
   }
-  if (context.channel !== "test_harness" || !context.authenticationLevel.startsWith("test-")) {
+  const testHarness = context.channel === "test_harness" && context.authenticationLevel.startsWith("test-");
+  const verifiedFeishuTest = context.channel === "feishu_test" &&
+    context.authenticationLevel === "test-feishu-verified";
+  if (!testHarness && !verifiedFeishuTest) {
     return { ok: false, hardBlock: false, reasonCode: "REQUEST_CONTEXT_INVALID" };
   }
   if (context.roles.includes("suspended")) {

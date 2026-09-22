@@ -29,7 +29,7 @@ featureFlag.enabled = false
 implementationBinding = null
 ```
 
-The gateway rejects them with `CAPABILITY_NOT_EXECUTABLE`. The 12 reserved identifiers and unknown identifiers are rejected with `CAPABILITY_NOT_REGISTERED`. No generic-tool fallback exists.
+The gateway rejects them with `CAPABILITY_NOT_EXECUTABLE`. The 17 reserved identifiers and unknown identifiers are rejected with `CAPABILITY_NOT_REGISTERED`. No generic-tool fallback exists.
 
 ## Test-only deep-path validation
 

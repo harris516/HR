@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "v1",
+  "manifestVersion": "1.0.0",
+  "generatedFor": "synthetic_default_closed_baseline",
+  "gateModel": {
+    "engineeringBaseline": "GENERIC_SYNTHETIC",
+    "customerActivation": "DEFERRED_TO_PILOT_CANDIDATE",
+    "customerConfigurationSatisfied": false
+  },
+  "components": [
+    { "componentId": "10_identity_runtime", "documentVersion": "v0.3", "documentDigestSha256": "fcb21f4d17d5b46f4369fec24be2d385a0f222129cc915710217dffcf76f1ee3", "sourcePaths": ["10_IDENTITY_RUNTIME_PACK/AUTHORIZATION.md", "10_IDENTITY_RUNTIME_PACK/IDENTITY.md", "10_IDENTITY_RUNTIME_PACK/README.md", "10_IDENTITY_RUNTIME_PACK/REQUEST_CONTEXT.md", "10_IDENTITY_RUNTIME_PACK/RUNTIME_BOUNDARY.md", "10_IDENTITY_RUNTIME_PACK/RUNTIME_CONFIG_SCHEMA.md", "10_IDENTITY_RUNTIME_PACK/SESSION_AND_MEMORY_POLICY.md", "10_IDENTITY_RUNTIME_PACK/SUBJECT_RESOLUTION.md", "10_IDENTITY_RUNTIME_PACK/TEST_AND_REVIEW.md"], "digestMode": "ORDERED_FILE_SET", "maturity": "RUNTIME_VERIFIED", "executionAllowed": false },
+    { "componentId": "11_task_navigation", "documentVersion": "v0.3", "documentDigestSha256": "8073c2c4059f76eed7b5d2b7cbb52e8daf3a24e75c72ecb1e6c79216a1f2a66b", "sourcePaths": ["11_TASK_NAVIGATION_AND_WORKFLOW.md"], "digestMode": "SINGLE_FILE", "maturity": "RUNTIME_VERIFIED", "executionAllowed": false },
+    { "componentId": "12_skill_capability", "documentVersion": "v0.4", "documentDigestSha256": "fa45409405daf0bec7f1bafcb71b5dcc39d408b442f616a4e252bd2462dedf8d", "sourcePaths": ["12_SKILL_PACK_ROADMAP_AND_CONTRACTS.md"], "digestMode": "SINGLE_FILE", "maturity": "RUNTIME_VERIFIED", "executionAllowed": false },
+    { "componentId": "13_industry_practice", "documentVersion": "v0.2", "documentDigestSha256": "9b7d2c55aa9dde4093d2b3b022b20b0c9c8ac096dd35556c7f110f2b5d2f32cc", "sourcePaths": ["13_INDUSTRY_PRACTICE_PACK_DESIGN.md"], "digestMode": "SINGLE_FILE", "maturity": "DESIGN_READY_DISABLED", "executionAllowed": false },
+    { "componentId": "14_mcp_connector", "documentVersion": "v0.2", "documentDigestSha256": "1dc2cb2c645a346f199f2adb640a7ec9b91e56d3d8d2efe25965c8f3d867d04a", "sourcePaths": ["14_MCP_CONNECTOR_IMPLEMENTATION_PLAN.md"], "digestMode": "SINGLE_FILE", "maturity": "DESIGN_READY_DISABLED", "executionAllowed": false },
+    { "componentId": "15_output_artifact", "documentVersion": "v0.2", "documentDigestSha256": "f47a9c9d7325ef44b9cc02d5900d339c7507904f4326afe525d559fd3d0923f1", "sourcePaths": ["15_OUTPUT_SPECS_AND_TEMPLATES.md"], "digestMode": "SINGLE_FILE", "maturity": "DESIGN_READY_DISABLED", "executionAllowed": false },
+    { "componentId": "16_security_human_review", "documentVersion": "v0.1", "documentDigestSha256": "c13c1d64922b1769cff16a6154d234b2eead0e603c23129be23f5924123d781f", "sourcePaths": ["16_BOUNDARY_SECURITY_HUMAN_REVIEW.md"], "digestMode": "SINGLE_FILE", "maturity": "DESIGN_READY_DISABLED", "executionAllowed": false }
+  ],
+  "practiceContracts": [
+    { "id": "hr_employment_contract_onboarding_practice_pack", "version": "0.2.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr_employment_eligibility_verification_practice_pack", "version": "0.2.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr_onboarding_exception_governance_practice_pack", "version": "0.2.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null }
+  ],
+  "outputContracts": [
+    { "id": "hr.onboarding.output.intake_handoff_card", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.weekly_exception_workbox", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.responsibility_workbox", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.contract_consistency_check", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.contract_exception_review_packet", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.exception_governance_workpaper", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "hr.onboarding.output.day1_ready_delivery_card", "version": "1.0.0", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null }
+  ],
+  "securityControls": [
+    { "id": "SEC-C001", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C002", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C003", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C004", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C005", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C006", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C007", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C008", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C009", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C010", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C011", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null },
+    { "id": "SEC-C012", "status": "DESIGN_READY_DISABLED", "runtimeBindingRef": null }
+  ],
+  "formalActions": [
+    { "formalActionId": "hr.onboarding.review.create", "capabilityId": "hr.onboarding.review.create", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "REVIEW_CREATION_POLICY", "commandSchemaRef": "ReviewCreationCommandV1", "resultSchemaRef": "ReviewCreationResultV1", "commitUnitRef": "ReviewCreationCommitUnitV1", "denyReasonCode": "FORMAL_REVIEW_CREATION_NOT_ALLOWED", "idempotencyNamespace": "review-create", "auditEventPrefix": "review.creation", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.review.decision.commit", "capabilityId": "hr.onboarding.review.decision.commit", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "REVIEW_DECIDE_AUTHORITY", "commandSchemaRef": "DecisionCommitCommandV1", "resultSchemaRef": "DecisionCommitResultV1", "commitUnitRef": "DecisionCommitUnitV1", "denyReasonCode": "FORMAL_DECISION_NOT_ALLOWED", "idempotencyNamespace": "review-decision", "auditEventPrefix": "review.decision", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.requirement.complete", "capabilityId": "hr.onboarding.requirement.complete", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "REQUIREMENT_COMMIT_AUTHORITY", "commandSchemaRef": "RequirementCompletionCommandV1", "resultSchemaRef": "RequirementCompletionCommitResultV1", "commitUnitRef": "RequirementCompletionCommitUnitV1", "denyReasonCode": "FORMAL_INTERNAL_COMMIT_NOT_ALLOWED", "idempotencyNamespace": "requirement-completion", "auditEventPrefix": "requirement.completion", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.requirement.waiver.commit", "capabilityId": "hr.onboarding.requirement.waiver.commit", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "WAIVER_AUTHORITY", "commandSchemaRef": "WaiverCommitCommandV1", "resultSchemaRef": "WaiverCommitResultV1", "commitUnitRef": "WaiverCommitUnitV1", "denyReasonCode": "WAIVER_NOT_ALLOWED", "idempotencyNamespace": "requirement-waiver", "auditEventPrefix": "requirement.waiver", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.exception.accept", "capabilityId": "hr.onboarding.exception.accept", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "ACCEPT_EXCEPTION_AUTHORITY", "commandSchemaRef": "ExceptionAcceptanceCommandV1", "resultSchemaRef": "ExceptionAcceptanceResultV1", "commitUnitRef": "ExceptionAcceptanceCommitUnitV1", "denyReasonCode": "ACCEPTED_EXCEPTION_NOT_ALLOWED", "idempotencyNamespace": "exception-acceptance", "auditEventPrefix": "exception.acceptance", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.frozen_action.create", "capabilityId": "hr.onboarding.frozen_action.create", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "FREEZE_POLICY", "commandSchemaRef": "FrozenActionCreationCommandV1", "resultSchemaRef": "FrozenActionCreationResultV1", "commitUnitRef": "FrozenActionCreationCommitUnitV1", "denyReasonCode": "FROZEN_ACTION_MUTATION_NOT_ALLOWED", "idempotencyNamespace": "frozen-action-create", "auditEventPrefix": "frozen_action.creation", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.frozen_action.release", "capabilityId": "hr.onboarding.frozen_action.release", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "FREEZE_RELEASE_AUTHORITY", "commandSchemaRef": "FrozenActionReleaseCommandV1", "resultSchemaRef": "FrozenActionReleaseResultV1", "commitUnitRef": "FrozenActionReleaseCommitUnitV1", "denyReasonCode": "FREEZE_RELEASE_NOT_AUTHORIZED", "idempotencyNamespace": "frozen-action-release", "auditEventPrefix": "frozen_action.release", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.ready.confirm", "capabilityId": "hr.onboarding.ready.confirm", "sideEffectClass": "INTERNAL_COMMIT", "authorityType": "READY_CONFIRM_AUTHORITY", "commandSchemaRef": "ConfirmationCommandV1", "resultSchemaRef": "ConfirmationCommitResultV1", "commitUnitRef": "ConfirmationCommitUnitV1", "denyReasonCode": "CONFIRMATION_NOT_ALLOWED", "idempotencyNamespace": "ready-confirmation", "auditEventPrefix": "ready.confirmation", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.artifact.export", "capabilityId": "hr.onboarding.artifact.export", "sideEffectClass": "EXPORT", "authorityType": "EXPORT_APPROVAL_AUTHORITY", "commandSchemaRef": "ArtifactExportCommandV1", "resultSchemaRef": "ArtifactExportResultV1", "commitUnitRef": "ArtifactExportCommitUnitV1", "denyReasonCode": "EXPORT_NOT_ALLOWED", "idempotencyNamespace": "artifact-export", "auditEventPrefix": "artifact.export", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "hr.onboarding.notification.send", "capabilityId": "hr.onboarding.notification.send", "sideEffectClass": "OUTBOUND_MESSAGE", "authorityType": "SEND_APPROVAL_AUTHORITY", "commandSchemaRef": "MessageSendCommandV1", "resultSchemaRef": "MessageSendResultV1", "commitUnitRef": "MessageSendCommitUnitV1", "denyReasonCode": "SEND_NOT_ALLOWED", "idempotencyNamespace": "message-send", "auditEventPrefix": "message.send", "owner": "root", "status": "RESERVED_NOT_REGISTERED", "registrationAllowed": false, "implementationBindingRef": null },
+    { "formalActionId": "external.write.target_specific", "capabilityId": null, "sideEffectClass": "EXTERNAL_WRITE", "authorityType": "EXTERNAL_WRITE_AUTHORITY", "commandSchemaRef": "TargetSpecificExternalWriteCommandV1", "resultSchemaRef": "TargetSpecificExternalWriteResultV1", "commitUnitRef": "TargetSpecificExternalWriteCommitUnitV1", "denyReasonCode": "EXTERNAL_WRITE_NOT_ALLOWED", "idempotencyNamespace": "target-specific-external-write", "auditEventPrefix": "external.target_write", "owner": "root", "status": "TARGET_SPECIFIC_CAPABILITY_REQUIRED", "registrationAllowed": false, "implementationBindingRef": null }
+  ],
+  "runtimeAssertions": {
+    "automationCeiling": "A2_DRAFT",
+    "plannedCapabilityCount": 18,
+    "enabledBusinessCapabilityCount": 0,
+    "reservedCapabilityCount": 17,
+    "registeredReservedCapabilityCount": 0,
+    "physicalToolBindingCount": 0,
+    "connectorBindingCount": 0,
+    "channelBindingCount": 0,
+    "realCustomerDataAllowed": false,
+    "formalInternalCommitAllowed": false,
+    "externalSideEffectsAllowed": false,
+    "outboundMessagingAllowed": false
+  }
+}

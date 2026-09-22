@@ -40,6 +40,11 @@ export const reservedCapabilityIds = [
   "hr.onboarding.deadline.update",
   "hr.onboarding.exception.open",
   "hr.onboarding.review.create",
+  "hr.onboarding.review.decision.commit",
+  "hr.onboarding.requirement.waiver.commit",
+  "hr.onboarding.exception.accept",
+  "hr.onboarding.frozen_action.create",
+  "hr.onboarding.frozen_action.release",
   "hr.onboarding.ready.confirm",
   "hr.onboarding.notification.send",
   "hr.onboarding.artifact.export"
@@ -205,7 +210,7 @@ export const capabilityEntrySchema = z.object({
 export const reservedCapabilitySchema = z.object({
   capabilityId: reservedCapabilityIdSchema,
   status: z.literal("RESERVED_NOT_REGISTERED"),
-  sideEffectClass: z.enum(["INTERNAL_COMMIT", "OUTBOUND_MESSAGE", "EXPORT"]),
+  sideEffectClass: z.enum(["INTERNAL_COMMIT", "OUTBOUND_MESSAGE", "EXPORT", "EXTERNAL_WRITE"]),
   registrationAllowed: z.literal(false)
 }).strict();
 

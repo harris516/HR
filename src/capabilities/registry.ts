@@ -345,7 +345,7 @@ const capabilities: CapabilityEntry[] = [
 
 function reserved(
   capabilityId: ReservedCapabilityId,
-  sideEffectClass: "INTERNAL_COMMIT" | "OUTBOUND_MESSAGE" | "EXPORT"
+  sideEffectClass: "INTERNAL_COMMIT" | "OUTBOUND_MESSAGE" | "EXPORT" | "EXTERNAL_WRITE"
 ) {
   return {
     capabilityId,
@@ -371,6 +371,11 @@ export const capabilityRegistry: CapabilityRegistry = capabilityRegistrySchema.p
     reserved("hr.onboarding.deadline.update", "INTERNAL_COMMIT"),
     reserved("hr.onboarding.exception.open", "INTERNAL_COMMIT"),
     reserved("hr.onboarding.review.create", "INTERNAL_COMMIT"),
+    reserved("hr.onboarding.review.decision.commit", "INTERNAL_COMMIT"),
+    reserved("hr.onboarding.requirement.waiver.commit", "INTERNAL_COMMIT"),
+    reserved("hr.onboarding.exception.accept", "INTERNAL_COMMIT"),
+    reserved("hr.onboarding.frozen_action.create", "INTERNAL_COMMIT"),
+    reserved("hr.onboarding.frozen_action.release", "INTERNAL_COMMIT"),
     reserved("hr.onboarding.ready.confirm", "INTERNAL_COMMIT"),
     reserved("hr.onboarding.notification.send", "OUTBOUND_MESSAGE"),
     reserved("hr.onboarding.artifact.export", "EXPORT")

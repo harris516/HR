@@ -1,6 +1,7 @@
 node_modules/
 coverage/
 dist/
+openclaw-test-tool/lib/
 .env
 .env.*
 !.env.example

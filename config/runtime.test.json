@@ -28,7 +28,13 @@
     "capabilityGateway": "v1",
     "readAnalyzeAdapters": "v1",
     "draftAdapters": "v1",
-    "skillOrchestrators": "v1"
+    "skillOrchestrators": "v1",
+    "practicePack": "v0.2",
+    "connectorPlan": "v0.2",
+    "outputSpecs": "v0.2",
+    "securityHumanReview": "v0.1",
+    "engineeringBaseline": "v1",
+    "formalActionCatalog": "v1"
   },
   "defaults": {
     "authorization": "deny",
@@ -60,6 +66,11 @@
     "growthWrite": false,
     "productionMemory": false,
     "mockCapabilities": true,
-    "businessCapabilityExecution": false
+    "businessCapabilityExecution": false,
+    "practiceContractExecution": false,
+    "connectorContractExecution": false,
+    "outputContractExecution": false,
+    "securityControlExecution": false,
+    "customerActivation": false
   }
 }

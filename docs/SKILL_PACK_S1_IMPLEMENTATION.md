@@ -38,7 +38,7 @@ corepack pnpm validate:capabilities
 corepack pnpm smoke:navigation
 ```
 
-The capability validator must report 18 planned capabilities, zero executable capabilities, 12 reserved identifiers, zero implementation bindings, zero physical tool bindings and no external side effects.
+The capability validator must report 18 planned capabilities, zero executable capabilities, 17 reserved identifiers, zero implementation bindings, zero physical tool bindings and no external side effects. Five additional internal formal-action identities were added during the 10—16 baseline closure; all remain unregistered.
 
 ## Next slice
 

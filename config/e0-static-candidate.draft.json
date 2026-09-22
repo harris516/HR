@@ -1,0 +1,314 @@
+{
+  "schemaVersion": "e0-static-manifest.v1",
+  "manifestId": "e0-local-candidate-20260922",
+  "manifestVersion": "1.0.0",
+  "subjectSnapshotRef": "e1-local-subject-candidate-20260922",
+  "synthetic": true,
+  "documents": [
+    {
+      "documentId": "00",
+      "version": "v0.4",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "00_PROJECT_BRIEF_AND_ROADMAP.md",
+          "sha256": "f1f9fd527983fd7cbc23dae78d67e73526aa50091fa2d025fe5567104b30f4ab"
+        }
+      ]
+    },
+    {
+      "documentId": "01",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "01_USER_INSIGHT_AND_STAKEHOLDER_MAP.md",
+          "sha256": "bc9ca20b78aa10a0816a9fedec3d7b4dc655c9306018dcda88077d6797fa31ba"
+        }
+      ]
+    },
+    {
+      "documentId": "02",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "02_PRODUCT_DEFINITION_AND_BOUNDARY.md",
+          "sha256": "7ba4a3286abc717904bc9e55a929cf5e345da97794faa800e428c7ff6ca4ead1"
+        }
+      ]
+    },
+    {
+      "documentId": "03",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "03_PROFESSIONAL_LEVEL_AND_PRACTICE_DECISION.md",
+          "sha256": "03cdcc1bae41e1639024989581066a3b9c63741bd278417c7c073cffea61ed61"
+        }
+      ]
+    },
+    {
+      "documentId": "04",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "04_BUSINESS_PROCESS_RECONSTRUCTION.md",
+          "sha256": "1abe4e69cd709853271c2fd9e9a52db34dde35cc58ebf77185a45c7c48c44212"
+        }
+      ]
+    },
+    {
+      "documentId": "05",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "05_HIGH_VALUE_MVP_SCOPE.md",
+          "sha256": "1217d50576b56c8e169dd829402a1936797b0dcd6294a62afb9dcdfdd68e2d58"
+        }
+      ]
+    },
+    {
+      "documentId": "06",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "06_FUNCTION_DESIGN.md",
+          "sha256": "884b2b6a410a8fd13aae78b7ca1b14c1f058fc681a17975a650182e237841faa"
+        }
+      ]
+    },
+    {
+      "documentId": "07",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "07_ARCHITECTURE_DESIGN.md",
+          "sha256": "1f55029c636466f65aa003010795840a1faa1b469ba63d6178bc9cb15de2c36e"
+        }
+      ]
+    },
+    {
+      "documentId": "08",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "08_DATA_SPACE_TENANT_TEAM_PROJECT_MODEL.md",
+          "sha256": "1dfe8be5eaa833fb02f0995f706c15e3df42d8ced5c37f7e344fb2c830118db0"
+        }
+      ]
+    },
+    {
+      "documentId": "09",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "09_KNOWLEDGE_SOURCE_DATA_POLICY.md",
+          "sha256": "056730a88c00811e675ffc7b1b8cb85f7aee713265365c07b9b6a2f77d71257b"
+        }
+      ]
+    },
+    {
+      "documentId": "10",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/AUTHORIZATION.md",
+          "sha256": "9ffeee388e6ba48938901c0d948b28d6ad7d88648d1c37d5a9f7781bc17b50ea"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/IDENTITY.md",
+          "sha256": "8f85406306fa25b8d2501e8108d5ec449b6cfcb1359a65ebdfe7b525f0d21ef2"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/README.md",
+          "sha256": "07709e5e97e83a88e3f7e080bbf6348ff1901284d4bc143045de23c7336c4ee6"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/REQUEST_CONTEXT.md",
+          "sha256": "6eac0600a25e1f725e7bb9dd83bb0bad451d21e78f8ceb6276ccb53d663286d7"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/RUNTIME_BOUNDARY.md",
+          "sha256": "dd25c45cb2b1e52e12dbf4b94825434ccaa0343689101320a30db521b36e6cc8"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/RUNTIME_CONFIG_SCHEMA.md",
+          "sha256": "8591c390422fbe5e2d019a6623e6043cb5b9cba4d61bc8263ed9a55e348965ae"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/SESSION_AND_MEMORY_POLICY.md",
+          "sha256": "e3162427ec57c950844d90557655ba6ce9e5eb35c666ab3c5d47ac36a7f91f51"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/SUBJECT_RESOLUTION.md",
+          "sha256": "3aec02890f58d62fe45d1ae541872cfb0092d97dfe5d6c39490c0b19d43dd2a2"
+        },
+        {
+          "path": "10_IDENTITY_RUNTIME_PACK/TEST_AND_REVIEW.md",
+          "sha256": "a9315820411e0bee4dffc21f9117e2b7eb43d63b8aa9018238dbb2410ecb26bf"
+        }
+      ]
+    },
+    {
+      "documentId": "11",
+      "version": "v0.3",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "11_TASK_NAVIGATION_AND_WORKFLOW.md",
+          "sha256": "8073c2c4059f76eed7b5d2b7cbb52e8daf3a24e75c72ecb1e6c79216a1f2a66b"
+        }
+      ]
+    },
+    {
+      "documentId": "12",
+      "version": "v0.4",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "12_SKILL_PACK_ROADMAP_AND_CONTRACTS.md",
+          "sha256": "fa45409405daf0bec7f1bafcb71b5dcc39d408b442f616a4e252bd2462dedf8d"
+        }
+      ]
+    },
+    {
+      "documentId": "13",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "13_INDUSTRY_PRACTICE_PACK_DESIGN.md",
+          "sha256": "9b7d2c55aa9dde4093d2b3b022b20b0c9c8ac096dd35556c7f110f2b5d2f32cc"
+        }
+      ]
+    },
+    {
+      "documentId": "14",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "14_MCP_CONNECTOR_IMPLEMENTATION_PLAN.md",
+          "sha256": "1dc2cb2c645a346f199f2adb640a7ec9b91e56d3d8d2efe25965c8f3d867d04a"
+        }
+      ]
+    },
+    {
+      "documentId": "15",
+      "version": "v0.2",
+      "status": "reviewed_ready",
+      "sourceFiles": [
+        {
+          "path": "15_OUTPUT_SPECS_AND_TEMPLATES.md",
+          "sha256": "f47a9c9d7325ef44b9cc02d5900d339c7507904f4326afe525d559fd3d0923f1"
+        }
+      ]
+    },
+    {
+      "documentId": "16",
+      "version": "v0.1",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "16_BOUNDARY_SECURITY_HUMAN_REVIEW.md",
+          "sha256": "c13c1d64922b1769cff16a6154d234b2eead0e603c23129be23f5924123d781f"
+        }
+      ]
+    },
+    {
+      "documentId": "17",
+      "version": "v0.2",
+      "status": "reviewed_closure_passed",
+      "sourceFiles": [
+        {
+          "path": "17_GROWTH_AND_SOUL_INJECTION_PLAN.md",
+          "sha256": "1933780024a40f7df4d253f15d28b0b4a4eeaed94fb7d8e0d6124d65ff7fcd79"
+        }
+      ]
+    },
+    {
+      "documentId": "18",
+      "version": "v0.1",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "18_IM_L0_L6_TRAINING_PLAN.md",
+          "sha256": "649019df7781c610b8681cd83aab026623411bfc7e4699d2c8329e40c74c53cd"
+        }
+      ]
+    },
+    {
+      "documentId": "19",
+      "version": "v0.1",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "19_TEST_EVAL_ACCEPTANCE_PLAN.md",
+          "sha256": "e0ecdd699a3dc38acdeb572bd81b749d6ed239223a3627f4d0ae9fae9e6a9be6"
+        }
+      ]
+    },
+    {
+      "documentId": "20",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "20_ENVIRONMENT_AND_DEPLOYMENT_PROFILE.md",
+          "sha256": "ac1afba39b44524c59b6764f7adb1061586b0c823e1f8de01994ece1b21e87b3"
+        }
+      ]
+    },
+    {
+      "documentId": "21",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "21_IMPLEMENTATION_RUNBOOK.md",
+          "sha256": "c750c72dcb66a061a29c09a6a3cbda189d1dbf7674ddab5bbf8b83ae477c3f8e"
+        }
+      ]
+    },
+    {
+      "documentId": "22",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "22_RELEASE_PACKAGE_AND_ROLLBACK_POLICY.md",
+          "sha256": "e037ef06034eb6c244b615fb2b2d688ae7f5f45c1445b258f69e1235a6f5ab4a"
+        }
+      ]
+    },
+    {
+      "documentId": "23",
+      "version": "v0.2",
+      "status": "reviewed",
+      "sourceFiles": [
+        {
+          "path": "23_OPERATION_AUDIT_AND_TARGET_AGENT_PACKAGE.md",
+          "sha256": "f550cc34d2c367c6f55518fd107345cde0814c20aee49e2dde4e321b78504ad3"
+        }
+      ]
+    }
+  ],
+  "runtimeConfig": {
+    "path": "hr-runtime-repo/config/runtime.test.json",
+    "sha256": "730893d9f9464c5d9ee8a7ec99c588e353c3e4cdc257e620dcc4e7743e82e044"
+  },
+  "engineeringBaseline": {
+    "path": "hr-runtime-repo/config/engineering-baseline.test.json",
+    "sha256": "e2252079c95e2572e9bc9a4b5fad38807679f6dd7fc9608703e58bf1035bc0ac"
+  },
+  "contentDigest": "e8bb4f0457beb2ea0d82f4637f46709df459dafc70eb7d2fda73f72e2fb25b96"
+}

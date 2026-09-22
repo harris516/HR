@@ -8,11 +8,16 @@
     "node": ">=24.16.0 <25"
   },
   "scripts": {
+    "build:mvp": "tsc -p tsconfig.build.json",
+    "seed:mvp": "tsx src/cli/seed-mvp-synthetic.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:security": "vitest run tests/security-negative.test.ts",
     "validate:config": "tsx src/cli/validate-config.ts config/runtime.test.json",
     "validate:capabilities": "tsx src/cli/validate-capability-registry.ts",
+    "validate:baseline": "tsx src/cli/validate-engineering-baseline.ts config/engineering-baseline.test.json",
+    "validate:e0-static": "tsx src/cli/validate-e0-static-manifest.ts",
+    "verify:baseline-docs": "tsx src/cli/validate-engineering-baseline.ts config/engineering-baseline.test.json ..",
     "smoke:navigation": "tsx src/cli/smoke-navigation.ts",
     "smoke:gateway": "tsx src/cli/smoke-capability-gateway.ts",
     "smoke:adapters": "tsx src/cli/smoke-read-analyze-adapters.ts",

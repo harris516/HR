@@ -16,6 +16,7 @@ import type { CapabilityEntry, ResultStatus } from "../../contracts/capability.j
 import { validateRequestContext } from "../../navigation/context-gate.js";
 import { digestCapabilityPayload } from "../gateway.js";
 import { capabilityRegistry } from "../registry.js";
+import { classifySyntheticIdempotencyReplay, deriveSyntheticCapabilityIdempotencyKey } from "./idempotency-key.js";
 import {
   capabilityPayloadSchemas,
   parseCapabilityInput
@@ -136,13 +137,13 @@ export class SyntheticCapabilityExecutor {
       );
     }
 
-    const idempotencyKey = this.#idempotencyKey(request, capability, parsedInput);
+    const idempotencyKey = deriveSyntheticCapabilityIdempotencyKey(request, capability, parsedInput);
     const inputPayloadDigest = (request.inputEnvelope as { inputPayloadDigest: string }).inputPayloadDigest;
     const previousOutcome = this.#idempotencyOutcomes.get(idempotencyKey);
-    if (
-      previousOutcome !== undefined &&
-      previousOutcome.envelope.inputPayloadDigest !== inputPayloadDigest
-    ) {
+    const replay = classifySyntheticIdempotencyReplay(
+      previousOutcome?.envelope.inputPayloadDigest, inputPayloadDigest
+    );
+    if (replay === "CONFLICT") {
       return this.#recordedFailure(
         request,
         admission,
@@ -155,7 +156,7 @@ export class SyntheticCapabilityExecutor {
         admission.auditRef ?? "gateway-audit-unavailable"
       );
     }
-    if (previousOutcome !== undefined) {
+    if (replay === "DUPLICATE" && previousOutcome !== undefined) {
       return this.#duplicateOutcome(
         request,
         admission,
@@ -362,42 +363,6 @@ export class SyntheticCapabilityExecutor {
       implementationInvoked: false,
       externalSideEffect: false
     });
-  }
-
-  #idempotencyKey(
-    request: CapabilityGatewayRequest,
-    capability: CapabilityEntry,
-    parsedInput: Record<string, unknown>
-  ): string {
-    const context = request.requestContext as {
-      tenantId: string;
-      dataSpaceId: string;
-      actorId: string;
-      roles: string[];
-      scopeGrantRefs: string[];
-      authorityGrantRefs: string[];
-    };
-    const explicitDeduplicationKey = typeof parsedInput.deduplicationKey === "string"
-      ? parsedInput.deduplicationKey
-      : request.capabilityRequestId;
-    return [
-      context.tenantId,
-      context.dataSpaceId,
-      context.actorId,
-      request.purpose,
-      request.authorizationDecision.grantVersion,
-      digestCapabilityPayload({
-        roles: context.roles,
-        scopeGrantRefs: context.scopeGrantRefs,
-        authorityGrantRefs: context.authorityGrantRefs
-      }),
-      capability.capabilityId,
-      capability.capabilityVersion,
-      capability.idempotencyProfile,
-      digestCapabilityPayload(request.resourceRefs),
-      digestCapabilityPayload(request.collectionAdmission ?? null),
-      explicitDeduplicationKey
-    ].join("|");
   }
 
   #recordedFailure(

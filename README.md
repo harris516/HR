@@ -18,12 +18,13 @@
 - Task Navigation Runtime：N1—N7 server verified；10—11 Runtime Cross-check passed
 - Skill Pack / Capability Contract：`v0.3 reviewed`
 - Skill Pack Runtime：S1—S6 server verified；Stage 12 Runtime Cross-check passed
-- Capability Registry：18 planned、0 enabled；12 reserved、0 registered
+- Capability Registry：18 planned、0 enabled；17 reserved、0 registered
 - Capability Gateway：S2 server verified；default all denied；0 implementation invoked
 - Read / Analyze Adapters：S3 server verified；13 synthetic test implementations；default runtime disabled
 - Draft Adapters：S4 server verified；5 synthetic test implementations；DRAFT / NOT_SENT only
 - Skill Orchestrators：S5 server verified；6 synthetic Skill contracts；child Capability independent admission/audit
 - Security Matrix：S6 server verified；NEG-001—NEG-012 plus version/schema/binding/idempotency isolation
+- Agent Engineering Baseline：10—16 Manifest v1；3 Practice、7 P0 Output、12 Security Control和11 Formal Action均为严格禁用态
 
 ## 目录
 
@@ -50,6 +51,9 @@ pnpm test
 pnpm test:security
 pnpm validate:config
 pnpm validate:capabilities
+pnpm validate:baseline
+# 仅在10—16源文档位于仓库父目录时执行内容Digest核验
+pnpm verify:baseline-docs
 pnpm smoke:gateway
 pnpm smoke:adapters
 pnpm smoke:drafts
@@ -83,4 +87,4 @@ Agent Dir: /home/xb/.openclaw/agents/aibang-hr-onboarding-agent/agent
 
 ## 当前不代表
 
-完成本骨架和Task Navigation Test Harness不代表整体Agent Engineering Ready、Pilot Ready或Production Ready。导航模块尚未注册为OpenClaw Tool；真实员工数据、飞书绑定、业务系统Connector、正式状态提交和对外发送必须等待12—16及后续Gate。
+Agent Engineering Baseline Ready只表示10—16合同、Manifest和默认拒绝测试可作为后续设计及逐项授权合成工程的输入，不代表业务Capability Runtime、Customer Activation、Pilot、Staging或Production Ready。导航模块尚未注册为OpenClaw Tool；真实员工数据、飞书绑定、业务系统Connector、正式状态提交和对外发送仍全部关闭。
