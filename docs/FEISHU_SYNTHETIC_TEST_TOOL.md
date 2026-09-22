@@ -5,7 +5,7 @@
 ## 能做什么
 
 - 由 `hr-bot-01` 的受控测试账号发问，读取一条 synthetic `OnboardingCase`，生成 Day-1 Ready 建议卡草稿；模型只负责解释工具返回的结构化结果。
-- 工具只接受 OpenClaw 在运行时提供的 `requesterSenderId` 与插件配置的单一 `allowedSenderId` 完全一致的调用；模型参数只有 `caseRef`，不能提供 Actor、Tenant 或 DataSpace。
+- 工具只接受 OpenClaw 在运行时提供的 Agent ID、Feishu 渠道、`hr-bot-01` 账号和 `requesterSenderId` 同时匹配的调用；其中发送者 ID 必须与插件配置的单一 `allowedSenderId` 完全一致。模型参数只有 `caseRef`，不能提供 Actor、Tenant 或 DataSpace。
 - SQLite 数据库必须位于仓库外。工具不发送消息，不提交正式 `READY`，不调用真实 Connector；聊天回复仍由当前 OpenClaw/飞书路由发送。
 
 ## 当前验证

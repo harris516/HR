@@ -26,7 +26,10 @@ export default defineToolPlugin({
     optional: true,
     factory({ api, toolContext }) {
       const config = api.pluginConfig ?? {};
-      if (toolContext.requesterSenderId !== config.allowedSenderId) return null;
+      if (toolContext.agentId !== "aibang-hr-onboarding-agent" ||
+        toolContext.messageChannel !== "feishu" ||
+        toolContext.agentAccountId !== "hr-bot-01" ||
+        toolContext.requesterSenderId !== config.allowedSenderId) return null;
       return {
         name: toolName,
         description: "Read a synthetic onboarding case and return a Day-1 Ready suggestion card for HR review. No formal Ready change or proactive message.",
