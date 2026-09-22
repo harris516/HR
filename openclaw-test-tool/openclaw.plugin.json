@@ -2,6 +2,7 @@
   "id": "aibang-hr-onboarding-test",
   "name": "Aibang HR Onboarding Synthetic Test",
   "description": "Read one synthetic onboarding case and draft a Ready review card.",
+  "version": "0.1.0",
   "categories": ["other"],
   "contracts": {
     "tools": ["aibang_hr_onboarding_test_ready_card"]
