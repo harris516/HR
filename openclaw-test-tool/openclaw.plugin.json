@@ -22,8 +22,9 @@
         "items": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["senderId", "tenantId", "dataSpaceId", "actorId", "activeTeamId", "teamMembershipRef", "roles", "scopeGrantRefs"],
+          "required": ["accountId", "senderId", "tenantId", "dataSpaceId", "actorId", "activeTeamId", "teamMembershipRef", "roles", "scopeGrantRefs"],
           "properties": {
+            "accountId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$" },
             "senderId": { "type": "string", "pattern": "^ou_[A-Za-z0-9]+$" },
             "tenantId": { "type": "string", "minLength": 1 },
             "dataSpaceId": { "type": "string", "minLength": 1 },

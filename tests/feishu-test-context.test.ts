@@ -11,6 +11,7 @@ const now = new Date("2026-09-22T03:00:00.000Z");
 describe("controlled Feishu synthetic test context", () => {
   it("creates a valid, short-lived context from the trusted sender", () => {
     const context = createFeishuTestContext({
+      agentAccountId: "hr-bot-01",
       requesterSenderId: "ou_hr1synthetic",
       trustedPrincipals: syntheticTrustedFeishuPrincipals,
       sessionRef: "feishu-chat-hr1",
@@ -26,24 +27,67 @@ describe("controlled Feishu synthetic test context", () => {
     expect(validateRequestContext(context, new Date(now.getTime() + 5 * 60_000)).ok).toBe(false);
   });
 
-  it("denies absent, mismatched, or malformed sender configuration", () => {
-    for (const requesterSenderId of [undefined, "ou_other", "ou_hrnonmember", "feishu:ou_hr1synthetic"]) {
-      expect(() => createFeishuTestContext({ requesterSenderId, trustedPrincipals: syntheticTrustedFeishuPrincipals, now }))
+  it("denies absent, unknown, or malformed runtime identity metadata", () => {
+    for (const [agentAccountId, requesterSenderId] of [
+      [undefined, "ou_hr1synthetic"],
+      ["unknown-bot", "ou_hr1synthetic"],
+      ["hr-bot-01", "ou_other"],
+      ["hr-bot-04", "ou_hrnonmember"],
+      ["feishu:hr-bot-01", "ou_hr1synthetic"],
+      ["hr-bot-01", "feishu:ou_hr1synthetic"]
+    ]) {
+      expect(() => createFeishuTestContext({ agentAccountId, requesterSenderId,
+        trustedPrincipals: syntheticTrustedFeishuPrincipals, now }))
         .toThrow(FeishuTestSenderDenied);
     }
   });
 
-  it("maps two tenants to one team while keeping their sessions and actors distinct", () => {
-    const hr1 = createFeishuTestContext({ requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now });
-    const hr2 = createFeishuTestContext({ requesterSenderId: "ou_hr2synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now });
-    expect(hr1.tenantId).not.toBe(hr2.tenantId);
-    expect(hr1.actorId).not.toBe(hr2.actorId);
+  it("maps two bot-and-sender pairs to separate tenants and sessions in one team", () => {
+    const hr1 = createFeishuTestContext({ agentAccountId: "hr-bot-01", requesterSenderId: "ou_hr1synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals, sessionRef: "session-hr1", now });
+    const hr2 = createFeishuTestContext({ agentAccountId: "hr-bot-02", requesterSenderId: "ou_hr2synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals, sessionRef: "session-hr2", now });
+    expect(hr1.tenantId).toBe("tenant-hr-001");
+    expect(hr2.tenantId).toBe("tenant-hr-002");
+    expect(hr1.actorId).toBe("hr-user-001");
+    expect(hr2.actorId).toBe("hr-user-002");
     expect(hr1.sessionId).not.toBe(hr2.sessionId);
     expect(hr1.activeTeamId).toBe(hr2.activeTeamId);
   });
 
+  it("denies sender and bot cross-pairing in both directions", () => {
+    expect(() => createFeishuTestContext({ agentAccountId: "hr-bot-02", requesterSenderId: "ou_hr1synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals, now })).toThrow(FeishuTestSenderDenied);
+    expect(() => createFeishuTestContext({ agentAccountId: "hr-bot-01", requesterSenderId: "ou_hr2synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals, now })).toThrow(FeishuTestSenderDenied);
+  });
+
+  it("denies an ambiguous duplicate bot-and-sender mapping", () => {
+    expect(() => createFeishuTestContext({
+      agentAccountId: "hr-bot-01",
+      requesterSenderId: "ou_hr1synthetic",
+      trustedPrincipals: [...syntheticTrustedFeishuPrincipals, syntheticTrustedFeishuPrincipals[0]],
+      now
+    })).toThrow(FeishuTestSenderDenied);
+  });
+
+  it("ignores forged identity and authority fields outside the trusted runtime inputs", () => {
+    const context = createFeishuTestContext({
+      agentAccountId: "hr-bot-01",
+      requesterSenderId: "ou_hr1synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals,
+      tenantId: "tenant-forged",
+      activeTeamId: "team-forged",
+      roles: ["admin"]
+    } as unknown as Parameters<typeof createFeishuTestContext>[0]);
+    expect(context.tenantId).toBe("tenant-hr-001");
+    expect(context.activeTeamId).toBe("hr-onboarding-team-001");
+    expect(context.roles).toEqual(["onboarding_hr_operations"]);
+  });
+
   it("does not accept a generic Feishu or forged authentication level", () => {
-    const context = createFeishuTestContext({ requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now });
+    const context = createFeishuTestContext({ agentAccountId: "hr-bot-01", requesterSenderId: "ou_hr1synthetic",
+      trustedPrincipals: syntheticTrustedFeishuPrincipals, now });
     expect(validateRequestContext({ ...context, channel: "feishu" }, now).ok).toBe(false);
     expect(validateRequestContext({ ...context, authenticationLevel: "test-self-asserted" }, now).ok).toBe(false);
   });

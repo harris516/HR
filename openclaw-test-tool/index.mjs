@@ -1,6 +1,6 @@
 import { Type } from "typebox";
 import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
-import { createFeishuTestContext } from "./lib/mvp/feishu-test-context.js";
+import { createFeishuTestContext, resolveTrustedFeishuPrincipal } from "./lib/mvp/feishu-test-context.js";
 import { SyntheticCaseStore } from "./lib/mvp/synthetic-case-store.js";
 import { createSyntheticReadyCard } from "./lib/mvp/synthetic-ready-card.js";
 
@@ -16,6 +16,7 @@ export default defineToolPlugin({
   description: "Read one synthetic onboarding case and draft a Ready review card.",
   configSchema: Type.Object({
     trustedPrincipals: Type.Array(Type.Object({
+      accountId: Type.String({ pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$" }),
       senderId: Type.String({ pattern: "^ou_[A-Za-z0-9]+$" }),
       tenantId: Type.String({ minLength: 1 }),
       dataSpaceId: Type.String({ minLength: 1 }),
@@ -37,8 +38,16 @@ export default defineToolPlugin({
       const config = api.pluginConfig ?? {};
       if (toolContext.agentId !== "aibang-hr-onboarding-agent" ||
         toolContext.messageChannel !== "feishu" ||
-        toolContext.agentAccountId !== "hr-bot-01" ||
-        !config.trustedPrincipals?.some((principal) => principal.senderId === toolContext.requesterSenderId)) return null;
+        !Array.isArray(config.trustedPrincipals)) return null;
+      try {
+        resolveTrustedFeishuPrincipal({
+          agentAccountId: toolContext.agentAccountId,
+          requesterSenderId: toolContext.requesterSenderId,
+          trustedPrincipals: config.trustedPrincipals
+        });
+      } catch {
+        return null;
+      }
       return {
         name: toolName,
         description: "Read a synthetic onboarding case and return a Day-1 Ready suggestion card for HR review. No formal Ready change or proactive message.",
@@ -47,6 +56,7 @@ export default defineToolPlugin({
           let store;
           try {
             const context = createFeishuTestContext({
+              agentAccountId: toolContext.agentAccountId,
               requesterSenderId: toolContext.requesterSenderId,
               trustedPrincipals: config.trustedPrincipals
             });

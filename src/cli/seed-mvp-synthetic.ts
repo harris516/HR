@@ -12,6 +12,7 @@ if (!databasePath) {
 
 const now = new Date();
 const context = createFeishuTestContext({
+  agentAccountId: "hr-bot-01",
   requesterSenderId: "ou_hr1synthetic",
   trustedPrincipals: syntheticTrustedFeishuPrincipals,
   sessionRef: "test-seed-team-session",

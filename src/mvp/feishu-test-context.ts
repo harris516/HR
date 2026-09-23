@@ -9,6 +9,7 @@ export class FeishuTestSenderDenied extends Error {
 }
 
 export interface TrustedFeishuPrincipal {
+  accountId: string;
   senderId: string;
   tenantId: string;
   dataSpaceId: string;
@@ -21,6 +22,7 @@ export interface TrustedFeishuPrincipal {
 
 export const syntheticTrustedFeishuPrincipals = [
   {
+    accountId: "hr-bot-01",
     senderId: "ou_hr1synthetic",
     tenantId: "tenant-hr-001",
     dataSpaceId: "dataspace-team-hr-onboarding-001",
@@ -31,6 +33,7 @@ export const syntheticTrustedFeishuPrincipals = [
     scopeGrantRefs: ["scope-mvp-synthetic-team-read", "scope-mvp-synthetic-team-write"]
   },
   {
+    accountId: "hr-bot-02",
     senderId: "ou_hr2synthetic",
     tenantId: "tenant-hr-002",
     dataSpaceId: "dataspace-team-hr-onboarding-001",
@@ -41,6 +44,7 @@ export const syntheticTrustedFeishuPrincipals = [
     scopeGrantRefs: ["scope-mvp-synthetic-team-read"]
   },
   {
+    accountId: "hr-bot-03",
     senderId: "ou_hr3synthetic",
     tenantId: "tenant-hr-003",
     dataSpaceId: "dataspace-team-other-001",
@@ -51,6 +55,7 @@ export const syntheticTrustedFeishuPrincipals = [
     scopeGrantRefs: ["scope-mvp-synthetic-team-read"]
   },
   {
+    accountId: "hr-bot-04",
     senderId: "ou_hrnonmember",
     tenantId: "tenant-hr-004",
     dataSpaceId: "dataspace-team-hr-onboarding-001",
@@ -62,23 +67,41 @@ export const syntheticTrustedFeishuPrincipals = [
   }
 ] as const satisfies readonly TrustedFeishuPrincipal[];
 
-/** Build scope only from host-supplied sender metadata, never from model arguments. */
-export function createFeishuTestContext(options: {
+const accountIdPattern = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+const senderIdPattern = /^ou_[A-Za-z0-9]+$/;
+
+/** Resolve exactly one principal from host-supplied runtime identity metadata. */
+export function resolveTrustedFeishuPrincipal(options: {
+  agentAccountId: unknown;
   requesterSenderId: unknown;
   trustedPrincipals: readonly TrustedFeishuPrincipal[];
-  sessionRef?: string;
-  now?: Date;
-}): RequestContext {
-  if (typeof options.requesterSenderId !== "string" || !/^ou_[a-zA-Z0-9]+$/.test(options.requesterSenderId)) {
+}): TrustedFeishuPrincipal {
+  if (typeof options.agentAccountId !== "string" || !accountIdPattern.test(options.agentAccountId) ||
+    typeof options.requesterSenderId !== "string" || !senderIdPattern.test(options.requesterSenderId)) {
     throw new FeishuTestSenderDenied();
   }
-  const principal = options.trustedPrincipals.find((candidate) => candidate.senderId === options.requesterSenderId);
-  if (principal === undefined || !/^ou_[a-zA-Z0-9]+$/.test(principal.senderId) ||
+  const matches = options.trustedPrincipals.filter((candidate) =>
+    candidate.accountId === options.agentAccountId && candidate.senderId === options.requesterSenderId);
+  if (matches.length !== 1) throw new FeishuTestSenderDenied();
+  const principal = matches[0];
+  if (!principal || !accountIdPattern.test(principal.accountId) || !senderIdPattern.test(principal.senderId) ||
     [principal.tenantId, principal.dataSpaceId, principal.actorId, principal.activeTeamId,
       principal.teamMembershipRef].some((value) => value.length === 0) ||
     principal.roles.length === 0 || principal.scopeGrantRefs.length === 0) {
     throw new FeishuTestSenderDenied();
   }
+  return principal;
+}
+
+/** Build scope only from host-supplied account and sender metadata, never from model arguments. */
+export function createFeishuTestContext(options: {
+  agentAccountId: unknown;
+  requesterSenderId: unknown;
+  trustedPrincipals: readonly TrustedFeishuPrincipal[];
+  sessionRef?: string;
+  now?: Date;
+}): RequestContext {
+  const principal = resolveTrustedFeishuPrincipal(options);
   const now = options.now ?? new Date();
   const requestRef = randomUUID();
   return {

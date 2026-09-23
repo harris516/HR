@@ -8,7 +8,7 @@ Status: implementation and local verification complete on `step1-tenant-team-iso
 - Handoff commit at implementation start: `a18540481b7772e6fbfcb702cd1b6c2ac123bff5`.
 - Final commit: `SELF` — the commit containing this report; its authoritative SHA is the post-commit `git rev-parse HEAD` value recorded in the delivery response.
 - Baseline: 14 test files and 214 passing tests.
-- Final local result: 14 test files and 217 passing tests.
+- Final local result: 14 test files and 220 passing tests after the trusted multi-Bot principal-mapping patch.
 - This work uses fictional identities and disposable synthetic SQLite only.
 - No live OpenClaw configuration, live SQLite, real employee data, route, or production setting was changed.
 
@@ -27,9 +27,9 @@ Status: implementation and local verification complete on `step1-tenant-team-iso
 
 - `RequestContext` now requires `activeTeamId` and `teamMembershipRef`.
 - `contextVersion` is `2` because the new required fields are a breaking contract change.
-- The Feishu test context resolves Tenant, Team DataSpace, Actor, Team, membership, roles, and scope grants from a host-supplied trusted-principal mapping.
+- The Feishu test context uniquely resolves a principal from the trusted Runtime `(accountId, senderId)` pair. It then obtains Tenant, Team DataSpace, Actor, Team, membership, roles, and scope grants only from that host-supplied mapping.
 - Fictional HR1 and HR2 have different Tenant/Actor identities and the same Team; HR3 belongs to another Team; the non-member identity is rejected.
-- Unknown, malformed, and incomplete principal mappings fail closed.
+- HR1 and HR2 use separate fictional Bot accounts and sessions while routing to the same Agent. Cross-paired Bot/sender values, unknown values, duplicate pairs, malformed values, and incomplete principal mappings fail closed.
 - The OpenClaw test plugin accepts only mapped senders and does not accept identity or authority fields in model tool arguments.
 
 ### 1C-2 Explicit Case scope
@@ -53,6 +53,8 @@ Status: implementation and local verification complete on `step1-tenant-team-iso
 Verified properties include:
 
 - HR1 and HR2 have distinct Tenant, Actor, and Session identity.
+- HR1 and HR2 are admitted only through their respective fictional `(accountId, senderId)` pairs; both cross-pair directions, unknown Bot, unknown sender, and duplicate pair ambiguity are denied.
+- Model-supplied Tenant, Team, and Role fields cannot override trusted principal values.
 - Same-Tenant/DataSpace different Actor remains denied for a private Case.
 - Different Tenant/Actor plus valid same-Team authorization can read a `TEAM_SHARED` Case.
 - Other Team, missing membership, forged membership, and forged write scope are denied.
@@ -69,8 +71,8 @@ No baseline isolation test was deleted or replaced.
 The following completed successfully:
 
 - `corepack pnpm typecheck`
-- Step 1 focused tests — 6 files, 128 tests passed
-- `corepack pnpm test` — 14 files, 217 tests passed
+- Step 1 focused tests — 6 files, 131 tests passed
+- `corepack pnpm test` — 14 files, 220 tests passed
 - `corepack pnpm build:mvp`
 - `corepack pnpm validate:config`
 - `corepack pnpm validate:capabilities`
@@ -157,6 +159,7 @@ This root report is the only new delivery file. No baseline test was deleted or 
 - If a later step routes Team-shared Case resources through Capability Gateway, it must introduce an explicit scope-aware Gateway resource contract; it must not repurpose or remove the current cross-Tenant hard block.
 - The OpenClaw CLI is not installed in this Windows workspace, so repository-local checks could not execute `openclaw plugins validate`. Server validation remains required before enabling the changed plugin configuration.
 - The plugin configuration shape changed from one `allowedSenderId` to `trustedPrincipals`. No live plugin configuration was migrated in this step.
+- The pre-merge Gate review further changed each trusted-principal entry to require `accountId`; Runtime admission now uses the unique `(accountId, senderId)` pair and no longer hard-codes `hr-bot-01`. No real second Bot was created and no server Runtime configuration was changed.
 
 ## P0 non-goal confirmation
 

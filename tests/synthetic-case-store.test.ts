@@ -73,9 +73,11 @@ afterEach(() => {
 describe("synthetic MVP Case store", () => {
   it("shares an explicitly Team-scoped Case across two trusted HR tenants with actor provenance", () => {
     const hr1 = createFeishuTestContext({
+      agentAccountId: "hr-bot-01",
       requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
     });
     const hr2 = createFeishuTestContext({
+      agentAccountId: "hr-bot-02",
       requesterSenderId: "ou_hr2synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
     });
     const teamOffer = {
@@ -113,12 +115,15 @@ describe("synthetic MVP Case store", () => {
 
   it("denies other-Team, missing, and forged membership without disclosing the shared Case", () => {
     const hr1 = createFeishuTestContext({
+      agentAccountId: "hr-bot-01",
       requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
     });
     const hr2 = createFeishuTestContext({
+      agentAccountId: "hr-bot-02",
       requesterSenderId: "ou_hr2synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
     });
     const hr3 = createFeishuTestContext({
+      agentAccountId: "hr-bot-03",
       requesterSenderId: "ou_hr3synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
     });
     const { tenantId: _privateTenant, ...teamOffer } = {
