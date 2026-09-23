@@ -34,6 +34,8 @@ const requestContext: RequestContext = {
   requestId: "request-s6-security",
   tenantId: "tenant-demo-001",
   dataSpaceId: "dataspace-demo-hr",
+  activeTeamId: "hr-onboarding-team-demo",
+  teamMembershipRef: "membership-demo-team",
   actorType: "user",
   actorId: "hr-user-demo-001",
   authenticationLevel: "test-verified",
@@ -47,7 +49,7 @@ const requestContext: RequestContext = {
   expiresAt: "2030-09-21T02:00:00.000Z",
   dataAccessPurpose: "onboarding_operation",
   environment: "test",
-  contextVersion: "1",
+  contextVersion: "2",
   integrityRef: "test-integrity-s6-security",
   synthetic: true
 };
@@ -383,7 +385,7 @@ describe("S6 cross-cutting negative matrix", () => {
     ]);
   });
 
-  it("keeps idempotency results isolated by Actor and does not reuse a broader result", () => {
+  it("keeps idempotency results isolated across same-Team Tenant and Actor identities", () => {
     const payload = {
       onboardingCaseRef: "case-demo-001",
       expectedCaseVersion: 7,
@@ -398,7 +400,9 @@ describe("S6 cross-cutting negative matrix", () => {
     const otherActorContext = {
       ...requestContext,
       requestId: "request-s6-other-actor",
-      actorId: "hr-user-not-authorized-for-case",
+      tenantId: "tenant-hr-002",
+      actorId: "hr-user-002",
+      teamMembershipRef: "membership-hr-002-team-demo",
       sessionId: "session-s6-other-actor",
       correlationId: "correlation-s6-other-actor",
       integrityRef: "test-integrity-s6-other-actor"
@@ -408,9 +412,14 @@ describe("S6 cross-cutting negative matrix", () => {
         capabilityRequestId: "revalidate-s6-other-actor"
       }),
       requestContext: otherActorContext,
+      resourceRefs: authorized.resourceRefs.map((resource) => ({
+        ...resource,
+        tenantId: otherActorContext.tenantId
+      })),
       authorizationDecision: {
         ...authorized.authorizationDecision,
         decisionId: "authorization-s6-other-actor",
+        tenantId: otherActorContext.tenantId,
         actorId: otherActorContext.actorId
       }
     };

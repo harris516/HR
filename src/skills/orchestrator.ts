@@ -448,6 +448,8 @@ export class SyntheticSkillOrchestrator {
       tenantId: request.requestContext.tenantId,
       dataSpaceId: request.requestContext.dataSpaceId,
       actorId: request.requestContext.actorId,
+      activeTeamId: request.requestContext.activeTeamId,
+      teamMembershipRef: request.requestContext.teamMembershipRef,
       ...(status === undefined ? {} : { status }),
       reasonCodes,
       occurredAt: this.#now().toISOString()

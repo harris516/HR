@@ -18,6 +18,8 @@ function context(overrides: Partial<RequestContext> = {}): RequestContext {
     requestId: "req-synthetic-gateway-001",
     tenantId: "tenant-demo-001",
     dataSpaceId: "dataspace-demo-hr",
+    activeTeamId: "hr-onboarding-team-demo",
+    teamMembershipRef: "membership-demo-team",
     actorType: "user",
     actorId: "hr-user-demo-001",
     authenticationLevel: "test-verified",
@@ -31,7 +33,7 @@ function context(overrides: Partial<RequestContext> = {}): RequestContext {
     expiresAt: "2030-09-21T02:00:00.000Z",
     dataAccessPurpose: "onboarding_operation",
     environment: "test",
-    contextVersion: "1",
+    contextVersion: "2",
     integrityRef: "test-integrity-gateway-001",
     synthetic: true,
     ...overrides
@@ -469,6 +471,11 @@ describe("S2 capability gateway rejection paths", () => {
       externalSideEffect: false
     });
     expect(audit.events().at(-1)?.eventType).toBe("capability_gateway_admission_allowed");
+    expect(audit.events().at(-1)).toMatchObject({
+      actorId: "hr-user-demo-001",
+      activeTeamId: "hr-onboarding-team-demo",
+      teamMembershipRef: "membership-demo-team"
+    });
   });
 });
 

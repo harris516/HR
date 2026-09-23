@@ -12,6 +12,8 @@ export function deriveSyntheticCapabilityIdempotencyKey(
     tenantId: string;
     dataSpaceId: string;
     actorId: string;
+    activeTeamId: string;
+    teamMembershipRef: string;
     roles: string[];
     scopeGrantRefs: string[];
     authorityGrantRefs: string[];
@@ -23,6 +25,8 @@ export function deriveSyntheticCapabilityIdempotencyKey(
     context.tenantId,
     context.dataSpaceId,
     context.actorId,
+    context.activeTeamId,
+    context.teamMembershipRef,
     request.purpose,
     request.authorizationDecision.grantVersion,
     digestCapabilityPayload({

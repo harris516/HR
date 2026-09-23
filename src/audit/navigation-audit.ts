@@ -5,6 +5,9 @@ export interface NavigationAuditEvent {
   correlationId: string;
   tenantId?: string;
   dataSpaceId?: string;
+  actorId?: string;
+  activeTeamId?: string;
+  teamMembershipRef?: string;
   taskId?: string;
   reasonCodes: string[];
   occurredAt: string;

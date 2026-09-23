@@ -15,6 +15,8 @@ const requestContext = {
   requestId: "request-gateway-smoke-001",
   tenantId: "tenant-demo-001",
   dataSpaceId: "dataspace-demo-hr",
+  activeTeamId: "hr-onboarding-team-demo",
+  teamMembershipRef: "membership-demo-team",
   actorType: "user",
   actorId: "hr-user-demo-001",
   authenticationLevel: "test-verified",
@@ -28,7 +30,7 @@ const requestContext = {
   expiresAt: "2030-09-21T02:00:00.000Z",
   dataAccessPurpose: "onboarding_operation",
   environment: "test",
-  contextVersion: "1",
+  contextVersion: "2",
   integrityRef: "test-integrity-gateway-smoke",
   synthetic: true
 };

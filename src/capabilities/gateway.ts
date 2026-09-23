@@ -423,6 +423,8 @@ export class CapabilityGateway {
     const tenantId = readString(context, "tenantId");
     const dataSpaceId = readString(context, "dataSpaceId");
     const actorId = readString(context, "actorId");
+    const activeTeamId = readString(context, "activeTeamId");
+    const teamMembershipRef = readString(context, "teamMembershipRef");
     return {
       auditRef,
       eventType,
@@ -433,6 +435,8 @@ export class CapabilityGateway {
       ...(tenantId === undefined ? {} : { tenantId }),
       ...(dataSpaceId === undefined ? {} : { dataSpaceId }),
       ...(actorId === undefined ? {} : { actorId }),
+      ...(activeTeamId === undefined ? {} : { activeTeamId }),
+      ...(teamMembershipRef === undefined ? {} : { teamMembershipRef }),
       decision: result.decision,
       reasonCodes: result.reasonCodes,
       occurredAt: now.toISOString()

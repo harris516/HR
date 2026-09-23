@@ -1,6 +1,8 @@
-import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
-import type { RequestContext } from "../contracts/navigation.js";
+import {
+  createFeishuTestContext,
+  syntheticTrustedFeishuPrincipals
+} from "../mvp/feishu-test-context.js";
 import { SyntheticCaseStore } from "../mvp/synthetic-case-store.js";
 
 const databasePath = process.argv[2];
@@ -9,40 +11,26 @@ if (!databasePath) {
 }
 
 const now = new Date();
-const requestRef = randomUUID();
-const context: RequestContext = {
-  requestId: `test-seed-${requestRef}`,
-  tenantId: "tenant-demo-001",
-  dataSpaceId: "dataspace-demo-hr",
-  actorType: "user",
-  actorId: "hr-user-demo-001",
-  authenticationLevel: "test-verified",
-  roles: ["onboarding_hr_operations"],
-  scopeGrantRefs: ["scope-mvp-synthetic-seed"],
-  authorityGrantRefs: [],
-  channel: "test_harness",
-  sessionId: `test-seed-session-${requestRef}`,
-  correlationId: `test-seed-correlation-${requestRef}`,
-  receivedAt: now.toISOString(),
-  expiresAt: new Date(now.getTime() + 5 * 60_000).toISOString(),
-  dataAccessPurpose: "onboarding_operation",
-  environment: "test",
-  contextVersion: "1",
-  integrityRef: `test-seed-integrity-${requestRef}`,
-  synthetic: true
-};
+const context = createFeishuTestContext({
+  requesterSenderId: "ou_hr1synthetic",
+  trustedPrincipals: syntheticTrustedFeishuPrincipals,
+  sessionRef: "test-seed-team-session",
+  now
+});
 
 const store = new SyntheticCaseStore({
   databasePath,
   repositoryRoot: resolve("."),
-  allowSyntheticTestStorage: true
+  allowSyntheticTestStorage: true,
+  trustedTeamMemberships: syntheticTrustedFeishuPrincipals
 });
 
 try {
   let snapshot = store.ingestOffer(context, {
     schemaVersion: "synthetic-offer.v1",
     synthetic: true,
-    tenantId: context.tenantId,
+    scopeType: "TEAM_SHARED",
+    teamId: context.activeTeamId,
     dataSpaceId: context.dataSpaceId,
     offerRef: "offer-mvp-feishu-001",
     candidateRef: "candidate-synthetic-feishu-001",

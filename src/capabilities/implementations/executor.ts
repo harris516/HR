@@ -467,6 +467,8 @@ export class SyntheticCapabilityExecutor {
       tenantId: string;
       dataSpaceId: string;
       actorId: string;
+      activeTeamId: string;
+      teamMembershipRef: string;
     };
     return {
       auditRef,
@@ -478,6 +480,8 @@ export class SyntheticCapabilityExecutor {
       tenantId: context.tenantId,
       dataSpaceId: context.dataSpaceId,
       actorId: context.actorId,
+      activeTeamId: context.activeTeamId,
+      teamMembershipRef: context.teamMembershipRef,
       ...(resultStatus === undefined ? {} : { resultStatus }),
       reasonCodes,
       occurredAt: occurredAt.toISOString()

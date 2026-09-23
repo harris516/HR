@@ -23,6 +23,8 @@ export interface SkillAuditEvent {
   tenantId?: string;
   dataSpaceId?: string;
   actorId?: string;
+  activeTeamId?: string;
+  teamMembershipRef?: string;
   status?: SkillRunResult["status"];
   reasonCodes: string[];
   occurredAt: string;

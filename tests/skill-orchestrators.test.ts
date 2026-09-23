@@ -26,6 +26,8 @@ function context(requestId: string): RequestContext {
     requestId,
     tenantId: "tenant-demo-001",
     dataSpaceId: "dataspace-demo-hr",
+    activeTeamId: "hr-onboarding-team-demo",
+    teamMembershipRef: "membership-demo-team",
     actorType: "user",
     actorId: "hr-user-demo-001",
     authenticationLevel: "test-verified",
@@ -39,7 +41,7 @@ function context(requestId: string): RequestContext {
     expiresAt: "2030-09-21T02:00:00.000Z",
     dataAccessPurpose: "onboarding_operation",
     environment: "test",
-    contextVersion: "1",
+    contextVersion: "2",
     integrityRef: `test-integrity-${requestId}`,
     synthetic: true
   };
@@ -408,6 +410,16 @@ describe("S5 six Skill Hero workflows", () => {
     expect(executionAudit.events()).toHaveLength(fixture.capabilities.length * 2);
     expect(skillAudit.events()[0]?.eventType).toBe("skill_run_ingress");
     expect(skillAudit.events().at(-1)?.eventType).toBe("skill_run_finalized");
+    expect(skillAudit.events()[0]).toMatchObject({
+      actorId: "hr-user-demo-001",
+      activeTeamId: "hr-onboarding-team-demo",
+      teamMembershipRef: "membership-demo-team"
+    });
+    expect(executionAudit.events().every((event) =>
+      event.actorId === "hr-user-demo-001" &&
+      event.activeTeamId === "hr-onboarding-team-demo" &&
+      event.teamMembershipRef === "membership-demo-team"
+    )).toBe(true);
     for (const step of result.stepResults) {
       expect(step.gatewayResult.auditRef).toBeTruthy();
       expect(step.executionOutcome?.envelope.auditRef).toBeTruthy();

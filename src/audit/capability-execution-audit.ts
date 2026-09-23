@@ -14,6 +14,8 @@ export interface CapabilityExecutionAuditEvent {
   tenantId: string;
   dataSpaceId: string;
   actorId: string;
+  activeTeamId: string;
+  teamMembershipRef: string;
   resultStatus?: string;
   reasonCodes: string[];
   occurredAt: string;

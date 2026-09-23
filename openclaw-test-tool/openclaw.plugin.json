@@ -14,9 +14,27 @@
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["allowedSenderId", "databasePath", "repositoryRoot"],
+    "required": ["trustedPrincipals", "databasePath", "repositoryRoot"],
     "properties": {
-      "allowedSenderId": { "type": "string", "pattern": "^ou_[A-Za-z0-9]+$" },
+      "trustedPrincipals": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["senderId", "tenantId", "dataSpaceId", "actorId", "activeTeamId", "teamMembershipRef", "roles", "scopeGrantRefs"],
+          "properties": {
+            "senderId": { "type": "string", "pattern": "^ou_[A-Za-z0-9]+$" },
+            "tenantId": { "type": "string", "minLength": 1 },
+            "dataSpaceId": { "type": "string", "minLength": 1 },
+            "actorId": { "type": "string", "minLength": 1 },
+            "activeTeamId": { "type": "string", "minLength": 1 },
+            "teamMembershipRef": { "type": "string", "minLength": 1 },
+            "roles": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+            "scopeGrantRefs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      },
       "databasePath": { "type": "string", "pattern": "^/" },
       "repositoryRoot": { "type": "string", "pattern": "^/" }
     }

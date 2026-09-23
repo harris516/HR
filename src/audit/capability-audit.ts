@@ -15,6 +15,8 @@ export interface CapabilityGatewayAuditEvent {
   tenantId?: string;
   dataSpaceId?: string;
   actorId?: string;
+  activeTeamId?: string;
+  teamMembershipRef?: string;
   decision?: CapabilityGatewayResult["decision"];
   reasonCodes: string[];
   occurredAt: string;
@@ -46,4 +48,3 @@ export class InMemoryCapabilityGatewayAuditSink implements CapabilityGatewayAudi
     return structuredClone(this.#events);
   }
 }
-

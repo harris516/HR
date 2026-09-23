@@ -76,6 +76,8 @@ export const requestContextSchema = z.object({
   requestId: z.string().min(1),
   tenantId: z.string().min(1),
   dataSpaceId: z.string().min(1),
+  activeTeamId: z.string().min(1),
+  teamMembershipRef: z.string().min(1),
   actorType: z.enum(["user", "service_principal", "system_event"]),
   actorId: z.string().min(1),
   authenticationLevel: z.string().min(1),
@@ -95,7 +97,7 @@ export const requestContextSchema = z.object({
     z.union([z.string(), z.number(), z.boolean()])
   ).optional(),
   riskSignals: z.array(z.string().min(1)).optional(),
-  contextVersion: z.literal("1"),
+  contextVersion: z.literal("2"),
   integrityRef: z.string().min(1),
   synthetic: z.literal(true)
 }).strict();

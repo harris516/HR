@@ -15,7 +15,16 @@ export default defineToolPlugin({
   name: "Aibang HR Onboarding Synthetic Test",
   description: "Read one synthetic onboarding case and draft a Ready review card.",
   configSchema: Type.Object({
-    allowedSenderId: Type.String({ pattern: "^ou_[A-Za-z0-9]+$" }),
+    trustedPrincipals: Type.Array(Type.Object({
+      senderId: Type.String({ pattern: "^ou_[A-Za-z0-9]+$" }),
+      tenantId: Type.String({ minLength: 1 }),
+      dataSpaceId: Type.String({ minLength: 1 }),
+      actorId: Type.String({ minLength: 1 }),
+      activeTeamId: Type.String({ minLength: 1 }),
+      teamMembershipRef: Type.String({ minLength: 1 }),
+      roles: Type.Array(Type.String({ minLength: 1 }), { minItems: 1 }),
+      scopeGrantRefs: Type.Array(Type.String({ minLength: 1 }), { minItems: 1 })
+    }, { additionalProperties: false }), { minItems: 1 }),
     databasePath: Type.String({ pattern: "^/" }),
     repositoryRoot: Type.String({ pattern: "^/" })
   }, { additionalProperties: false }),
@@ -29,7 +38,7 @@ export default defineToolPlugin({
       if (toolContext.agentId !== "aibang-hr-onboarding-agent" ||
         toolContext.messageChannel !== "feishu" ||
         toolContext.agentAccountId !== "hr-bot-01" ||
-        toolContext.requesterSenderId !== config.allowedSenderId) return null;
+        !config.trustedPrincipals?.some((principal) => principal.senderId === toolContext.requesterSenderId)) return null;
       return {
         name: toolName,
         description: "Read a synthetic onboarding case and return a Day-1 Ready suggestion card for HR review. No formal Ready change or proactive message.",
@@ -39,12 +48,13 @@ export default defineToolPlugin({
           try {
             const context = createFeishuTestContext({
               requesterSenderId: toolContext.requesterSenderId,
-              allowedSenderId: config.allowedSenderId
+              trustedPrincipals: config.trustedPrincipals
             });
             store = new SyntheticCaseStore({
               databasePath: config.databasePath,
               repositoryRoot: config.repositoryRoot,
-              allowSyntheticTestStorage: true
+              allowSyntheticTestStorage: true,
+              trustedTeamMemberships: config.trustedPrincipals
             });
             const card = createSyntheticReadyCard(store, context, params.caseRef);
             return { content: [{ type: "text", text: JSON.stringify(card) }] };

@@ -360,7 +360,14 @@ export class NavigationEngine {
     requestId: string,
     correlationId: string,
     reasonCodes: string[],
-    boundary: { tenantId: string; dataSpaceId: string; taskId?: string } | undefined
+    boundary: {
+      tenantId: string;
+      dataSpaceId: string;
+      actorId: string;
+      activeTeamId: string;
+      teamMembershipRef: string;
+      taskId?: string;
+    } | undefined
   ): void {
     const event: NavigationAuditEvent = {
       eventId: `audit-${this.id()}`,
@@ -370,6 +377,9 @@ export class NavigationEngine {
       ...(boundary === undefined ? {} : {
         tenantId: boundary.tenantId,
         dataSpaceId: boundary.dataSpaceId,
+        actorId: boundary.actorId,
+        activeTeamId: boundary.activeTeamId,
+        teamMembershipRef: boundary.teamMembershipRef,
         ...(boundary.taskId === undefined ? {} : { taskId: boundary.taskId })
       }),
       reasonCodes,
@@ -381,7 +391,10 @@ export class NavigationEngine {
   private auditForContext(eventType: string, context: RequestContext, reasonCodes: string[]): void {
     this.audit(eventType, context.requestId, context.correlationId, reasonCodes, {
       tenantId: context.tenantId,
-      dataSpaceId: context.dataSpaceId
+      dataSpaceId: context.dataSpaceId,
+      actorId: context.actorId,
+      activeTeamId: context.activeTeamId,
+      teamMembershipRef: context.teamMembershipRef
     });
   }
 
@@ -389,6 +402,9 @@ export class NavigationEngine {
     this.audit(eventType, context.requestId, context.correlationId, reasonCodes, {
       tenantId: context.tenantId,
       dataSpaceId: context.dataSpaceId,
+      actorId: context.actorId,
+      activeTeamId: context.activeTeamId,
+      teamMembershipRef: context.teamMembershipRef,
       taskId: task.taskId
     });
   }

@@ -3,22 +3,29 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { RequestContext } from "../src/contracts/navigation.js";
+import {
+  createFeishuTestContext,
+  syntheticTrustedFeishuPrincipals
+} from "../src/mvp/feishu-test-context.js";
 import { SyntheticCaseStore, SyntheticCaseStoreError } from "../src/mvp/synthetic-case-store.js";
 import { createSyntheticReadyCard } from "../src/mvp/synthetic-ready-card.js";
 
 const now = new Date("2026-09-22T03:00:00.000Z");
 const context: RequestContext = {
   requestId: "request-mvp-001", tenantId: "tenant-demo-001", dataSpaceId: "dataspace-demo-hr",
+  activeTeamId: "hr-onboarding-team-demo",
+  teamMembershipRef: "membership-demo-team",
   actorType: "user", actorId: "hr-user-demo-001", authenticationLevel: "test-verified",
   roles: ["onboarding_hr_operations"], scopeGrantRefs: ["scope-mvp-synthetic"],
   authorityGrantRefs: [], channel: "test_harness", sessionId: "session-mvp-001",
   correlationId: "correlation-mvp-001", receivedAt: "2026-09-22T02:59:00.000Z",
   expiresAt: "2026-09-22T04:00:00.000Z", dataAccessPurpose: "onboarding_operation",
-  environment: "test", contextVersion: "1", integrityRef: "test-integrity-mvp-001",
+  environment: "test", contextVersion: "2", integrityRef: "test-integrity-mvp-001",
   synthetic: true
 };
 const offer = {
   schemaVersion: "synthetic-offer.v1", synthetic: true,
+  scopeType: "TENANT_PRIVATE",
   tenantId: context.tenantId, dataSpaceId: context.dataSpaceId,
   offerRef: "offer-mvp-001", candidateRef: "candidate-mvp-001",
   plannedStartAt: "2026-10-01T01:00:00.000Z", sourceVersionRef: "offer-source-v1",
@@ -34,7 +41,10 @@ const offer = {
 const opened: SyntheticCaseStore[] = [];
 const paths: Array<{ directory: string; databasePath: string }> = [];
 
-function openStore(databasePath?: string): SyntheticCaseStore {
+function openStore(
+  databasePath?: string,
+  trustedTeamMemberships = syntheticTrustedFeishuPrincipals
+): SyntheticCaseStore {
   const path = databasePath ?? (() => {
     const directory = mkdtempSync(join(tmpdir(), "hr-onboarding-mvp-"));
     const file = join(directory, "synthetic-cases.sqlite");
@@ -45,6 +55,7 @@ function openStore(databasePath?: string): SyntheticCaseStore {
     databasePath: path,
     repositoryRoot: resolve("."),
     allowSyntheticTestStorage: true,
+    trustedTeamMemberships,
     now: () => now
   });
   opened.push(store);
@@ -60,6 +71,84 @@ afterEach(() => {
 });
 
 describe("synthetic MVP Case store", () => {
+  it("shares an explicitly Team-scoped Case across two trusted HR tenants with actor provenance", () => {
+    const hr1 = createFeishuTestContext({
+      requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
+    });
+    const hr2 = createFeishuTestContext({
+      requesterSenderId: "ou_hr2synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
+    });
+    const teamOffer = {
+      ...offer,
+      scopeType: "TEAM_SHARED" as const,
+      teamId: hr1.activeTeamId,
+      dataSpaceId: hr1.dataSpaceId
+    };
+    const { tenantId: _privateTenant, ...sharedInput } = teamOffer;
+    const store = openStore();
+    const created = store.ingestOffer(hr1, sharedInput).case;
+    store.updateRequirement(hr1, {
+      schemaVersion: "synthetic-requirement-update.v1",
+      caseRef: created.caseRef,
+      kind: "DEVICE",
+      expectedCaseVersion: created.caseVersion,
+      status: "blocked",
+      evidenceRefs: [],
+      freshness: "fresh",
+      sourceVersionRef: "itsm-team-synthetic-v2"
+    });
+    const observedByHr2 = store.getCase(hr2, created.caseRef);
+    expect(observedByHr2).toMatchObject({
+      scopeType: "TEAM_SHARED",
+      teamId: "hr-onboarding-team-001",
+      createdByTenantId: "tenant-hr-001",
+      createdByActorId: "hr-user-001"
+    });
+    expect(observedByHr2?.requirements).toHaveLength(3);
+    expect(observedByHr2?.requirements.find((item) => item.kind === "DEVICE")?.status).toBe("blocked");
+    store.recordReadinessEvaluation(hr2, created.caseRef, observedByHr2?.caseVersion ?? 0);
+    expect(store.listAuditEvents(hr2, created.caseRef).map((event) => event.actorId))
+      .toEqual(["hr-user-001", "hr-user-001", "hr-user-002"]);
+  });
+
+  it("denies other-Team, missing, and forged membership without disclosing the shared Case", () => {
+    const hr1 = createFeishuTestContext({
+      requesterSenderId: "ou_hr1synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
+    });
+    const hr2 = createFeishuTestContext({
+      requesterSenderId: "ou_hr2synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
+    });
+    const hr3 = createFeishuTestContext({
+      requesterSenderId: "ou_hr3synthetic", trustedPrincipals: syntheticTrustedFeishuPrincipals, now
+    });
+    const { tenantId: _privateTenant, ...teamOffer } = {
+      ...offer, scopeType: "TEAM_SHARED" as const, teamId: hr1.activeTeamId, dataSpaceId: hr1.dataSpaceId
+    };
+    const store = openStore();
+    const caseRef = store.ingestOffer(hr1, teamOffer).case.caseRef;
+    const missing = { ...hr2, teamMembershipRef: "membership-missing" };
+    const forged = { ...hr2, teamMembershipRef: hr1.teamMembershipRef };
+    const forgedWriter = {
+      ...hr2,
+      scopeGrantRefs: [...hr2.scopeGrantRefs, "scope-mvp-synthetic-team-write"]
+    };
+    expect(store.getCase(hr3, caseRef)).toBeNull();
+    expect(store.getCase(missing, caseRef)).toBeNull();
+    expect(store.getCase(forged, caseRef)).toBeNull();
+    expect(() => store.updateRequirement(forgedWriter, {
+      schemaVersion: "synthetic-requirement-update.v1",
+      caseRef,
+      kind: "DEVICE",
+      expectedCaseVersion: 1,
+      status: "blocked",
+      evidenceRefs: [],
+      freshness: "fresh",
+      sourceVersionRef: "forged-source-v1"
+    })).toThrowError("CASE_NOT_FOUND_OR_NOT_ACCESSIBLE");
+    expect(store.listAuditEvents(hr3, caseRef)).toEqual([]);
+    expect(store.countAuditEvents(missing, caseRef)).toBe(0);
+  });
+
   it("creates exactly one Case and three Requirement records for an accepted Offer", () => {
     const store = openStore();
     const first = store.ingestOffer(context, offer);

@@ -21,12 +21,14 @@ import { resolveSubject, type SyntheticCaseRecord } from "../src/navigation/subj
 const now = new Date("2026-09-22T02:00:00.000Z");
 const context: RequestContext = {
   requestId: "e1-request-001", tenantId: "tenant-synthetic-001", dataSpaceId: "space-synthetic-001",
+  activeTeamId: "hr-onboarding-team-demo",
+  teamMembershipRef: "membership-demo-team",
   actorType: "user", actorId: "actor-synthetic-001", authenticationLevel: "test-verified",
   roles: ["onboarding_hr_operations"], scopeGrantRefs: ["grant-synthetic-001"],
   authorityGrantRefs: [], channel: "test_harness", sessionId: "session-synthetic-001",
   correlationId: "correlation-synthetic-001", receivedAt: "2026-09-22T01:00:00.000Z",
   expiresAt: "2026-09-23T02:00:00.000Z", dataAccessPurpose: "onboarding_operation",
-  environment: "test", contextVersion: "1", integrityRef: "test-integrity-001", synthetic: true
+  environment: "test", contextVersion: "2", integrityRef: "test-integrity-001", synthetic: true
 };
 const record: SyntheticCaseRecord = {
   synthetic: true, tenantId: context.tenantId, dataSpaceId: context.dataSpaceId,

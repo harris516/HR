@@ -11,6 +11,8 @@
       "requestId": "request-handoff-73",
       "tenantId": "tenant-synthetic-73",
       "dataSpaceId": "space-synthetic-73",
+      "activeTeamId": "team-synthetic-73",
+      "teamMembershipRef": "membership-synthetic-73",
       "actorType": "user",
       "actorId": "actor-handoff-73",
       "authenticationLevel": "test-verified",
@@ -28,7 +30,7 @@
       "expiresAt": "2026-10-11T11:00:00.000Z",
       "dataAccessPurpose": "onboarding_operation",
       "environment": "test",
-      "contextVersion": "1",
+      "contextVersion": "2",
       "integrityRef": "test-integrity-handoff-73",
       "synthetic": true
     },

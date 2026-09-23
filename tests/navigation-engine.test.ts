@@ -13,6 +13,8 @@ function baseContext(overrides: Partial<RequestContext> = {}): RequestContext {
     requestId: "req-synthetic-001",
     tenantId: "tenant-demo-001",
     dataSpaceId: "dataspace-demo-hr",
+    activeTeamId: "hr-onboarding-team-demo",
+    teamMembershipRef: "membership-demo-team",
     actorType: "user",
     actorId: "hr-user-demo-001",
     authenticationLevel: "test-verified",
@@ -26,7 +28,7 @@ function baseContext(overrides: Partial<RequestContext> = {}): RequestContext {
     expiresAt: "2030-09-21T02:00:00.000Z",
     dataAccessPurpose: "onboarding_operation",
     environment: "test",
-    contextVersion: "1",
+    contextVersion: "2",
     integrityRef: "test-integrity-001",
     synthetic: true,
     ...overrides
@@ -122,6 +124,11 @@ describe("task navigation N1-N7 acceptance", () => {
     });
     expect(engine.capabilityCallCount).toBe(1);
     expect(audit.events().some((event) => event.eventType === "navigation_finalized")).toBe(true);
+    expect(audit.events().find((event) => event.eventType === "navigation_finalized")).toMatchObject({
+      actorId: "hr-user-demo-001",
+      activeTeamId: "hr-onboarding-team-demo",
+      teamMembershipRef: "membership-demo-team"
+    });
   });
 
   it("TN-A02 splits a safe query from a forbidden formal READY commit", () => {
@@ -226,6 +233,14 @@ describe("task navigation N1-N7 acceptance", () => {
     const conflict = engine.navigate(request("帮我处理一下"));
     expect(conflict.aggregateStatus).toBe("failed");
     expect(conflict.childResults[0]?.reasonCodes).toContain("REQUEST_ID_CONFLICT");
+    expect(engine.capabilityCallCount).toBe(1);
+    const crossTenantReplay = engine.navigate(request("查询 case-demo-001 状态", {
+      ...baseContext(),
+      tenantId: "tenant-hr-002",
+      actorId: "hr-user-002",
+      teamMembershipRef: "membership-hr-002-team-demo"
+    }));
+    expect(crossTenantReplay.childResults[0]?.reasonCodes).toContain("REQUEST_ID_CONFLICT");
     expect(engine.capabilityCallCount).toBe(1);
   });
 

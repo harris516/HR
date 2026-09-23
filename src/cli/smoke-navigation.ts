@@ -16,6 +16,8 @@ const context: RequestContext = {
   requestId: "req-smoke-001",
   tenantId: fixture.tenantId,
   dataSpaceId: fixture.dataSpaceId,
+  activeTeamId: "hr-onboarding-team-demo",
+  teamMembershipRef: "membership-demo-team",
   actorType: "user",
   actorId: fixture.actor.actorId,
   authenticationLevel: "test-verified",
@@ -29,7 +31,7 @@ const context: RequestContext = {
   expiresAt: "2030-09-21T02:00:00.000Z",
   dataAccessPurpose: "onboarding_operation",
   environment: "test",
-  contextVersion: "1",
+  contextVersion: "2",
   integrityRef: "test-smoke-integrity",
   synthetic: true
 };
