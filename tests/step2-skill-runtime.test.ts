@@ -69,7 +69,7 @@ describe("Step 2 controlled Skill execution", () => {
     ["onboarding_case_intake_pack", "case_intake_candidate", { handoffRef: "handoff-demo-001", expectedSourceVersion: "ats-offer-v3", language: "zh-CN" }],
     ["onboarding_requirement_tracking_pack", "requirement_completion_candidate", { caseRef: "case-demo-001", expectedCaseVersion: 7, requirementRef: "requirement-equipment-001", expectedRequirementVersion: 3 }],
     ["onboarding_status_control_pack", "case_workbench_read", { pageSize: 20 }],
-    ["onboarding_status_control_pack", "case_status_inspection", { caseRef: "case-demo-001", expectedCaseVersion: 7 }],
+    ["onboarding_status_control_pack", "case_status_inspection", { caseRef: "case-demo-001" }],
     ["onboarding_status_control_pack", "risk_workbox", { caseRef: "case-demo-001", pageSize: 20 }],
     ["onboarding_coordination_pack", "responsibility_reminder_draft", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
     ["onboarding_coordination_pack", "responsibility_escalation_draft", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
@@ -120,18 +120,18 @@ describe("Step 2 controlled Skill execution", () => {
     expect(output.implementationCallCount).toBe(2);
   });
 
-  it("runs a second status-inspection Skill path through all three Capability gates", () => {
+  it("runs a second status-inspection Skill path through all four Capability gates", () => {
     const output = runtime().run({
       skillId: "onboarding_status_control_pack",
       workflowId: "case_status_inspection",
       requestContext: context(),
-      businessInput: { caseRef: "case-demo-001", expectedCaseVersion: 7 }
+      businessInput: { caseRef: "case-demo-001" }
     });
     expect(output.result.status).toBe("COMPLETED");
-    expect(output.result.stepResults).toHaveLength(3);
-    expect(output.implementationCallCount).toBe(3);
-    expect(output.auditRefs.gateway).toHaveLength(6);
-    expect(output.auditRefs.execution).toHaveLength(6);
+    expect(output.result.stepResults).toHaveLength(4);
+    expect(output.implementationCallCount).toBe(4);
+    expect(output.auditRefs.gateway).toHaveLength(8);
+    expect(output.auditRefs.execution).toHaveLength(8);
   });
 
   it("rejects stale Context v1 before compiling any Skill request", () => {

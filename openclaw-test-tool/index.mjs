@@ -36,7 +36,8 @@ const requirementTrackingParameters = Type.Union([
 ]);
 const statusControlParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("case_workbench_read"), pageSize: pageSize() }, { additionalProperties: false }),
-  Type.Object({ workflowId: Type.Literal("case_status_inspection"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()) }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("case_status_inspection"), caseRef: ref() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("case_status_inspection"), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }) }, { additionalProperties: false }),
   Type.Object({ workflowId: Type.Literal("risk_workbox"), caseRef: ref(), pageSize: pageSize() }, { additionalProperties: false })
 ]);
 const coordinationParameters = Type.Union([
@@ -133,7 +134,7 @@ export default defineToolPlugin({
   tools: (tool) => [
     runtimeTool(tool, {
       name: runtimeToolNames.taskNavigation,
-      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. It distinguishes accepted-Offer Case creation, Existing Handoff review, and explicit HR completion statements for DOCUMENTS, IT_ACCOUNT, or DEVICE; unclear completion remains CLARIFY.",
+      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. It distinguishes accepted-Offer Case creation, Existing Handoff review, explicit HR completion statements, and read-only candidate status queries; unclear intent remains CLARIFY.",
       parameters: taskNavigationParameters,
       skillId: "onboarding_task_navigation_pack",
       workflowId: "navigation_route_handoff"
@@ -154,7 +155,7 @@ export default defineToolPlugin({
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.statusControl,
-      description: "Read a controlled synthetic onboarding workbench, case status, evidence, audit, or risk view.",
+      description: "Read controlled synthetic onboarding status. For a named candidate status/progress question, use case_status_inspection with candidateDisplayName; Runtime resolves exactly one Case inside the trusted Team/DataSpace and reads Case plus Requirement status. This is read-only and never confirms formal READY.",
       parameters: statusControlParameters,
       skillId: "onboarding_status_control_pack",
       workflowId: (params) => params.workflowId

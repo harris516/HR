@@ -10,6 +10,12 @@ const caseInputSchema = z.object({
   caseRef: refSchema,
   expectedCaseVersion: z.number().int().nonnegative().default(7)
 }).strict();
+const caseStatusInspectionInputSchema = z.object({
+  caseRef: refSchema.optional(),
+  candidateDisplayName: z.string().trim().min(1).max(128).optional()
+}).strict().refine((value) =>
+  Number(value.caseRef !== undefined) + Number(value.candidateDisplayName !== undefined) === 1,
+  "exactly one of caseRef or candidateDisplayName is required");
 
 export const step2WorkflowInputSchemas = {
   navigation_route_handoff: z.object({ requestText: z.string().min(1).max(2000) }).strict(),
@@ -36,7 +42,7 @@ export const step2WorkflowInputSchemas = {
   }).strict().refine((value) => value.caseRef !== undefined || value.candidateDisplayName !== undefined,
     "caseRef or candidateDisplayName is required"),
   case_workbench_read: z.object({ pageSize: pageSizeSchema }).strict(),
-  case_status_inspection: caseInputSchema,
+  case_status_inspection: caseStatusInspectionInputSchema,
   risk_workbox: z.object({ caseRef: refSchema, pageSize: pageSizeSchema }).strict(),
   responsibility_reminder_draft: caseInputSchema.extend({ language: languageSchema }).strict(),
   responsibility_escalation_draft: caseInputSchema.extend({ language: languageSchema }).strict(),

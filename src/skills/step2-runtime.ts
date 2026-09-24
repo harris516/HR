@@ -145,6 +145,7 @@ export class Step2SyntheticSkillRuntime {
     });
     let persistentStore: SyntheticCaseStore | undefined;
     let adapterStore = scopeStoreToPrincipal(invocation.requestContext);
+    let effectiveBusinessInput = invocation.businessInput;
     if (this.#databaseOptions !== undefined) {
       persistentStore = new SyntheticCaseStore({
         databasePath: this.#databaseOptions.databasePath!,
@@ -156,6 +157,26 @@ export class Step2SyntheticSkillRuntime {
         now: this.#now,
         auditAvailable: () => this.#auditAvailability.execution ?? true
       });
+      if (invocation.workflowId === "case_status_inspection") {
+        const statusInput = parseStep2WorkflowInput(
+          invocation.workflowId,
+          invocation.businessInput
+        );
+        const resolution = persistentStore.resolveCase(invocation.requestContext, {
+          ...(statusInput.caseRef === undefined ? {} : { caseRef: statusInput.caseRef as string }),
+          ...(statusInput.candidateDisplayName === undefined ? {} : {
+            candidateDisplayName: statusInput.candidateDisplayName as string
+          })
+        });
+        if (resolution.status !== "MATCHED" || resolution.case === null) {
+          const reason = resolution.status === "AMBIGUOUS"
+            ? "CASE_REFERENCE_AMBIGUOUS" : "CASE_NOT_FOUND";
+          persistentStore.close();
+          persistentStore = undefined;
+          throw new Error(reason);
+        }
+        effectiveBusinessInput = { caseRef: resolution.case.caseRef };
+      }
       const cases = persistentStore.listCases(invocation.requestContext);
       const audits = cases.flatMap((item) => persistentStore!.listAuditEvents(
         invocation.requestContext, item.caseRef));
@@ -192,11 +213,11 @@ export class Step2SyntheticSkillRuntime {
       skillId: invocation.skillId,
       workflowId: invocation.workflowId,
       requestContext: invocation.requestContext,
-      businessInput: invocation.businessInput
+      businessInput: effectiveBusinessInput
     });
     const result = orchestrator.run(request);
     if (persistentStore !== undefined && result.status === "COMPLETED") {
-      const parsedInput = invocation.businessInput as Record<string, unknown>;
+      const parsedInput = effectiveBusinessInput as Record<string, unknown>;
       const caseRef = parsedInput.caseRef;
       if (typeof caseRef === "string") {
         persistentStore.recordWorkflowEvent(invocation.requestContext, caseRef, invocation.workflowId);

@@ -43,3 +43,9 @@ Tenant、DataSpace、Actor、Team、Membership、Role、Scope 和授权结论只
 业务输入只需要 `candidateDisplayName` 和 `requirementKind`。不要求 HR 提供 `caseRef`、版本号、`requirementRef` 或 Evidence 引用；Runtime 继续在授权 Team / DataSpace 内解析唯一 Case 和当前版本。
 
 “文件怎么样了”“电脑可能准备好了”“IT 账号处理一下”“看起来差不多了”等查询、可能性或模糊表达不得路由为 Mutation。候选人、准备项类型或完成状态不明确时必须澄清，不得使用上一次会话、最近 Case 或数据库第一条记录补全。
+
+## 合成状态查询路由契约
+
+当请求同时明确包含合成测试语境、可识别的候选人，并询问当前入职准备状态、准备情况或进展，且没有要求更新状态时，导航到 `onboarding_status_control_pack` 的 `case_status_inspection`，只传 `candidateDisplayName`。Runtime 负责在可信 Tenant、DataSpace 与 Team 内解析唯一 Case。
+
+“Mark 现在的入职准备状态怎么样”“看一下 Mark 当前的入职进展”“Mark 的入职准备情况怎么样”属于只读状态查询；“Mark 的电脑已经准备好了”仍属于明确的 Requirement 完成写入。没有候选人的状态查询必须澄清，不得沿用聊天历史或最近 Case。

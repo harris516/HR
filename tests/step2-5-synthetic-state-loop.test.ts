@@ -281,8 +281,8 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
     complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 1);
     const result = runtime(databasePath).run({ skillId: "onboarding_status_control_pack",
       workflowId: "case_status_inspection", requestContext: principal(),
-      businessInput: { caseRef: created.caseRef, expectedCaseVersion: 2 } });
-    expect(result.result).toMatchObject({ status: "COMPLETED", implementationCallCount: 3 });
+      businessInput: { caseRef: created.caseRef } });
+    expect(result.result).toMatchObject({ status: "COMPLETED", implementationCallCount: 4 });
     const store = open(databasePath);
     expect(store.listAuditEvents(principal(), created.caseRef).at(-1)?.eventType)
       .toBe("synthetic_workflow_case_status_inspection");
@@ -489,5 +489,95 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
     };
     expect(payload.items.find((candidate) => candidate.caseRef === created.caseRef))
       .toMatchObject({ plannedStartDateCandidate: plannedStartAt, caseVersion: 1 });
+  });
+
+  it("43 resolves Mark and reads the persistent Version-4 Case plus all Requirement statuses", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath, principal(), "turn-e-create", "Mark", null)
+      .mutationOutput!.receipt!.case;
+    complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 1, 1, "turn-e-documents");
+    complete(databasePath, principal(), created.caseRef, "IT_ACCOUNT", 2, 1, "turn-e-account");
+    complete(databasePath, principal(), created.caseRef, "DEVICE", 3, 1, "turn-e-device");
+
+    const output = runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Mark" }
+    });
+    const caseStatus = output.result.stepResults.find((step) =>
+      step.capabilityRef.capabilityId === "hr.onboarding.case.status.read")!
+      .executionOutcome!.outputPayload as Record<string, unknown>;
+    const requirementStatus = output.result.stepResults.find((step) =>
+      step.capabilityRef.capabilityId === "hr.onboarding.requirement.status.read")!
+      .executionOutcome!.outputPayload as {
+        caseVersion: number;
+        requirements: Array<{ requirementType: string; formalStatus: string }>;
+      };
+
+    expect(output.result).toMatchObject({
+      status: "COMPLETED",
+      capabilityRequestCount: 4,
+      implementationCallCount: 4
+    });
+    expect(caseStatus).toMatchObject({
+      caseVersion: 4,
+      suggestedReadiness: "READY",
+      formalReadiness: null
+    });
+    expect(requirementStatus.caseVersion).toBe(4);
+    expect(Object.fromEntries(requirementStatus.requirements.map((item) =>
+      [item.requirementType, item.formalStatus]))).toEqual({
+      DOCUMENTS: "completed",
+      IT_ACCOUNT: "completed",
+      DEVICE: "completed"
+    });
+    expect(output).toMatchObject({
+      formalStateChanged: false,
+      outboundMessageSent: false,
+      externalSideEffect: false
+    });
+
+    const store = open(databasePath);
+    expect(store.getCase(principal(), created.caseRef)).toMatchObject({
+      caseVersion: 4,
+      plannedStartAt: null,
+      formalReadinessStatus: null
+    });
+    store.close();
+  });
+
+  it("44 fails closed when the candidate is not found in the authorized scope", () => {
+    const { databasePath } = database();
+    createCase(databasePath, principal(), "not-found-base", "Mark");
+    expect(() => runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Lisa" }
+    })).toThrowError("CASE_NOT_FOUND");
+  });
+
+  it("45 fails closed when two scoped Cases share the candidate name", () => {
+    const { databasePath } = database();
+    createCase(databasePath, principal(), "ambiguous-status-a", "Mark");
+    createCase(databasePath, principal(), "ambiguous-status-b", "Mark");
+    expect(() => runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Mark" }
+    })).toThrowError("CASE_REFERENCE_AMBIGUOUS");
+  });
+
+  it("46 excludes another Team and Tenant from status candidate resolution", () => {
+    const { databasePath } = database();
+    createCase(databasePath, principal(), "cross-scope-status", "Mark");
+    expect(() => runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      requestContext: principal("hr-bot-03", "ou_hr3synthetic"),
+      businessInput: { candidateDisplayName: "Mark" }
+    })).toThrowError("CASE_NOT_FOUND");
   });
 });

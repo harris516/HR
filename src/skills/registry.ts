@@ -119,6 +119,7 @@ const definitions: SkillDefinition[] = [
         workflowId: "case_status_inspection",
         capabilityRefs: [
           ref("hr.onboarding.case.status.read"),
+          ref("hr.onboarding.requirement.status.read"),
           ref("hr.onboarding.source_evidence.inspect"),
           ref("hr.onboarding.audit.timeline.read")
         ],
@@ -218,17 +219,17 @@ if (new Set(registeredWorkflowIds).size !== registeredWorkflowIds.length) {
   throw new Error("skill workflow IDs must be globally unique");
 }
 
-const registeredCapabilityIds = skillRegistry.flatMap((skill) => [
-  ...new Set(skill.workflows.flatMap((workflow) =>
+const registeredCapabilityIds = skillRegistry.flatMap((skill) =>
+  skill.workflows.flatMap((workflow) =>
     workflow.capabilityRefs.map((item) => item.capabilityId)
-  ))
-]);
+  )
+);
+const registeredCapabilityIdSet = new Set(registeredCapabilityIds);
 if (
-  registeredCapabilityIds.length !== plannedCapabilityIds.length ||
-  new Set(registeredCapabilityIds).size !== plannedCapabilityIds.length ||
-  plannedCapabilityIds.some((capabilityId) => !registeredCapabilityIds.includes(capabilityId))
+  registeredCapabilityIdSet.size !== plannedCapabilityIds.length ||
+  plannedCapabilityIds.some((capabilityId) => !registeredCapabilityIdSet.has(capabilityId))
 ) {
-  throw new Error("skill registry must cover every planned capability exactly once");
+  throw new Error("skill registry must cover every planned capability");
 }
 
 export function getSkillDefinition(skillId: SkillId): SkillDefinition {

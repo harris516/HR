@@ -70,6 +70,18 @@ The statement remains `SYNTHETIC_HR_MANUAL_STATEMENT` with the trusted HR Actor 
 
 Ten added routing cases cover Turn B/C/D positives, four ambiguous/uncertain negatives, missing candidate, Turn A regression, and Existing Handoff regression. Full regression: **19 test files / 321 tests PASS**. Store, Gateway, SQLite, Tenant/Team isolation, Principal mapping, Audit, Idempotency, optimistic locking, Capability Registry, and Tool Policy remain unchanged.
 
+## Mark Turn E Status Query Hotfix
+
+The first server Turn E failure, `CAPABILITY_OUTPUT_INVALID`, was already closed by omitting `plannedStartDateCandidate` when canonical `plannedStartAt` is null. The next real Feishu attempt failed closed because the model could not uniquely connect the explicit candidate name Mark to the existing scoped Case and required the HR to supply `caseRef`. The current failure class was `LLM_STATUS_QUERY_CASE_RESOLUTION_MISMATCH`.
+
+The Hotfix adds an explicit read-only status-query routing contract for Synthetic context + identified candidate + status/progress question. Task Navigation recommends `onboarding_status_control_pack -> case_status_inspection` with only `candidateDisplayName`. Explicit completion statements remain routed to Requirement Tracking mutation; unclear intent or a missing candidate remains clarification-only.
+
+`case_status_inspection` now accepts exactly one user-facing Case clue: `caseRef` or `candidateDisplayName`. The model can no longer supply `expectedCaseVersion` for this workflow. When a candidate name is used, Runtime reuses `SyntheticCaseStore.resolveCase()` under the trusted Tenant, DataSpace, Team, membership and Actor context. Only a unique scoped match continues; zero matches, multiple same-name matches and cross-Team/cross-Tenant matches fail closed without using conversation history, recency or the first database row.
+
+The existing status workflow now invokes the existing `hr.onboarding.requirement.status.read` Capability in addition to Case status, evidence and audit reads. The persistent Hero-flow test creates Mark, completes `DOCUMENTS`, `IT_ACCOUNT` and `DEVICE`, then queries by candidate name and reads Case version 4 plus all three `completed` Requirement states. Suggested readiness remains a candidate-only interpretation, formal READY remains null, planned start remains Unknown, Case version does not change, and there is no outbound or external side effect.
+
+Routing and resolution coverage includes the three required positive status phrasings, explicit DEVICE completion regression, DEVICE/file query non-mutation, missing-candidate clarification, unique match, not found, ambiguous same-name, cross-scope exclusion, and strict rejection of model-visible `expectedCaseVersion`. Final regression after Turn E: **19 test files / 334 tests PASS**. The plugin remains at seven tools; no Capability, Workflow, SQLite table, state machine or top-level Tool was added.
+
 ## Store and schema changes
 
 - Added `SyntheticBusinessStorePort` for Case create/read/list/resolve and Requirement completion.
@@ -140,12 +152,13 @@ Observed final evidence:
 
 - TypeScript typecheck: PASS
 - Build: PASS
-- Full suite after the Mark Turn B/C/D routing Hotfix: **19 test files / 321 tests PASS**
+- Full suite after the Mark Turn E Status Query Hotfix: **19 test files / 334 tests PASS**
 - Step 2 baseline: **17 test files / 256 tests PASS**
 - Step 2.5 before the routing Hotfix: **18 test files / 296 tests PASS**
 - Mark Turn A routing Hotfix final baseline: **19 test files / 311 tests PASS**
 - Mark Turn B/C/D routing Hotfix final baseline: **19 test files / 321 tests PASS**
-- Step 2.5 focused state-loop tests: 40 PASS
+- Mark Turn E status-query Hotfix final baseline: **19 test files / 334 tests PASS**
+- Step 2.5 focused state-loop tests: 46 PASS
 - Runtime config validator: PASS
 - Capability Registry validator: PASS; 18 planned, 0 executable, 17 reserved, 0 bindings
 - Engineering baseline validator: PASS
@@ -189,7 +202,7 @@ Tests cover:
 | 2.5C-3 Synthetic mutation contracts | PASS | Separate test-only mutation Gateway; formal registry unchanged/closed |
 | 2.5C-4 Skill/tool integration | PASS | Existing intake/tracking Skills and tool names extended; no raw write interface |
 | 2.5C-5 Mark Hero Flow | PASS (local) | Six-turn smoke completes on one persistent truth |
-| 2.5C-6 Security/regression | PASS (local) | Final Requirement Routing Hotfix baseline: 19 files / 321 tests; Turn A Hotfix: 19 / 311; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
+| 2.5C-6 Security/regression | PASS (local) | Final Turn E Status Query Hotfix baseline: 19 files / 334 tests; Turn B/C/D Hotfix: 19 / 321; Turn A Hotfix: 19 / 311; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
 | 2.5C-7 Evidence | PASS | This report and reproducible test/smoke commands |
 
 ## Files changed

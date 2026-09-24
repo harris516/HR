@@ -56,7 +56,13 @@ function capabilityPayload(
     case "hr.onboarding.case.status.read":
       return { onboardingCaseRef: caseRef, expectedCaseVersion: caseVersion, fieldSetRef: "field-set-case-status" };
     case "hr.onboarding.requirement.status.read":
-      return { onboardingCaseRef: caseRef, requirementRef: stringValue(input, "requirementRef"), expectedCaseVersion: caseVersion };
+      return {
+        onboardingCaseRef: caseRef,
+        ...(input.requirementRef === undefined ? {} : {
+          requirementRef: stringValue(input, "requirementRef")
+        }),
+        ...(caseVersion === undefined ? {} : { expectedCaseVersion: caseVersion })
+      };
     case "hr.onboarding.requirement.completion.evaluate":
       return { onboardingCaseRef: caseRef, requirementRef: stringValue(input, "requirementRef"), expectedCaseVersion: caseVersion, expectedRequirementVersion: numberValue(input, "expectedRequirementVersion") };
     case "hr.onboarding.risk.list":

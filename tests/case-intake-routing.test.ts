@@ -163,7 +163,6 @@ describe("Mark Turn B/C/D Requirement Update routing", () => {
   });
 
   it.each([
-    "这是合成测试数据：Mark 的文件怎么样了？",
     "这是合成测试数据：Mark 的电脑可能准备好了。",
     "这是合成测试数据：Mark 的 IT 账号帮我处理一下。",
     "这是合成测试数据：Mark 的电脑看起来差不多了。"
@@ -172,6 +171,16 @@ describe("Mark Turn B/C/D Requirement Update routing", () => {
       decision: "CLARIFY",
       skillId: null,
       workflowId: null
+    });
+  });
+
+  it("routes a Requirement question to read-only Status Control rather than mutation", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 的文件怎么样了？"
+    )).toMatchObject({
+      decision: "ROUTE",
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection"
     });
   });
 
@@ -198,5 +207,58 @@ describe("Mark Turn B/C/D Requirement Update routing", () => {
       skillId: "onboarding_case_intake_pack",
       workflowId: "case_intake_candidate"
     });
+  });
+});
+
+describe("Mark Turn E natural-language status routing", () => {
+  it.each([
+    "这是合成测试数据：Mark 现在的入职准备状态怎么样？",
+    "这是合成测试数据：看一下 Mark 当前的入职进展。",
+    "合成测试：Mark 的入职准备情况怎么样？"
+  ])("routes a named synthetic progress query to Status Control: %s", (requestText) => {
+    expect(evaluateCaseIntakeRouting(requestText)).toEqual({
+      decision: "ROUTE",
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      businessInput: { candidateDisplayName: "Mark" },
+      missingConditions: []
+    });
+  });
+
+  it("keeps an explicit device completion statement on the mutation route", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 的电脑已经准备好了。"
+    )).toMatchObject({
+      skillId: "onboarding_requirement_tracking_pack",
+      workflowId: "synthetic_requirement_completion_update"
+    });
+  });
+
+  it("routes a device question to read-only Status Control rather than mutation", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 的电脑怎么样了？"
+    )).toMatchObject({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection",
+      businessInput: { candidateDisplayName: "Mark" }
+    });
+  });
+
+  it("clarifies a status query with no candidate instead of using recent context", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：现在入职准备状态怎么样？"
+    )).toMatchObject({
+      decision: "CLARIFY",
+      skillId: null,
+      workflowId: null,
+      missingConditions: expect.arrayContaining(["candidateDisplayName"])
+    });
+  });
+
+  it("rejects model-visible expectedCaseVersion for status inspection", () => {
+    expect(() => parseStep2WorkflowInput("case_status_inspection", {
+      candidateDisplayName: "Mark",
+      expectedCaseVersion: 4
+    })).toThrow();
   });
 });

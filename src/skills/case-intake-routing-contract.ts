@@ -1,6 +1,13 @@
 export type CaseIntakeRoutingDecision =
   | {
     decision: "ROUTE";
+    skillId: "onboarding_status_control_pack";
+    workflowId: "case_status_inspection";
+    businessInput: { candidateDisplayName: string };
+    missingConditions: [];
+  }
+  | {
+    decision: "ROUTE";
     skillId: "onboarding_requirement_tracking_pack";
     workflowId: "synthetic_requirement_completion_update";
     businessInput: {
@@ -34,7 +41,7 @@ export type CaseIntakeRoutingDecision =
     businessInput: Record<string, never>;
     missingConditions: Array<
       "syntheticContext" | "candidateDisplayName" | "offerAccepted" | "createCaseIntent" |
-      "requirementKind" | "requirementCompleted"
+      "requirementKind" | "requirementCompleted" | "statusQueryIntent"
     >;
   };
 
@@ -61,6 +68,13 @@ const intakeReviewPatterns = [
 
 const uncertainCompletionPatterns = [/(?:可能|也许|大概|似乎|看起来|差不多)/u,
   /\b(?:maybe|probably|seems?|almost)\b/iu];
+const statusQueryPatterns = [
+  /(?:入职)?准备(?:状态|情况|进展)[\s\S]{0,8}(?:怎么样|如何|查看|看一下)?/u,
+  /(?:查看|看一下|查询)[\s\S]{0,16}(?:入职)?(?:状态|情况|进展)/u,
+  /(?:入职)(?:状态|情况|进展)[\s\S]{0,8}(?:怎么样|如何)?/u,
+  /(?:怎么样了|现在怎么样|当前如何)[？?]?$/u,
+  /\b(?:status|progress)\b/iu
+];
 
 const requirementPatterns = {
   DOCUMENTS: [/(?:入职文件|入职材料|入职资料)/u, /\bonboarding\s+(?:documents?|materials?)\b/iu],
@@ -90,7 +104,9 @@ function candidateDisplayName(text: string): string | null {
     /\b([A-Za-z][A-Za-z0-9._-]{0,63})\b\s*(?:已|已经)?接受/u,
     /(?:给|为)\s*([\p{Script=Han}]{2,8})\s*(?:发|创建|建立)/u,
     /([\p{Script=Han}]{2,8})\s*(?:已|已经)接受(?:录用|聘用)?/u,
-    /([\p{Script=Han}]{2,8})\s*的(?:入职文件|入职材料|入职资料|IT\s*账号|系统账号|电脑|笔记本|办公设备)/iu
+    /([\p{Script=Han}]{2,8})\s*的(?:入职文件|入职材料|入职资料|IT\s*账号|系统账号|电脑|笔记本|办公设备)/iu,
+    /\b([A-Za-z][A-Za-z0-9._-]{0,63})\b\s*(?:现在|当前)/u,
+    /([\p{Script=Han}]{2,8})\s*(?:现在|当前)/u
   ];
   for (const pattern of patterns) {
     const matched = text.match(pattern)?.[1];
@@ -138,11 +154,13 @@ export function evaluateCaseIntakeRouting(requestText: string): CaseIntakeRoutin
 
   const candidate = candidateDisplayName(text);
   const kind = requirementKind(text);
+  const isSynthetic = matchesAny(text, syntheticContextPatterns);
+  const isStatusQuery = matchesAny(text, statusQueryPatterns);
   const hasRequirementSignal = kind !== null || matchesAny(text,
     Object.values(requirementPatterns).flat());
   if (hasRequirementSignal) {
     const conditions = {
-      syntheticContext: matchesAny(text, syntheticContextPatterns),
+      syntheticContext: isSynthetic,
       candidateDisplayName: candidate !== null,
       requirementKind: kind !== null,
       requirementCompleted: kind !== null && requirementIsExplicitlyCompleted(text, kind)
@@ -159,6 +177,37 @@ export function evaluateCaseIntakeRouting(requestText: string): CaseIntakeRoutin
         missingConditions: []
       };
     }
+    if (isSynthetic && candidate !== null && isStatusQuery) {
+      return {
+        decision: "ROUTE",
+        skillId: "onboarding_status_control_pack",
+        workflowId: "case_status_inspection",
+        businessInput: { candidateDisplayName: candidate },
+        missingConditions: []
+      };
+    }
+    return {
+      decision: "CLARIFY",
+      skillId: null,
+      workflowId: null,
+      businessInput: {},
+      missingConditions
+    };
+  }
+
+  if (isStatusQuery) {
+    const missingConditions: Array<"syntheticContext" | "candidateDisplayName"> = [];
+    if (!isSynthetic) missingConditions.push("syntheticContext");
+    if (candidate === null) missingConditions.push("candidateDisplayName");
+    if (missingConditions.length === 0 && candidate !== null) {
+      return {
+        decision: "ROUTE",
+        skillId: "onboarding_status_control_pack",
+        workflowId: "case_status_inspection",
+        businessInput: { candidateDisplayName: candidate },
+        missingConditions: []
+      };
+    }
     return {
       decision: "CLARIFY",
       skillId: null,
@@ -169,7 +218,7 @@ export function evaluateCaseIntakeRouting(requestText: string): CaseIntakeRoutin
   }
 
   const conditions = {
-    syntheticContext: matchesAny(text, syntheticContextPatterns),
+    syntheticContext: isSynthetic,
     candidateDisplayName: candidate !== null,
     offerAccepted: matchesAny(text, acceptedOfferPatterns),
     createCaseIntent: matchesAny(text, createVerbPatterns) && matchesAny(text, onboardingCasePatterns)

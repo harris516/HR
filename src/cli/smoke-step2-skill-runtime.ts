@@ -31,8 +31,7 @@ const secondary = runtime.run({
   workflowId: "case_status_inspection",
   requestContext,
   businessInput: {
-    caseRef: "case-demo-001",
-    expectedCaseVersion: 7
+    caseRef: "case-demo-001"
   }
 });
 

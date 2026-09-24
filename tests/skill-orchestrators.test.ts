@@ -370,13 +370,7 @@ describe("S5 Skill Registry", () => {
     const allowed = new Set(skillRegistry.flatMap((skill) =>
       skill.workflows.flatMap((workflow) => workflow.capabilityRefs.map((item) => item.capabilityId))
     ));
-    const allowedList = skillRegistry.flatMap((skill) => [
-      ...new Set(skill.workflows.flatMap((workflow) =>
-        workflow.capabilityRefs.map((item) => item.capabilityId)
-      ))
-    ]);
     expect(allowed.size).toBe(18);
-    expect(allowedList).toHaveLength(18);
     expect(skillRegistry.flatMap((skill) => skill.workflows).every((workflow) =>
       workflow.genericToolFallbackAllowed === false && workflow.stopOnNonSuccess
     )).toBe(true);

@@ -50,7 +50,7 @@ try {
     skillId: "onboarding_status_control_pack",
     workflowId: "case_status_inspection",
     requestContext: context,
-    businessInput: { caseRef, expectedCaseVersion: 4 }
+    businessInput: { candidateDisplayName: "Mark（合成测试）" }
   });
   const delivery = runtime().run({
     skillId: "onboarding_delivery_pack",
