@@ -1,6 +1,13 @@
 export type CaseIntakeRoutingDecision =
   | {
     decision: "ROUTE";
+    skillId: "onboarding_delivery_pack";
+    workflowId: "day1_ready_card_candidate";
+    businessInput: { candidateDisplayName: string };
+    missingConditions: [];
+  }
+  | {
+    decision: "ROUTE";
     skillId: "onboarding_status_control_pack";
     workflowId: "case_status_inspection";
     businessInput: { candidateDisplayName: string };
@@ -41,7 +48,7 @@ export type CaseIntakeRoutingDecision =
     businessInput: Record<string, never>;
     missingConditions: Array<
       "syntheticContext" | "candidateDisplayName" | "offerAccepted" | "createCaseIntent" |
-      "requirementKind" | "requirementCompleted" | "statusQueryIntent"
+      "requirementKind" | "requirementCompleted" | "statusQueryIntent" | "deliveryIntent"
     >;
   };
 
@@ -75,6 +82,12 @@ const statusQueryPatterns = [
   /(?:怎么样了|现在怎么样|当前如何)[？?]?$/u,
   /\b(?:status|progress)\b/iu
 ];
+const readyCardPatterns = [
+  /入职准备卡/u,
+  /\bday[-\s]?1\s+ready\s+card\b/iu,
+  /\bready\s+card\b/iu
+];
+const deliveryVerbPatterns = [/(?:生成|制作|创建|出一份)/u, /\b(?:generate|create|make|draft)\b/iu];
 
 const requirementPatterns = {
   DOCUMENTS: [/(?:入职文件|入职材料|入职资料)/u, /\bonboarding\s+(?:documents?|materials?)\b/iu],
@@ -100,9 +113,9 @@ function candidateDisplayName(text: string): string | null {
   const patterns = [
     /\b([A-Za-z][A-Za-z0-9._-]{0,63})['’]s\s+offer\b/iu,
     /\b([A-Za-z][A-Za-z0-9._-]{0,63})\b\s*的/u,
-    /(?:给|为)\s*([A-Za-z][A-Za-z0-9._-]{0,63})\s*(?:发|创建|建立)/u,
+    /(?:给|为)\s*([A-Za-z][A-Za-z0-9._-]{0,63})\s*(?:发|创建|建立|生成|制作)/u,
     /\b([A-Za-z][A-Za-z0-9._-]{0,63})\b\s*(?:已|已经)?接受/u,
-    /(?:给|为)\s*([\p{Script=Han}]{2,8})\s*(?:发|创建|建立)/u,
+    /(?:给|为)\s*([\p{Script=Han}]{2,8})\s*(?:发|创建|建立|生成|制作)/u,
     /([\p{Script=Han}]{2,8})\s*(?:已|已经)接受(?:录用|聘用)?/u,
     /([\p{Script=Han}]{2,8})\s*的(?:入职文件|入职材料|入职资料|IT\s*账号|系统账号|电脑|笔记本|办公设备)/iu,
     /\b([A-Za-z][A-Za-z0-9._-]{0,63})\b\s*(?:现在|当前)/u,
@@ -156,6 +169,33 @@ export function evaluateCaseIntakeRouting(requestText: string): CaseIntakeRoutin
   const kind = requirementKind(text);
   const isSynthetic = matchesAny(text, syntheticContextPatterns);
   const isStatusQuery = matchesAny(text, statusQueryPatterns);
+  const hasReadyCardSignal = matchesAny(text, readyCardPatterns);
+  if (hasReadyCardSignal) {
+    const conditions = {
+      syntheticContext: isSynthetic,
+      candidateDisplayName: candidate !== null,
+      deliveryIntent: matchesAny(text, deliveryVerbPatterns)
+    };
+    const missingConditions = (Object.entries(conditions) as Array<
+      [keyof typeof conditions, boolean]
+    >).filter(([, satisfied]) => !satisfied).map(([name]) => name);
+    if (missingConditions.length === 0 && candidate !== null) {
+      return {
+        decision: "ROUTE",
+        skillId: "onboarding_delivery_pack",
+        workflowId: "day1_ready_card_candidate",
+        businessInput: { candidateDisplayName: candidate },
+        missingConditions: []
+      };
+    }
+    return {
+      decision: "CLARIFY",
+      skillId: null,
+      workflowId: null,
+      businessInput: {},
+      missingConditions
+    };
+  }
   const hasRequirementSignal = kind !== null || matchesAny(text,
     Object.values(requirementPatterns).flat());
   if (hasRequirementSignal) {

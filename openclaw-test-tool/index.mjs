@@ -46,7 +46,8 @@ const coordinationParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("practice_review_draft"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false })
 ]);
 const deliveryParameters = Type.Union([
-  Type.Object({ workflowId: Type.Literal("day1_ready_card_candidate"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("day1_ready_card_candidate"), caseRef: ref(), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("day1_ready_card_candidate"), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), language: language() }, { additionalProperties: false }),
   Type.Object({ workflowId: Type.Literal("readiness_revalidation"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), previousEvaluationRef: ref(), invalidationTriggerRef: ref() }, { additionalProperties: false }),
   Type.Object({ workflowId: Type.Literal("artifact_center_read"), caseRef: ref(), pageSize: pageSize() }, { additionalProperties: false })
 ]);
@@ -134,7 +135,7 @@ export default defineToolPlugin({
   tools: (tool) => [
     runtimeTool(tool, {
       name: runtimeToolNames.taskNavigation,
-      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. It distinguishes accepted-Offer Case creation, Existing Handoff review, explicit HR completion statements, and read-only candidate status queries; unclear intent remains CLARIFY.",
+      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. It distinguishes accepted-Offer Case creation, Existing Handoff review, explicit HR completion statements, read-only status queries, and Ready Card draft requests; unclear intent remains CLARIFY.",
       parameters: taskNavigationParameters,
       skillId: "onboarding_task_navigation_pack",
       workflowId: "navigation_route_handoff"
@@ -169,7 +170,7 @@ export default defineToolPlugin({
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.delivery,
-      description: "Run controlled synthetic readiness, revalidation, or artifact workflows; formal READY remains unchanged.",
+      description: "Generate a controlled synthetic Day-1 Ready Card draft by caseRef or candidateDisplayName, or run revalidation/artifact workflows. Runtime resolves a named candidate only inside the trusted Team/DataSpace and reads the current Case version. Output remains DRAFT/NOT_SENT; formal READY is unchanged.",
       parameters: deliveryParameters,
       skillId: "onboarding_delivery_pack",
       workflowId: (params) => params.workflowId

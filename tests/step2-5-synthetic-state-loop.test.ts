@@ -580,4 +580,61 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
       businessInput: { candidateDisplayName: "Mark" }
     })).toThrowError("CASE_NOT_FOUND");
   });
+
+  it("47 resolves Mark and delivers a Version-4 Ready Card draft without formal or external effects", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath, principal(), "turn-f-create", "Mark", null)
+      .mutationOutput!.receipt!.case;
+    complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 1, 1, "turn-f-documents");
+    complete(databasePath, principal(), created.caseRef, "IT_ACCOUNT", 2, 1, "turn-f-account");
+    complete(databasePath, principal(), created.caseRef, "DEVICE", 3, 1, "turn-f-device");
+
+    const output = runtime(databasePath).run({
+      skillId: "onboarding_delivery_pack",
+      workflowId: "day1_ready_card_candidate",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Mark", language: "zh-CN" }
+    });
+    const evaluation = output.result.stepResults.find((step) =>
+      step.capabilityRef.capabilityId === "hr.onboarding.readiness.evaluate")!
+      .executionOutcome!.outputPayload as Record<string, unknown>;
+    const card = output.result.stepResults.find((step) =>
+      step.capabilityRef.capabilityId === "hr.onboarding.ready_card.draft")!
+      .executionOutcome!.outputPayload as Record<string, unknown>;
+
+    expect(output.result).toMatchObject({
+      status: "COMPLETED",
+      capabilityRequestCount: 2,
+      implementationCallCount: 2
+    });
+    expect(evaluation).toMatchObject({
+      caseRef: created.caseRef,
+      caseVersion: 4,
+      result: "ELIGIBLE",
+      blockingRequirementRefs: [],
+      unknownRefs: [],
+      conflictRefs: [],
+      formalReadinessChanged: false
+    });
+    expect(card).toMatchObject({
+      artifactType: "DAY1_READY_CARD_DRAFT",
+      artifactStatus: "DRAFT",
+      sendStatus: "NOT_SENT",
+      formalStateChanged: false,
+      externalSideEffect: false
+    });
+    expect(output).toMatchObject({
+      formalStateChanged: false,
+      outboundMessageSent: false,
+      externalSideEffect: false
+    });
+
+    const store = open(databasePath);
+    expect(store.getCase(principal(), created.caseRef)).toMatchObject({
+      caseVersion: 4,
+      plannedStartAt: null,
+      formalReadinessStatus: null
+    });
+    store.close();
+  });
 });

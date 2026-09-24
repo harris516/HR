@@ -74,7 +74,7 @@ describe("Step 2 controlled Skill execution", () => {
     ["onboarding_coordination_pack", "responsibility_reminder_draft", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
     ["onboarding_coordination_pack", "responsibility_escalation_draft", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
     ["onboarding_coordination_pack", "practice_review_draft", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
-    ["onboarding_delivery_pack", "day1_ready_card_candidate", { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }],
+    ["onboarding_delivery_pack", "day1_ready_card_candidate", { caseRef: "case-demo-001", language: "zh-CN" }],
     ["onboarding_delivery_pack", "readiness_revalidation", { caseRef: "case-demo-001", expectedCaseVersion: 7, previousEvaluationRef: "evaluation-readiness-001", invalidationTriggerRef: "trigger-source-refresh-001" }],
     ["onboarding_delivery_pack", "artifact_center_read", { caseRef: "case-demo-001", pageSize: 20 }]
   ] as const;
@@ -96,7 +96,7 @@ describe("Step 2 controlled Skill execution", () => {
       skillId: "onboarding_delivery_pack",
       workflowId: "day1_ready_card_candidate",
       requestContext: context(),
-      businessInput: { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }
+      businessInput: { caseRef: "case-demo-001", language: "zh-CN" }
     });
     expect(output.result).toMatchObject({
       status: "COMPLETED",
@@ -139,7 +139,7 @@ describe("Step 2 controlled Skill execution", () => {
       skillId: "onboarding_delivery_pack",
       workflowId: "day1_ready_card_candidate",
       requestContext: { ...context(), contextVersion: "1" },
-      businessInput: { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }
+      businessInput: { caseRef: "case-demo-001", language: "zh-CN" }
     })).toThrow();
   });
 
@@ -148,7 +148,7 @@ describe("Step 2 controlled Skill execution", () => {
       skillId: "onboarding_status_control_pack",
       workflowId: "day1_ready_card_candidate",
       requestContext: context(),
-      businessInput: { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }
+      businessInput: { caseRef: "case-demo-001", language: "zh-CN" }
     })).toThrow("Skill workflow is unavailable");
     expect(() => runtime().run({
       skillId: "onboarding_delivery_pack",
@@ -183,7 +183,7 @@ describe("Step 2 controlled Skill execution", () => {
       skillId: "onboarding_delivery_pack",
       workflowId: "day1_ready_card_candidate",
       requestContext: context(),
-      businessInput: { caseRef: "case-demo-001", expectedCaseVersion: 7, language: "zh-CN" }
+      businessInput: { caseRef: "case-demo-001", language: "zh-CN" }
     });
     expect(["FAILED", "DENIED"]).toContain(output.result.status);
     expect(output.result.reasonCodes).toContain("AUDIT_UNAVAILABLE");

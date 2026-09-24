@@ -21,6 +21,10 @@ export interface Step2SkillCompileInput {
   workflowId: SkillWorkflowId;
   requestContext: RequestContext;
   businessInput: unknown;
+  trustedCaseResolution?: {
+    caseRef: string;
+    caseVersion: number;
+  };
 }
 
 export interface Step2SkillRequestCompilerOptions {
@@ -40,10 +44,11 @@ function numberValue(input: Record<string, unknown>, key: string): number {
 function capabilityPayload(
   capabilityId: CapabilityId,
   input: Record<string, unknown>,
-  context: RequestContext
+  context: RequestContext,
+  trustedCaseResolution?: Step2SkillCompileInput["trustedCaseResolution"]
 ): Record<string, unknown> {
-  const caseRef = input.caseRef as string | undefined;
-  const caseVersion = input.expectedCaseVersion as number | undefined;
+  const caseRef = trustedCaseResolution?.caseRef ?? input.caseRef as string | undefined;
+  const caseVersion = trustedCaseResolution?.caseVersion ?? input.expectedCaseVersion as number | undefined;
   switch (capabilityId) {
     case "hr.onboarding.intake.handoff.read":
       return { handoffRef: stringValue(input, "handoffRef"), expectedSourceVersion: stringValue(input, "expectedSourceVersion"), fieldSetRef: "field-set-intake-minimum" };
@@ -120,9 +125,15 @@ export class Step2SkillRequestCompiler {
         throw new Error("Workflow contains a Capability outside the Step 2 activation profile");
       }
       const entry = getPlannedCapability(capabilityRef.capabilityId);
-      const payload = capabilityPayload(entry.capabilityId, businessInput, input.requestContext);
+      const payload = capabilityPayload(
+        entry.capabilityId,
+        businessInput,
+        input.requestContext,
+        input.trustedCaseResolution
+      );
       const capabilityRequestId = `step2-capability-${this.#idFactory()}`;
-      const caseRef = (businessInput.caseRef as string | undefined) ??
+      const caseRef = input.trustedCaseResolution?.caseRef ??
+        (businessInput.caseRef as string | undefined) ??
         (businessInput.handoffRef as string | undefined) ?? "synthetic-navigation";
       const reviewRequired = ["HUMAN_REVIEW_REQUIRED", "PHC_4_FACTS_ONLY"].includes(entry.reviewRequirement);
       const collectionAdmission = collectionCapabilityIds.has(entry.capabilityId) ? {

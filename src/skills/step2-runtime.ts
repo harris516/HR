@@ -146,6 +146,12 @@ export class Step2SyntheticSkillRuntime {
     let persistentStore: SyntheticCaseStore | undefined;
     let adapterStore = scopeStoreToPrincipal(invocation.requestContext);
     let effectiveBusinessInput = invocation.businessInput;
+    let trustedCaseResolution: { caseRef: string; caseVersion: number } | undefined;
+    const resolvesCaseClue = invocation.workflowId === "case_status_inspection" ||
+      invocation.workflowId === "day1_ready_card_candidate";
+    const caseClueInput = resolvesCaseClue
+      ? parseStep2WorkflowInput(invocation.workflowId, invocation.businessInput)
+      : undefined;
     if (this.#databaseOptions !== undefined) {
       persistentStore = new SyntheticCaseStore({
         databasePath: this.#databaseOptions.databasePath!,
@@ -157,15 +163,11 @@ export class Step2SyntheticSkillRuntime {
         now: this.#now,
         auditAvailable: () => this.#auditAvailability.execution ?? true
       });
-      if (invocation.workflowId === "case_status_inspection") {
-        const statusInput = parseStep2WorkflowInput(
-          invocation.workflowId,
-          invocation.businessInput
-        );
+      if (caseClueInput !== undefined) {
         const resolution = persistentStore.resolveCase(invocation.requestContext, {
-          ...(statusInput.caseRef === undefined ? {} : { caseRef: statusInput.caseRef as string }),
-          ...(statusInput.candidateDisplayName === undefined ? {} : {
-            candidateDisplayName: statusInput.candidateDisplayName as string
+          ...(caseClueInput.caseRef === undefined ? {} : { caseRef: caseClueInput.caseRef as string }),
+          ...(caseClueInput.candidateDisplayName === undefined ? {} : {
+            candidateDisplayName: caseClueInput.candidateDisplayName as string
           })
         });
         if (resolution.status !== "MATCHED" || resolution.case === null) {
@@ -175,7 +177,10 @@ export class Step2SyntheticSkillRuntime {
           persistentStore = undefined;
           throw new Error(reason);
         }
-        effectiveBusinessInput = { caseRef: resolution.case.caseRef };
+        trustedCaseResolution = {
+          caseRef: resolution.case.caseRef,
+          caseVersion: resolution.case.caseVersion
+        };
       }
       const cases = persistentStore.listCases(invocation.requestContext);
       const audits = cases.flatMap((item) => persistentStore!.listAuditEvents(
@@ -186,6 +191,12 @@ export class Step2SyntheticSkillRuntime {
         cases,
         audits
       );
+    }
+    if (caseClueInput !== undefined && trustedCaseResolution === undefined) {
+      if (caseClueInput.candidateDisplayName !== undefined) throw new Error("CASE_NOT_FOUND");
+      const record = adapterStore.cases.find((item) => item.caseRef === caseClueInput.caseRef);
+      if (record === undefined) throw new Error("CASE_NOT_FOUND");
+      trustedCaseResolution = { caseRef: record.caseRef, caseVersion: record.caseVersion };
     }
     try {
       const executor = new SyntheticCapabilityExecutor({
@@ -213,12 +224,13 @@ export class Step2SyntheticSkillRuntime {
       skillId: invocation.skillId,
       workflowId: invocation.workflowId,
       requestContext: invocation.requestContext,
-      businessInput: effectiveBusinessInput
+      businessInput: effectiveBusinessInput,
+      ...(trustedCaseResolution === undefined ? {} : { trustedCaseResolution })
     });
     const result = orchestrator.run(request);
     if (persistentStore !== undefined && result.status === "COMPLETED") {
       const parsedInput = effectiveBusinessInput as Record<string, unknown>;
-      const caseRef = parsedInput.caseRef;
+      const caseRef = trustedCaseResolution?.caseRef ?? parsedInput.caseRef;
       if (typeof caseRef === "string") {
         persistentStore.recordWorkflowEvent(invocation.requestContext, caseRef, invocation.workflowId);
       }

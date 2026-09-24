@@ -10,9 +10,18 @@ const caseInputSchema = z.object({
   caseRef: refSchema,
   expectedCaseVersion: z.number().int().nonnegative().default(7)
 }).strict();
-const caseStatusInspectionInputSchema = z.object({
+const caseClueShape = {
   caseRef: refSchema.optional(),
   candidateDisplayName: z.string().trim().min(1).max(128).optional()
+};
+const caseStatusInspectionInputSchema = z.object({
+  ...caseClueShape
+}).strict().refine((value) =>
+  Number(value.caseRef !== undefined) + Number(value.candidateDisplayName !== undefined) === 1,
+  "exactly one of caseRef or candidateDisplayName is required");
+const day1ReadyCardCandidateInputSchema = z.object({
+  ...caseClueShape,
+  language: languageSchema
 }).strict().refine((value) =>
   Number(value.caseRef !== undefined) + Number(value.candidateDisplayName !== undefined) === 1,
   "exactly one of caseRef or candidateDisplayName is required");
@@ -47,7 +56,7 @@ export const step2WorkflowInputSchemas = {
   responsibility_reminder_draft: caseInputSchema.extend({ language: languageSchema }).strict(),
   responsibility_escalation_draft: caseInputSchema.extend({ language: languageSchema }).strict(),
   practice_review_draft: caseInputSchema.extend({ language: languageSchema }).strict(),
-  day1_ready_card_candidate: caseInputSchema.extend({ language: languageSchema }).strict(),
+  day1_ready_card_candidate: day1ReadyCardCandidateInputSchema,
   readiness_revalidation: caseInputSchema.extend({
     previousEvaluationRef: refSchema,
     invalidationTriggerRef: refSchema

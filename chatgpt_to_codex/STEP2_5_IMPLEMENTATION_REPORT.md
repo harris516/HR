@@ -82,6 +82,16 @@ The existing status workflow now invokes the existing `hr.onboarding.requirement
 
 Routing and resolution coverage includes the three required positive status phrasings, explicit DEVICE completion regression, DEVICE/file query non-mutation, missing-candidate clarification, unique match, not found, ambiguous same-name, cross-scope exclusion, and strict rejection of model-visible `expectedCaseVersion`. Final regression after Turn E: **19 test files / 334 tests PASS**. The plugin remains at seven tools; no Capability, Workflow, SQLite table, state machine or top-level Tool was added.
 
+## Mark Turn F Delivery Routing Hotfix
+
+The real server Delivery Runtime already passed: Status Control resolved Mark, and the existing Delivery Pack generated a Version-4 Day-1 Ready Card draft with `ELIGIBLE`, all three P0 Requirements completed, no blockers/unknowns/conflicts, formal READY unchanged, no send, and independent evaluation/draft/delivery audit evidence. The remaining failure was Task Navigation routing the explicit request “这是合成测试数据：请给我生成 Mark 的入职准备卡供我复核。” to Case Intake and asking for Offer information. Failure class: `LLM_DELIVERY_ROUTING_MISMATCH`.
+
+The Hotfix adds a precise Ready Card intent contract: Synthetic context + identified candidate + explicit generate/make/create Ready Card request routes directly to `onboarding_delivery_pack -> day1_ready_card_candidate` with `candidateDisplayName`. Existing Status Query, Requirement completion, accepted-Offer Case Create and Handoff Review routes retain precedence for their own explicit semantics; a Ready Card request without a candidate returns clarification and cannot inherit conversation history.
+
+`day1_ready_card_candidate` now accepts exactly one user-facing Case clue, `caseRef` or `candidateDisplayName`. Runtime reuses the Turn E scoped `SyntheticCaseStore.resolveCase()` path and supplies the resolved `caseRef` and current `caseVersion` to the existing Delivery workflow as trusted internal data. Model-visible `expectedCaseVersion`, evaluation/template/evidence/audit references remain rejected. No Readiness Evaluation, Ready Card Draft, Artifact, review or formal-state logic was redesigned.
+
+Four positive natural-language cases cover the server wording, a simple Chinese request, Day-1 Ready Card wording and draft wording. Contrast tests preserve Turn A–E routing and missing-candidate clarification. The persistent Hero test creates Mark, completes all three Requirements, resolves by name, and proves Version 4 is used by Readiness Evaluation and Ready Card Draft; output remains `DRAFT / NOT_SENT`, formal READY stays null, and outbound/external side effects stay false. Final regression after Turn F: **19 test files / 345 tests PASS**. Tool Surface remains seven; no Capability, Workflow, Skill, Tool, table, router framework or state machine was added.
+
 ## Store and schema changes
 
 - Added `SyntheticBusinessStorePort` for Case create/read/list/resolve and Requirement completion.
@@ -152,13 +162,14 @@ Observed final evidence:
 
 - TypeScript typecheck: PASS
 - Build: PASS
-- Full suite after the Mark Turn E Status Query Hotfix: **19 test files / 334 tests PASS**
+- Full suite after the Mark Turn F Delivery Routing Hotfix: **19 test files / 345 tests PASS**
 - Step 2 baseline: **17 test files / 256 tests PASS**
 - Step 2.5 before the routing Hotfix: **18 test files / 296 tests PASS**
 - Mark Turn A routing Hotfix final baseline: **19 test files / 311 tests PASS**
 - Mark Turn B/C/D routing Hotfix final baseline: **19 test files / 321 tests PASS**
 - Mark Turn E status-query Hotfix final baseline: **19 test files / 334 tests PASS**
-- Step 2.5 focused state-loop tests: 46 PASS
+- Mark Turn F delivery-routing Hotfix final baseline: **19 test files / 345 tests PASS**
+- Step 2.5 focused state-loop tests: 47 PASS
 - Runtime config validator: PASS
 - Capability Registry validator: PASS; 18 planned, 0 executable, 17 reserved, 0 bindings
 - Engineering baseline validator: PASS
@@ -202,7 +213,7 @@ Tests cover:
 | 2.5C-3 Synthetic mutation contracts | PASS | Separate test-only mutation Gateway; formal registry unchanged/closed |
 | 2.5C-4 Skill/tool integration | PASS | Existing intake/tracking Skills and tool names extended; no raw write interface |
 | 2.5C-5 Mark Hero Flow | PASS (local) | Six-turn smoke completes on one persistent truth |
-| 2.5C-6 Security/regression | PASS (local) | Final Turn E Status Query Hotfix baseline: 19 files / 334 tests; Turn B/C/D Hotfix: 19 / 321; Turn A Hotfix: 19 / 311; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
+| 2.5C-6 Security/regression | PASS (local) | Final Turn F Delivery Routing Hotfix baseline: 19 files / 345 tests; Turn E Hotfix: 19 / 334; Turn B/C/D Hotfix: 19 / 321; Turn A Hotfix: 19 / 311; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
 | 2.5C-7 Evidence | PASS | This report and reproducible test/smoke commands |
 
 ## Files changed

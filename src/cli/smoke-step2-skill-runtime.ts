@@ -22,7 +22,6 @@ const hero = runtime.run({
   requestContext,
   businessInput: {
     caseRef: "case-demo-001",
-    expectedCaseVersion: 7,
     language: "zh-CN"
   }
 });

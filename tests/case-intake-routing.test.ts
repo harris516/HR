@@ -262,3 +262,72 @@ describe("Mark Turn E natural-language status routing", () => {
     })).toThrow();
   });
 });
+
+describe("Mark Turn F natural-language Delivery routing", () => {
+  it.each([
+    "这是合成测试数据：请给我生成 Mark 的入职准备卡供我复核。",
+    "这是合成测试数据：给 Mark 生成一份入职准备卡。",
+    "合成测试：生成 Mark 的 Day-1 Ready Card。",
+    "这是合成测试数据：帮我制作 Mark 的入职准备卡草稿。"
+  ])("routes an explicit Ready Card request directly to Delivery: %s", (requestText) => {
+    expect(evaluateCaseIntakeRouting(requestText)).toEqual({
+      decision: "ROUTE",
+      skillId: "onboarding_delivery_pack",
+      workflowId: "day1_ready_card_candidate",
+      businessInput: { candidateDisplayName: "Mark" },
+      missingConditions: []
+    });
+  });
+
+  it("keeps the Mark status question on Status Control", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 现在的入职准备状态怎么样？"
+    )).toMatchObject({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_status_inspection"
+    });
+  });
+
+  it("keeps the Mark device completion on Requirement Tracking", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 的电脑已经准备好了。"
+    )).toMatchObject({
+      skillId: "onboarding_requirement_tracking_pack",
+      workflowId: "synthetic_requirement_completion_update",
+      businessInput: { candidateDisplayName: "Mark", requirementKind: "DEVICE" }
+    });
+  });
+
+  it("keeps accepted-Offer Case creation on Case Intake", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：Mark 已接受 Offer，请创建入职案例。"
+    )).toMatchObject({
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "synthetic_case_create_from_accepted_offer"
+    });
+  });
+
+  it("clarifies a Ready Card request with no candidate", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：请生成入职准备卡供我复核。"
+    )).toMatchObject({
+      decision: "CLARIFY",
+      skillId: null,
+      workflowId: null,
+      missingConditions: expect.arrayContaining(["candidateDisplayName"])
+    });
+  });
+
+  it("accepts a candidate clue without model-visible version data", () => {
+    expect(parseStep2WorkflowInput("day1_ready_card_candidate", {
+      candidateDisplayName: "Mark"
+    })).toEqual({ candidateDisplayName: "Mark", language: "zh-CN" });
+  });
+
+  it("rejects model-visible expectedCaseVersion for Ready Card delivery", () => {
+    expect(() => parseStep2WorkflowInput("day1_ready_card_candidate", {
+      candidateDisplayName: "Mark",
+      expectedCaseVersion: 4
+    })).toThrow();
+  });
+});

@@ -56,7 +56,7 @@ try {
     skillId: "onboarding_delivery_pack",
     workflowId: "day1_ready_card_candidate",
     requestContext: context,
-    businessInput: { caseRef, expectedCaseVersion: 4, language: "zh-CN" }
+    businessInput: { candidateDisplayName: "Mark（合成测试）", language: "zh-CN" }
   });
   const store = new SyntheticCaseStore({ databasePath, repositoryRoot: resolve("."),
     allowSyntheticTestStorage: true, trustedTeamMemberships: syntheticTrustedFeishuPrincipals,
