@@ -33,6 +33,8 @@ export interface SyntheticReadyCardDraft {
     freshness: SyntheticRequirementSnapshot["freshness"];
     evidenceRefs: string[];
     evidenceValidationRef: string | null;
+    sourceType: SyntheticRequirementSnapshot["sourceType"];
+    sourceActorId: string | null;
     conflictRefs: string[];
     sourceVersionRef: string;
     ruleVersionRef: string;
@@ -48,7 +50,10 @@ function issueFor(item: SyntheticRequirementSnapshot): string | null {
   if (item.conflictRefs.length > 0) return "FACT_CONFLICT";
   if (item.freshness !== "fresh") return "SOURCE_NOT_FRESH";
   if (item.status === "blocked") return "REQUIREMENT_BLOCKED";
-  if (item.status !== "completed" || item.evidenceRefs.length === 0 || !item.evidenceValidationRef) {
+  const hasTrustedManualStatement = item.sourceType === "SYNTHETIC_HR_MANUAL_STATEMENT" &&
+    item.sourceActorId !== null;
+  if (item.status !== "completed" || item.evidenceRefs.length === 0 ||
+    (!item.evidenceValidationRef && !hasTrustedManualStatement)) {
     return "REQUIREMENT_INCOMPLETE";
   }
   return null;
@@ -93,6 +98,8 @@ export function createSyntheticReadyCard(
       freshness: item.freshness,
       evidenceRefs: item.evidenceRefs,
       evidenceValidationRef: item.evidenceValidationRef,
+      sourceType: item.sourceType,
+      sourceActorId: item.sourceActorId,
       conflictRefs: item.conflictRefs,
       sourceVersionRef: item.sourceVersionRef,
       ruleVersionRef: item.ruleVersionRef

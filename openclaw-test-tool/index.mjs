@@ -27,11 +27,11 @@ const pageSize = () => Type.Optional(Type.Integer({ minimum: 1, maximum: 50 }));
 const taskNavigationParameters = Type.Object({ requestText: Type.String({ minLength: 1, maxLength: 2000 }) }, { additionalProperties: false });
 const caseIntakeParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("case_intake_candidate"), handoffRef: ref(), expectedSourceVersion: Type.Optional(ref()), language: language() }, { additionalProperties: false }),
-  Type.Object({ workflowId: Type.Literal("synthetic_case_create_from_accepted_offer"), offerRef: ref(), candidateRef: ref(), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), plannedStartAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])), sourceVersionRef: Type.Optional(ref()) }, { additionalProperties: false })
+  Type.Object({ workflowId: Type.Literal("synthetic_case_create_from_accepted_offer"), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), offerAccepted: Type.Optional(Type.Literal(true)), plannedStartAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])), language: language() }, { additionalProperties: false })
 ]);
 const requirementTrackingParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("requirement_completion_candidate"), caseRef: ref(), requirementRef: ref(), expectedCaseVersion: Type.Optional(version()), expectedRequirementVersion: Type.Optional(version()) }, { additionalProperties: false }),
-  Type.Object({ workflowId: Type.Literal("synthetic_requirement_completion_update"), caseRef: Type.Optional(ref()), candidateDisplayName: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })), requirementKind: Type.Union([Type.Literal("DOCUMENTS"), Type.Literal("IT_ACCOUNT"), Type.Literal("DEVICE")]), expectedCaseVersion: Type.Integer({ minimum: 1 }), expectedRequirementVersion: Type.Integer({ minimum: 1 }), evidenceRef: Type.Optional(ref()), evidenceValidationRef: Type.Optional(ref()), sourceVersionRef: Type.Optional(ref()) }, { additionalProperties: false })
+  Type.Object({ workflowId: Type.Literal("synthetic_requirement_completion_update"), caseRef: Type.Optional(ref()), candidateDisplayName: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })), requirementKind: Type.Union([Type.Literal("DOCUMENTS"), Type.Literal("IT_ACCOUNT"), Type.Literal("DEVICE")]), language: language() }, { additionalProperties: false })
 ]);
 const statusControlParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("case_workbench_read"), pageSize: pageSize() }, { additionalProperties: false }),

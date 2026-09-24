@@ -1,4 +1,4 @@
-import { mkdtempSync, rmdirSync, unlinkSync } from "node:fs";
+import { existsSync, mkdtempSync, rmdirSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -22,7 +22,9 @@ function principal(bot = "hr-bot-01", sender = "ou_hr1synthetic"): RequestContex
     trustedPrincipals: syntheticTrustedFeishuPrincipals, now: fixedNow });
 }
 
-function runtime(databasePath: string, audit = true): Step2SyntheticSkillRuntime {
+function runtime(databasePath: string, auditAvailability: {
+  skill?: boolean; gateway?: boolean; execution?: boolean;
+} = {}): Step2SyntheticSkillRuntime {
   let id = 0;
   return new Step2SyntheticSkillRuntime({
     allowSyntheticTestExecution: true,
@@ -31,7 +33,7 @@ function runtime(databasePath: string, audit = true): Step2SyntheticSkillRuntime
     trustedTeamMemberships: syntheticTrustedFeishuPrincipals,
     now: () => fixedNow,
     idFactory: () => `step25-${++id}`,
-    auditAvailability: { execution: audit }
+    auditAvailability
   });
 }
 
@@ -43,29 +45,23 @@ function createCase(databasePath: string, context = principal(), mutationId = "m
     trustedInvocationId: mutationId,
     requestContext: context,
     businessInput: {
-      offerRef: `offer-${mutationId}`,
-      candidateRef: `candidate-${mutationId}`,
       candidateDisplayName,
-      plannedStartAt,
-      sourceVersionRef: "synthetic-offer-v1"
+      offerAccepted: true,
+      plannedStartAt
     }
   });
 }
 
 function complete(databasePath: string, context: RequestContext, caseRef: string,
-  kind: "DOCUMENTS" | "IT_ACCOUNT" | "DEVICE", caseVersion: number,
-  requirementVersion = 1, mutationId = `mutation-${kind.toLowerCase()}`) {
+  kind: "DOCUMENTS" | "IT_ACCOUNT" | "DEVICE", _caseVersion: number,
+  _requirementVersion = 1, mutationId = `mutation-${kind.toLowerCase()}`) {
   return runtime(databasePath).run({
     skillId: "onboarding_requirement_tracking_pack",
     workflowId: "synthetic_requirement_completion_update",
     trustedInvocationId: mutationId,
     requestContext: context,
     businessInput: {
-      caseRef, requirementKind: kind, expectedCaseVersion: caseVersion,
-      expectedRequirementVersion: requirementVersion,
-      evidenceRef: `synthetic-evidence-${kind.toLowerCase()}`,
-      evidenceValidationRef: `synthetic-validation-${kind.toLowerCase()}`,
-      sourceVersionRef: `synthetic-update-${kind.toLowerCase()}-v1`
+      caseRef, requirementKind: kind
     }
   });
 }
@@ -78,7 +74,8 @@ function open(databasePath: string, auditAvailable = true): SyntheticCaseStore {
 
 afterEach(() => {
   for (const directory of directories.splice(0)) {
-    unlinkSync(join(directory, "synthetic.sqlite"));
+    const databasePath = join(directory, "synthetic.sqlite");
+    if (existsSync(databasePath)) unlinkSync(databasePath);
     rmdirSync(directory);
   }
 });
@@ -112,7 +109,8 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
         .mutationOutput!.receipt!.case;
       expect(updated.caseVersion).toBe(2);
       expect(updated.requirements.find((item) => item.kind === kind)).toMatchObject({
-        status: "completed", version: 2, evidenceValidationRef: `synthetic-validation-${kind.toLowerCase()}`
+        status: "completed", version: 2, evidenceValidationRef: null,
+        sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT", sourceActorId: principal().actorId
       });
     });
 
@@ -164,23 +162,43 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
   it("12 rejects a stale case version", () => {
     const { databasePath } = database();
     const created = createCase(databasePath).mutationOutput!.receipt!.case;
-    complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 1);
-    expect(() => complete(databasePath, principal(), created.caseRef, "DEVICE", 1))
-      .toThrowError(SyntheticCaseStoreError);
+    const store = open(databasePath);
+    store.completeRequirement(principal(), {
+      mutationId: "first-direct-update", caseRef: created.caseRef, kind: "DOCUMENTS",
+      expectedCaseVersion: 1, expectedRequirementVersion: 1,
+      evidenceRef: "runtime-evidence-1", evidenceValidationRef: null,
+      sourceVersionRef: "runtime-manual-source-1", sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId
+    });
+    expect(() => store.completeRequirement(principal(), {
+      mutationId: "stale-case-update", caseRef: created.caseRef, kind: "DEVICE",
+      expectedCaseVersion: 1, expectedRequirementVersion: 1,
+      evidenceRef: "runtime-evidence-2", evidenceValidationRef: null,
+      sourceVersionRef: "runtime-manual-source-2", sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId
+    })).toThrowError(SyntheticCaseStoreError);
+    store.close();
   });
 
   it("13 rejects a stale requirement version", () => {
     const { databasePath } = database();
     const created = createCase(databasePath).mutationOutput!.receipt!.case;
-    expect(() => complete(databasePath, principal(), created.caseRef, "DEVICE", 1, 2))
-      .toThrowError(SyntheticCaseStoreError);
+    const store = open(databasePath);
+    expect(() => store.completeRequirement(principal(), {
+      mutationId: "stale-requirement-update", caseRef: created.caseRef, kind: "DEVICE",
+      expectedCaseVersion: 1, expectedRequirementVersion: 2,
+      evidenceRef: "runtime-evidence", evidenceValidationRef: null,
+      sourceVersionRef: "runtime-manual-source", sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId
+    })).toThrowError(SyntheticCaseStoreError);
+    store.close();
   });
 
   it("14 denies a principal without synthetic team write scope", () => {
     const { databasePath } = database();
     const readOnly = principal("hr-bot-03", "ou_hr3synthetic");
-    const result = createCase(databasePath, readOnly, "readonly-create");
-    expect(result.mutationOutput).toMatchObject({ decision: "DENY", implementationCallCount: 0 });
+    expect(() => createCase(databasePath, readOnly, "readonly-create"))
+      .toThrowError("SYNTHETIC_MUTATION_NOT_AUTHORIZED");
   });
 
   it("15 hides the case from a different Team and DataSpace", () => {
@@ -283,5 +301,144 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
     const { capabilityRegistry } = await import("../src/capabilities/registry.js");
     expect(capabilityRegistry.capabilities).toHaveLength(18);
     expect(capabilityRegistry.capabilities.some((entry) => entry.capabilityId.includes("synthetic"))).toBe(false);
+  });
+
+  it("26 returns independent Skill, Gateway, and persistent execution audit evidence", () => {
+    const { databasePath } = database();
+    const result = createCase(databasePath);
+    expect(result.result.independentCapabilityAudit).toBe(true);
+    expect(result.auditRefs.skill.length).toBeGreaterThanOrEqual(2);
+    expect(result.auditRefs.gateway.length).toBeGreaterThanOrEqual(2);
+    expect(result.auditRefs.execution).toEqual([result.mutationOutput!.receipt!.eventRef]);
+    expect(new Set([...result.auditRefs.skill, ...result.auditRefs.gateway,
+      ...result.auditRefs.execution]).size).toBe(
+      result.auditRefs.skill.length + result.auditRefs.gateway.length + result.auditRefs.execution.length);
+  });
+
+  it("27 fails closed before mutation when Skill audit is unavailable", () => {
+    const { databasePath } = database();
+    expect(() => runtime(databasePath, { skill: false }).run({
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "synthetic_case_create_from_accepted_offer",
+      trustedInvocationId: "skill-audit-fail",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Skill 审计失败" }
+    })).toThrowError("SKILL_AUDIT_UNAVAILABLE");
+    const store = open(databasePath);
+    expect(store.listCases(principal())).toHaveLength(0);
+    store.close();
+  });
+
+  it("28 fails closed before mutation when Gateway audit is unavailable", () => {
+    const { databasePath } = database();
+    expect(() => runtime(databasePath, { gateway: false }).run({
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "synthetic_case_create_from_accepted_offer",
+      trustedInvocationId: "gateway-audit-fail",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "Gateway 审计失败" }
+    })).toThrowError("GATEWAY_AUDIT_UNAVAILABLE");
+    const store = open(databasePath);
+    expect(store.listCases(principal())).toHaveLength(0);
+    store.close();
+  });
+
+  it("29 rolls back mutation when persistent execution audit is unavailable", () => {
+    const { databasePath } = database();
+    expect(() => runtime(databasePath, { execution: false }).run({
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "synthetic_case_create_from_accepted_offer",
+      trustedInvocationId: "execution-audit-fail",
+      requestContext: principal(),
+      businessInput: { candidateDisplayName: "执行审计失败" }
+    })).toThrowError("AUDIT_UNAVAILABLE");
+    const store = open(databasePath);
+    expect(store.listCases(principal())).toHaveLength(0);
+    store.close();
+  });
+
+  it.each(["expectedCaseVersion", "expectedRequirementVersion"])(
+    "30-31 strictly rejects model-visible %s", (field) => {
+      const { databasePath } = database();
+      const created = createCase(databasePath).mutationOutput!.receipt!.case;
+      expect(() => runtime(databasePath).run({
+        skillId: "onboarding_requirement_tracking_pack",
+        workflowId: "synthetic_requirement_completion_update",
+        trustedInvocationId: `reject-${field}`,
+        requestContext: principal(),
+        businessInput: { caseRef: created.caseRef, requirementKind: "DOCUMENTS", [field]: 1 }
+      })).toThrow();
+    });
+
+  it.each(["evidenceRef", "evidenceValidationRef", "sourceVersionRef"])(
+    "32-34 strictly rejects model-visible system provenance field %s", (field) => {
+      const { databasePath } = database();
+      const created = createCase(databasePath).mutationOutput!.receipt!.case;
+      expect(() => runtime(databasePath).run({
+        skillId: "onboarding_requirement_tracking_pack",
+        workflowId: "synthetic_requirement_completion_update",
+        trustedInvocationId: `reject-${field}`,
+        requestContext: principal(),
+        businessInput: { caseRef: created.caseRef, requirementKind: "DOCUMENTS", [field]: "forged" }
+      })).toThrow();
+    });
+
+  it.each(["offerRef", "candidateRef", "sourceVersionRef"])(
+    "35-37 strictly rejects model-visible Case system reference %s", (field) => {
+      const { databasePath } = database();
+      expect(() => runtime(databasePath).run({
+        skillId: "onboarding_case_intake_pack",
+        workflowId: "synthetic_case_create_from_accepted_offer",
+        trustedInvocationId: `reject-create-${field}`,
+        requestContext: principal(),
+        businessInput: { candidateDisplayName: "伪造引用测试", [field]: "forged" }
+      })).toThrow();
+    });
+
+  it("38 reads current Case and Requirement versions internally before updating", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath).mutationOutput!.receipt!.case;
+    const first = complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 999)
+      .mutationOutput!.receipt!.case;
+    const second = complete(databasePath, principal(), created.caseRef, "IT_ACCOUNT", 0)
+      .mutationOutput!.receipt!.case;
+    expect(first.caseVersion).toBe(2);
+    expect(second.caseVersion).toBe(3);
+  });
+
+  it("39 keeps the store transaction fail-closed for a concurrent stale snapshot", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath).mutationOutput!.receipt!.case;
+    const firstStore = open(databasePath);
+    const secondStore = open(databasePath);
+    const stale = secondStore.getCase(principal(), created.caseRef)!;
+    firstStore.completeRequirement(principal(), {
+      mutationId: "concurrent-first", caseRef: created.caseRef, kind: "DOCUMENTS",
+      expectedCaseVersion: stale.caseVersion, expectedRequirementVersion: 1,
+      evidenceRef: "manual-first", evidenceValidationRef: null,
+      sourceVersionRef: "manual-source-first", sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId
+    });
+    expect(() => secondStore.completeRequirement(principal(), {
+      mutationId: "concurrent-stale", caseRef: created.caseRef, kind: "IT_ACCOUNT",
+      expectedCaseVersion: stale.caseVersion, expectedRequirementVersion: 1,
+      evidenceRef: "manual-stale", evidenceValidationRef: null,
+      sourceVersionRef: "manual-source-stale", sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId
+    })).toThrowError("OBJECT_VERSION_CONFLICT");
+    firstStore.close();
+    secondStore.close();
+  });
+
+  it("40 records HR manual statement provenance without external validation", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath).mutationOutput!.receipt!.case;
+    const updated = complete(databasePath, principal(), created.caseRef, "DEVICE", 1)
+      .mutationOutput!.receipt!.case;
+    expect(updated.requirements.find((item) => item.kind === "DEVICE")).toMatchObject({
+      sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT",
+      sourceActorId: principal().actorId,
+      evidenceValidationRef: null
+    });
   });
 });

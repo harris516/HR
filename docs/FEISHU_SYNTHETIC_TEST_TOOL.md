@@ -5,9 +5,11 @@
 ## 能做什么
 
 - 由受控测试 Feishu Bot 与测试发送者发问，经六个 OpenClaw Skill 对应的高层工具进入统一 Step 2 runtime；支持 14 条已批准工作流，包括 synthetic `OnboardingCase` 创建、准备项更新、查询、分析与草稿生成。同一个 `aibang-hr-onboarding-agent` 可承接多个独立 Bot。
-- 工具只接受 OpenClaw 在运行时提供的 Agent ID、Feishu 渠道以及 `(agentAccountId, requesterSenderId)` 联合身份同时匹配的调用。该联合键必须在插件配置的 `trustedPrincipals` 中唯一命中；未知 Bot、未知发送者、Bot 与发送者错配或重复映射均拒绝。Tenant、Actor、Team、membership、角色和权限范围全部来自该可信配置。模型参数只有 `caseRef`，不能自行提供或覆盖这些身份字段。
+- 工具只接受 OpenClaw 在运行时提供的 Agent ID、Feishu 渠道以及 `(agentAccountId, requesterSenderId)` 联合身份同时匹配的调用。该联合键必须在插件配置的 `trustedPrincipals` 中唯一命中；未知 Bot、未知发送者、Bot 与发送者错配或重复映射均拒绝。Tenant、Actor、Team、membership、角色和权限范围全部来自该可信配置。模型只能提供显示名、已接受 Offer 语义、可选计划入职时间、案例线索和准备项类型等业务输入，不能提供或覆盖身份、系统引用、证据验证引用或乐观锁版本。
 - 六个 Step 2 高层工具和旧 Ready-card 兼容工具现在读取同一份仓库外 SQLite 核心业务真值。风险、责任和 Artifact 等尚未进入 P0 核心闭环的展示数据仍是只读合成补充数据，不得被当作案例主状态。
 - `onboarding_case_intake_pack` 新增 `synthetic_case_create_from_accepted_offer`；`onboarding_requirement_tracking_pack` 新增 `synthetic_requirement_completion_update`。两者仅通过独立的 Step 2.5 合成 Mutation Gateway 开放，不会启用正式写 Capability，也不暴露任意数据库写入或 patch 接口。
+- Mutation Runtime 在安全解析案例后读取当前 Case/Requirement 版本，并在 SQLite 事务中再次校验；并发旧版本仍会拒绝。Offer、Candidate、来源与人工证据引用均由 Runtime 生成。准备项完成被明确记录为 `SYNTHETIC_HR_MANUAL_STATEMENT`，绑定可信 Actor，`evidenceValidationRef` 为 `null`，不得解释为 HRIS、ITSM 或外部系统验证。
+- 每次成功写入必须同时具备独立的 Skill admission/run audit、Mutation Gateway admission audit 和 SQLite 事务内 persistent execution audit。任一审计不可用都会停止写入；persistent audit 失败会回滚事务。只有三类审计引用均存在时，Runtime 才报告 `independentCapabilityAudit: true`。
 - Step 2 工具不发送消息，不提交正式 `READY`，不调用真实 Connector；聊天回复仍由当前 OpenClaw/飞书路由发送。
 
 ## 当前验证

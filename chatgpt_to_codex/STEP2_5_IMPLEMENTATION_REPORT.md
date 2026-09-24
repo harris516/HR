@@ -28,6 +28,9 @@ State survives later tool calls and new runtime instances. A completed three-ite
 - Added durable mutation idempotency with payload digest conflict detection.
 - Extended audit with mutation ID, correlation, runtime profile, Requirement kind, previous/new state, and previous/new Requirement version.
 - Audit is written in the same SQLite transaction as mutation; unavailable audit rolls back the mutation.
+- Successful mutation results now expose real, independent Skill run, Mutation Gateway admission, and persistent execution audit references. Skill or Gateway audit unavailability stops before mutation; persistent execution audit unavailability rolls back the transaction.
+- Optimistic Case/Requirement versions are resolved internally from the authorized persistent snapshot and are rechecked inside the write transaction. They are no longer model-visible inputs.
+- Runtime generates opaque Offer, Candidate, evidence, and source references. Requirement completion provenance is explicitly `SYNTHETIC_HR_MANUAL_STATEMENT`, records the trusted Actor, and keeps `evidenceValidationRef` null so a manual statement is never represented as external-system validation.
 - Core Case/Requirement/readiness adapters now receive a view projected from SQLite. Risk, responsibility, evidence presentation, and Artifact fixture content remains supplementary synthetic read-only data and is not claimed as canonical P0 truth.
 
 ## Synthetic mutation activation model
@@ -58,6 +61,8 @@ No top-level Skill or OpenClaw tool was added.
 
 The plugin still exposes the same six controlled Step 2 business tools plus the deprecated compatibility tool. Runtime identity is resolved from trusted `(accountId, senderId)` mapping. Tenant, Actor, Team, membership, roles, scopes, mutation profile, capability identity, and SQLite path cannot be supplied by model business parameters.
 
+The model-visible Case-create contract is limited to candidate display name, accepted-Offer semantics, optional planned start, and language. The Requirement-update contract is limited to an authorized Case clue, Requirement kind, and language. Strict schemas reject model-supplied optimistic versions, Offer/Candidate/source references, and evidence/validation references.
+
 ## Mark Hero Flow evidence
 
 The local `smoke:step2.5` run used independent runtime instances for each turn:
@@ -84,9 +89,9 @@ Observed final evidence:
 
 - TypeScript typecheck: PASS
 - Build: PASS
-- Full suite: **18 test files / 281 tests PASS**
-- Step 2 baseline retained: 17 files / 256 tests, with 25 new Step 2.5 tests
-- Step 2.5 focused state-loop tests: 25 PASS
+- Full suite: **18 test files / 296 tests PASS**
+- Step 2 baseline retained: 17 files / 256 tests, with 40 Step 2.5 tests
+- Step 2.5 focused state-loop tests: 40 PASS
 - Runtime config validator: PASS
 - Capability Registry validator: PASS; 18 planned, 0 executable, 17 reserved, 0 bindings
 - Engineering baseline validator: PASS
@@ -111,6 +116,10 @@ Tests cover:
 - idempotent create/update replay;
 - stale Case and Requirement version denial;
 - audit unavailable rollback;
+- independent Skill/Gateway/persistent execution audit evidence and fail-closed behavior for each unavailable audit layer;
+- strict rejection of model-supplied optimistic versions, system evidence/validation/source references, and Offer/Candidate references;
+- runtime-resolved current versions plus concurrent stale-transaction rejection;
+- explicit trusted-Actor HR manual-statement provenance with no external-validation claim;
 - same-Team continuation by a second authorized HR;
 - scoped unique-name resolution, ambiguity clarification, and no cross-scope name leakage;
 - persistent read-after-write through the status Skill;
@@ -126,7 +135,7 @@ Tests cover:
 | 2.5C-3 Synthetic mutation contracts | PASS | Separate test-only mutation Gateway; formal registry unchanged/closed |
 | 2.5C-4 Skill/tool integration | PASS | Existing intake/tracking Skills and tool names extended; no raw write interface |
 | 2.5C-5 Mark Hero Flow | PASS (local) | Six-turn smoke completes on one persistent truth |
-| 2.5C-6 Security/regression | PASS (local) | 18 files / 281 tests plus validators, smokes, build and plugin checks |
+| 2.5C-6 Security/regression | PASS (local) | 18 files / 296 tests plus validators, smokes, build and plugin checks |
 | 2.5C-7 Evidence | PASS | This report and reproducible test/smoke commands |
 
 ## Files changed

@@ -32,8 +32,7 @@ try {
     workflowId: "synthetic_case_create_from_accepted_offer",
     trustedInvocationId: "smoke-turn-a",
     requestContext: context,
-    businessInput: { offerRef: "offer-smoke-mark", candidateRef: "candidate-smoke-mark",
-      candidateDisplayName: "Mark（合成测试）", sourceVersionRef: "synthetic-offer-smoke-v1" }
+    businessInput: { candidateDisplayName: "Mark（合成测试）", offerAccepted: true }
   });
   const caseRef = create.mutationOutput?.receipt?.case.caseRef;
   if (caseRef === undefined) throw new Error("Turn A did not create a Case");
@@ -43,10 +42,7 @@ try {
       workflowId: "synthetic_requirement_completion_update",
       trustedInvocationId: `smoke-turn-${String.fromCharCode(98 + index)}`,
       requestContext: context,
-      businessInput: { caseRef, requirementKind: kind, expectedCaseVersion: index + 1,
-        expectedRequirementVersion: 1, evidenceRef: `synthetic-evidence-${kind.toLowerCase()}`,
-        evidenceValidationRef: `synthetic-validation-${kind.toLowerCase()}`,
-        sourceVersionRef: `synthetic-update-${kind.toLowerCase()}-v1` }
+      businessInput: { caseRef, requirementKind: kind }
     });
     if (update.result.status !== "COMPLETED") throw new Error(`Turn ${index + 2} failed`);
   }

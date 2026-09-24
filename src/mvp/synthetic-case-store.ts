@@ -146,6 +146,8 @@ type RequirementRow = {
   deadline_at: string; deadline_at_optional?: string | null; completion_criteria_ref: string; rule_version_ref: string;
   source_version_ref: string; freshness: Freshness; evidence_refs_json: string;
   evidence_validation_ref: string | null; conflict_refs_json: string;
+  source_type?: "SYNTHETIC_HR_MANUAL_STATEMENT" | "LEGACY_SYNTHETIC_SOURCE" | null;
+  source_actor_ref?: string | null;
 };
 
 /** Local synthetic state only; this is not an OpenClaw Tool or an authority decision. */
@@ -238,6 +240,8 @@ export class SyntheticCaseStore implements SyntheticBusinessStorePort {
     this.#addColumn("synthetic_cases", "created_at", "TEXT");
     this.#addColumn("synthetic_cases", "updated_at", "TEXT");
     this.#addColumn("synthetic_requirements", "deadline_at_optional", "TEXT");
+    this.#addColumn("synthetic_requirements", "source_type", "TEXT");
+    this.#addColumn("synthetic_requirements", "source_actor_ref", "TEXT");
     this.#addColumn("synthetic_case_audit", "requirement_kind", "TEXT");
     this.#addColumn("synthetic_case_audit", "previous_status", "TEXT");
     this.#addColumn("synthetic_case_audit", "new_status", "TEXT");
@@ -445,12 +449,17 @@ export class SyntheticCaseStore implements SyntheticBusinessStorePort {
       expectedCaseVersion: z.number().int().positive(),
       expectedRequirementVersion: z.number().int().positive(),
       evidenceRef: ref,
-      evidenceValidationRef: ref,
-      sourceVersionRef: ref
+      evidenceValidationRef: z.null(),
+      sourceVersionRef: ref,
+      sourceType: z.literal("SYNTHETIC_HR_MANUAL_STATEMENT"),
+      sourceActorId: ref
     }).strict().safeParse(input);
     if (!parsed.success) throw new SyntheticCaseStoreError("INPUT_INVALID");
     const value = parsed.data;
-    const inputDigest = digest(value);
+    if (value.sourceActorId !== context.actorId) throw new SyntheticCaseStoreError("SCOPE_MISMATCH");
+    const { expectedCaseVersion: _caseVersion, expectedRequirementVersion: _requirementVersion,
+      ...idempotentBusinessInput } = value;
+    const inputDigest = digest(idempotentBusinessInput);
     const replay = this.#idempotencyReplay(context, value.mutationId, inputDigest);
     if (replay !== null) return replay;
     this.#db.exec("BEGIN IMMEDIATE");
@@ -468,9 +477,10 @@ export class SyntheticCaseStore implements SyntheticBusinessStorePort {
       const nextRequirementVersion = requirement.version + 1;
       this.#db.prepare(`UPDATE synthetic_requirements SET version = ?, status = 'completed',
         evidence_refs_json = ?, evidence_validation_ref = ?, conflict_refs_json = '[]',
-        freshness = 'fresh', source_version_ref = ? WHERE case_ref = ? AND kind = ?`)
+        freshness = 'fresh', source_version_ref = ?, source_type = ?, source_actor_ref = ?
+        WHERE case_ref = ? AND kind = ?`)
         .run(nextRequirementVersion, JSON.stringify([value.evidenceRef]), value.evidenceValidationRef,
-          value.sourceVersionRef, value.caseRef, value.kind);
+          value.sourceVersionRef, value.sourceType, value.sourceActorId, value.caseRef, value.kind);
       const now = this.#now().toISOString();
       this.#db.prepare("UPDATE synthetic_cases SET case_version = ?, updated_at = ? WHERE case_ref = ?")
         .run(nextCaseVersion, now, value.caseRef);
@@ -695,6 +705,8 @@ export class SyntheticCaseStore implements SyntheticBusinessStorePort {
         freshness: item.freshness,
         evidenceRefs: JSON.parse(item.evidence_refs_json) as string[],
         evidenceValidationRef: item.evidence_validation_ref,
+        sourceType: item.source_type ?? "LEGACY_SYNTHETIC_SOURCE",
+        sourceActorId: item.source_actor_ref ?? null,
         conflictRefs: JSON.parse(item.conflict_refs_json) as string[]
       }))
     };

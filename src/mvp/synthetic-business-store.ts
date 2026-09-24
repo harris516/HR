@@ -21,6 +21,8 @@ export interface SyntheticRequirementSnapshot {
   freshness: "fresh" | "stale" | "unavailable" | "unknown";
   evidenceRefs: string[];
   evidenceValidationRef: string | null;
+  sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT" | "LEGACY_SYNTHETIC_SOURCE";
+  sourceActorId: string | null;
   conflictRefs: string[];
 }
 
@@ -80,8 +82,10 @@ export interface CompleteRequirementInput {
   expectedCaseVersion: number;
   expectedRequirementVersion: number;
   evidenceRef: string;
-  evidenceValidationRef: string;
+  evidenceValidationRef: null;
   sourceVersionRef: string;
+  sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT";
+  sourceActorId: string;
 }
 
 /** Canonical synthetic business truth used by every Step 2.5 workflow. */

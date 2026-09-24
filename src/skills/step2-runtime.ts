@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { InMemoryCapabilityGatewayAuditSink } from "../audit/capability-audit.js";
 import { InMemoryCapabilityExecutionAuditSink } from "../audit/capability-execution-audit.js";
 import { InMemorySkillAuditSink } from "../audit/skill-audit.js";
@@ -227,6 +227,27 @@ export class Step2SyntheticSkillRuntime {
       throw new Error("Synthetic mutation requires configured persistent storage and trusted invocation ID");
     }
     const businessInput = parseStep2WorkflowInput(invocation.workflowId, invocation.businessInput);
+    const skillAudit = new InMemorySkillAuditSink(this.#auditAvailability.skill ?? true);
+    const gatewayAudit = new InMemoryCapabilityGatewayAuditSink(this.#auditAvailability.gateway ?? true);
+    if (!skillAudit.isAvailable()) throw new Error("SKILL_AUDIT_UNAVAILABLE");
+    const skillRunId = `step25-skill-${this.#idFactory()}`;
+    if (!skillAudit.append({
+      auditRef: `step25-skill-audit-${this.#idFactory()}`,
+      eventType: "skill_run_ingress",
+      skillRunId,
+      skillId: invocation.skillId,
+      skillVersion: "1.0.0",
+      workflowId: invocation.workflowId,
+      taskId: invocation.requestContext.requestId,
+      attemptId: invocation.trustedInvocationId,
+      tenantId: invocation.requestContext.tenantId,
+      dataSpaceId: invocation.requestContext.dataSpaceId,
+      actorId: invocation.requestContext.actorId,
+      activeTeamId: invocation.requestContext.activeTeamId,
+      teamMembershipRef: invocation.requestContext.teamMembershipRef,
+      reasonCodes: [],
+      occurredAt: this.#now().toISOString()
+    })) throw new Error("SKILL_AUDIT_UNAVAILABLE");
     const store = new SyntheticCaseStore({
       databasePath: this.#databaseOptions.databasePath!,
       repositoryRoot: this.#databaseOptions.repositoryRoot!,
@@ -241,13 +262,15 @@ export class Step2SyntheticSkillRuntime {
       let payload;
       if (invocation.workflowId === "synthetic_case_create_from_accepted_offer") {
         const plannedStartAt = businessInput.plannedStartAt as string | null | undefined;
+        const trustedRefParts = [invocation.requestContext.tenantId, invocation.requestContext.actorId,
+          invocation.trustedInvocationId];
         payload = {
           mutationId: invocation.trustedInvocationId,
-          offerRef: businessInput.offerRef as string,
-          candidateRef: businessInput.candidateRef as string,
+          offerRef: opaqueRuntimeRef("synthetic-offer", ...trustedRefParts),
+          candidateRef: opaqueRuntimeRef("synthetic-candidate", ...trustedRefParts),
           candidateDisplayName: businessInput.candidateDisplayName as string,
           ...(plannedStartAt === undefined ? {} : { plannedStartAt }),
-          sourceVersionRef: businessInput.sourceVersionRef as string,
+          sourceVersionRef: opaqueRuntimeRef("synthetic-hr-manual-statement", ...trustedRefParts),
           scopeType: "TEAM_SHARED" as const,
           teamId: invocation.requestContext.activeTeamId
         };
@@ -259,26 +282,28 @@ export class Step2SyntheticSkillRuntime {
           ...(candidateDisplayName === undefined ? {} : { candidateDisplayName })
         });
         if (resolution.status !== "MATCHED" || resolution.case === null) {
-          const denied: SyntheticMutationResult = {
-            decision: "DENY",
-            reasonCode: resolution.status === "AMBIGUOUS" ? "CASE_REFERENCE_AMBIGUOUS" : "CASE_NOT_FOUND",
-            inputDigest: "not-compiled",
-            implementationCallCount: 0
-          };
-          return this.#mutationRuntimeResult(invocation, denied);
+          throw new Error(resolution.status === "AMBIGUOUS"
+            ? "CASE_REFERENCE_AMBIGUOUS" : "CASE_NOT_FOUND");
         }
+        const kind = businessInput.requirementKind as "DOCUMENTS" | "IT_ACCOUNT" | "DEVICE";
+        const targetRequirement = resolution.case.requirements.find((item) => item.kind === kind);
+        if (targetRequirement === undefined) throw new Error("REQUIREMENT_NOT_FOUND");
+        const trustedRefParts = [invocation.requestContext.tenantId, invocation.requestContext.actorId,
+          invocation.trustedInvocationId, resolution.case.caseRef, kind];
         payload = {
           mutationId: invocation.trustedInvocationId,
           caseRef: resolution.case.caseRef,
-          kind: businessInput.requirementKind as "DOCUMENTS" | "IT_ACCOUNT" | "DEVICE",
-          expectedCaseVersion: businessInput.expectedCaseVersion as number,
-          expectedRequirementVersion: businessInput.expectedRequirementVersion as number,
-          evidenceRef: businessInput.evidenceRef as string,
-          evidenceValidationRef: businessInput.evidenceValidationRef as string,
-          sourceVersionRef: businessInput.sourceVersionRef as string
+          kind,
+          expectedCaseVersion: resolution.case.caseVersion,
+          expectedRequirementVersion: targetRequirement.version,
+          evidenceRef: opaqueRuntimeRef("synthetic-hr-manual-evidence", ...trustedRefParts),
+          evidenceValidationRef: null,
+          sourceVersionRef: opaqueRuntimeRef("synthetic-hr-manual-statement", ...trustedRefParts),
+          sourceType: "SYNTHETIC_HR_MANUAL_STATEMENT" as const,
+          sourceActorId: invocation.requestContext.actorId
         };
       }
-      const gateway = new SyntheticMutationGateway(store);
+      const gateway = new SyntheticMutationGateway(store, gatewayAudit, this.#now, this.#idFactory);
       const mutationWorkflowId = invocation.workflowId as
         "synthetic_case_create_from_accepted_offer" | "synthetic_requirement_completion_update";
       const output = gateway.execute({
@@ -292,7 +317,33 @@ export class Step2SyntheticSkillRuntime {
         requestContext: invocation.requestContext,
         payload
       });
-      return this.#mutationRuntimeResult(invocation, output);
+      if (output.decision !== "ALLOW" || output.receipt === undefined) {
+        throw new Error(output.reasonCode);
+      }
+      if (!skillAudit.append({
+        auditRef: `step25-skill-audit-${this.#idFactory()}`,
+        eventType: "skill_run_finalized",
+        skillRunId,
+        skillId: invocation.skillId,
+        skillVersion: "1.0.0",
+        workflowId: invocation.workflowId,
+        taskId: invocation.requestContext.requestId,
+        attemptId: invocation.trustedInvocationId,
+        capabilityRequestId: invocation.trustedInvocationId,
+        capabilityId: mutationWorkflowId === "synthetic_case_create_from_accepted_offer"
+          ? "hr.onboarding.synthetic.case.create" : "hr.onboarding.synthetic.requirement.update",
+        tenantId: invocation.requestContext.tenantId,
+        dataSpaceId: invocation.requestContext.dataSpaceId,
+        actorId: invocation.requestContext.actorId,
+        activeTeamId: invocation.requestContext.activeTeamId,
+        teamMembershipRef: invocation.requestContext.teamMembershipRef,
+        status: "COMPLETED",
+        reasonCodes: [],
+        occurredAt: this.#now().toISOString()
+      })) throw new Error("SKILL_AUDIT_UNAVAILABLE");
+      return this.#mutationRuntimeResult(invocation, output, skillRunId,
+        skillAudit.events().map((event) => event.auditRef),
+        gatewayAudit.events().map((event) => event.auditRef));
     } finally {
       store.close();
     }
@@ -300,13 +351,16 @@ export class Step2SyntheticSkillRuntime {
 
   #mutationRuntimeResult(
     invocation: ReturnType<typeof step2RuntimeInvocationSchema.parse>,
-    output: SyntheticMutationResult
+    output: SyntheticMutationResult,
+    skillRunId: string,
+    skillAuditRefs: string[],
+    gatewayAuditRefs: string[]
   ): Step2SkillRuntimeResult {
     const workflowId = invocation.workflowId as
       "synthetic_case_create_from_accepted_offer" | "synthetic_requirement_completion_update";
     const now = this.#now().toISOString();
     const result = {
-      skillRunId: `step25-skill-${this.#idFactory()}`,
+      skillRunId,
       skillRef: { skillId: invocation.skillId, skillVersion: "1.0.0" },
       workflowId,
       taskId: `step25-task-${this.#idFactory()}`,
@@ -324,7 +378,7 @@ export class Step2SyntheticSkillRuntime {
       realCustomerDataProcessed: false,
       unsafeToolFallbackCount: 0,
       domainCompletionClaimed: false,
-      auditRef: output.receipt?.eventRef ?? null,
+      auditRef: skillAuditRefs.at(-1) ?? null,
       startedAt: now,
       completedAt: now
     } as SkillRunResult;
@@ -332,7 +386,8 @@ export class Step2SyntheticSkillRuntime {
       activationProfileId: "STEP2.5-SYNTHETIC-MUTATION-V1",
       result,
       mutationOutput: output,
-      auditRefs: { skill: [], gateway: [], execution: output.receipt ? [output.receipt.eventRef] : [] },
+      auditRefs: { skill: skillAuditRefs, gateway: gatewayAuditRefs,
+        execution: output.receipt ? [output.receipt.eventRef] : [] },
       implementationCallCount: output.implementationCallCount,
       formalStateChanged: false,
       outboundMessageSent: false,
@@ -341,4 +396,9 @@ export class Step2SyntheticSkillRuntime {
       unsafeToolFallbackCount: 0
     };
   }
+}
+
+function opaqueRuntimeRef(prefix: string, ...trustedParts: string[]): string {
+  const value = createHash("sha256").update(trustedParts.join("\u001f")).digest("hex").slice(0, 24);
+  return `${prefix}-${value}`;
 }

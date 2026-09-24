@@ -19,11 +19,10 @@ export const step2WorkflowInputSchemas = {
     language: languageSchema
   }).strict(),
   synthetic_case_create_from_accepted_offer: z.object({
-    offerRef: refSchema,
-    candidateRef: refSchema,
     candidateDisplayName: z.string().trim().min(1).max(128),
+    offerAccepted: z.literal(true).default(true),
     plannedStartAt: z.iso.datetime({ offset: true }).nullable().optional(),
-    sourceVersionRef: refSchema.default("synthetic-offer-v1")
+    language: languageSchema
   }).strict(),
   requirement_completion_candidate: caseInputSchema.extend({
     requirementRef: refSchema,
@@ -33,11 +32,7 @@ export const step2WorkflowInputSchemas = {
     caseRef: refSchema.optional(),
     candidateDisplayName: z.string().trim().min(1).max(128).optional(),
     requirementKind: z.enum(["DOCUMENTS", "IT_ACCOUNT", "DEVICE"]),
-    expectedCaseVersion: z.number().int().positive(),
-    expectedRequirementVersion: z.number().int().positive(),
-    evidenceRef: refSchema.default("synthetic-human-confirmation"),
-    evidenceValidationRef: refSchema.default("synthetic-validation-v1"),
-    sourceVersionRef: refSchema.default("synthetic-update-v1")
+    language: languageSchema
   }).strict().refine((value) => value.caseRef !== undefined || value.candidateDisplayName !== undefined,
     "caseRef or candidateDisplayName is required"),
   case_workbench_read: z.object({ pageSize: pageSizeSchema }).strict(),

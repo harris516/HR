@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { CapabilityGatewayAuditSink } from "../audit/capability-audit.js";
 import type { RequestContext } from "../contracts/navigation.js";
 import type {
   CompleteRequirementInput,
@@ -38,11 +39,42 @@ function digest(value: unknown): string {
 
 /** Separate test-only gate. It never activates a reserved formal-write capability. */
 export class SyntheticMutationGateway {
-  constructor(private readonly store: SyntheticBusinessStorePort) {}
+  constructor(
+    private readonly store: SyntheticBusinessStorePort,
+    private readonly auditSink: CapabilityGatewayAuditSink,
+    private readonly now: () => Date,
+    private readonly idFactory: () => string
+  ) {}
 
   execute(request: SyntheticMutationRequest): SyntheticMutationResult {
+    if (!this.auditSink.isAvailable()) throw new Error("GATEWAY_AUDIT_UNAVAILABLE");
     const inputDigest = digest(request.payload);
     const context = request.requestContext;
+    const appendAudit = (
+      eventType: "capability_gateway_ingress" | "capability_gateway_rejected" |
+        "capability_gateway_admission_allowed",
+      decision?: "ALLOW_TO_IMPLEMENTATION" | "DENY",
+      reasonCodes: string[] = []
+    ) => {
+      const appended = this.auditSink.append({
+        auditRef: `step25-gateway-${this.idFactory()}`,
+        eventType,
+        capabilityRequestId: request.mutationId,
+        taskId: context.requestId,
+        capabilityId: request.capabilityId,
+        capabilityVersion: "1.0.0",
+        tenantId: context.tenantId,
+        dataSpaceId: context.dataSpaceId,
+        actorId: context.actorId,
+        activeTeamId: context.activeTeamId,
+        teamMembershipRef: context.teamMembershipRef,
+        ...(decision === undefined ? {} : { decision }),
+        reasonCodes,
+        occurredAt: this.now().toISOString()
+      });
+      if (!appended) throw new Error("GATEWAY_AUDIT_UNAVAILABLE");
+    };
+    appendAudit("capability_gateway_ingress");
     const bindingIsExact =
       (request.workflowId === "synthetic_case_create_from_accepted_offer" &&
         request.skillId === "onboarding_case_intake_pack" &&
@@ -57,9 +89,12 @@ export class SyntheticMutationGateway {
       context.scopeGrantRefs.includes("scope-mvp-synthetic-team-write") && bindingIsExact &&
       request.mutationId.length > 0 && request.payload.mutationId === request.mutationId;
     if (!authorized) {
+      appendAudit("capability_gateway_rejected", "DENY", ["SYNTHETIC_MUTATION_NOT_AUTHORIZED"]);
       return { decision: "DENY", reasonCode: "SYNTHETIC_MUTATION_NOT_AUTHORIZED",
         inputDigest, implementationCallCount: 0 };
     }
+    appendAudit("capability_gateway_admission_allowed", "ALLOW_TO_IMPLEMENTATION",
+      ["SYNTHETIC_MUTATION_AUTHORIZED"]);
     const receipt = request.capabilityId === "hr.onboarding.synthetic.case.create"
       ? this.store.createAcceptedOfferCase(context, request.payload as CreateAcceptedOfferInput)
       : this.store.completeRequirement(context, request.payload as CompleteRequirementInput);
