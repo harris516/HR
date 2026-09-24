@@ -1,6 +1,6 @@
 ---
 name: onboarding_task_navigation_pack
-description: 识别入职请求并生成受控的下一步导航建议，包括区分已接受 Offer 的合成案例创建与已有 Handoff 审查，不执行正式业务动作。
+description: 识别入职请求并生成受控的下一步导航建议，包括合成案例创建、已有 Handoff 审查与合成准备项完成更新，不执行正式业务动作。
 version: 1.0.0
 ---
 
@@ -30,3 +30,16 @@ Tenant、DataSpace、Actor、Team、Membership、Role、Scope 和授权结论只
 只有请求明确要读取或检查已有 Handoff / 交接、检查 Intake 完整性，或基于已有 Handoff 生成 Intake Draft 时，才导航到 `case_intake_candidate`。缺少已有 Handoff 引用时可以要求补充引用，但不得把“Offer 已接受并创建 Case”误判为 Handoff 审查。
 
 若 Synthetic、候选人、Offer 已接受、明确创建四项中任何一项不明确，例如“Mark 的 Offer 处理一下”，必须澄清，不得推断接受状态或创建意图。
+
+## 准备项完成路由契约
+
+当请求同时明确满足以下四项时，导航到 `onboarding_requirement_tracking_pack` 的 `synthetic_requirement_completion_update`：
+
+1. 当前是 Synthetic / 合成测试；
+2. 候选人可识别；
+3. 准备项明确为 `DOCUMENTS`、`IT_ACCOUNT` 或 `DEVICE`；
+4. HR 明确陈述该准备项已经完成。
+
+业务输入只需要 `candidateDisplayName` 和 `requirementKind`。不要求 HR 提供 `caseRef`、版本号、`requirementRef` 或 Evidence 引用；Runtime 继续在授权 Team / DataSpace 内解析唯一 Case 和当前版本。
+
+“文件怎么样了”“电脑可能准备好了”“IT 账号处理一下”“看起来差不多了”等查询、可能性或模糊表达不得路由为 Mutation。候选人、准备项类型或完成状态不明确时必须澄清，不得使用上一次会话、最近 Case 或数据库第一条记录补全。

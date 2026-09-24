@@ -133,7 +133,7 @@ export default defineToolPlugin({
   tools: (tool) => [
     runtimeTool(tool, {
       name: runtimeToolNames.taskNavigation,
-      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. Synthetic test + resolved candidate + accepted Offer + explicit Case creation routes to synthetic_case_create_from_accepted_offer; a missing plannedStartAt does not block that route.",
+      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. It distinguishes accepted-Offer Case creation, Existing Handoff review, and explicit HR completion statements for DOCUMENTS, IT_ACCOUNT, or DEVICE; unclear completion remains CLARIFY.",
       parameters: taskNavigationParameters,
       skillId: "onboarding_task_navigation_pack",
       workflowId: "navigation_route_handoff"
@@ -147,7 +147,7 @@ export default defineToolPlugin({
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.requirementTracking,
-      description: "Persist an explicitly requested synthetic requirement completion, or evaluate a completion candidate.",
+      description: "For a clear synthetic HR completion statement, use synthetic_requirement_completion_update with candidateDisplayName or caseRef plus DOCUMENTS, IT_ACCOUNT, or DEVICE; Runtime resolves the scoped Case and versions. Unclear or uncertain status must not mutate.",
       parameters: requirementTrackingParameters,
       skillId: "onboarding_requirement_tracking_pack",
       workflowId: (params) => params.workflowId

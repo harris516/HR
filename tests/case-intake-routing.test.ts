@@ -146,3 +146,57 @@ describe("OpenClaw routing instruction alignment", () => {
     expect(source).toContain("use case_intake_candidate only to review an existing Handoff");
   });
 });
+
+describe("Mark Turn B/C/D Requirement Update routing", () => {
+  it.each([
+    ["这是合成测试数据：Mark 的入职文件已经收齐。", "DOCUMENTS"],
+    ["这是合成测试数据：Mark 的 IT 账号已经开好了。", "IT_ACCOUNT"],
+    ["这是合成测试数据：Mark 的电脑已经准备好了。", "DEVICE"]
+  ] as const)("routes %s to a scoped synthetic Requirement update", (requestText, requirementKind) => {
+    expect(evaluateCaseIntakeRouting(requestText)).toEqual({
+      decision: "ROUTE",
+      skillId: "onboarding_requirement_tracking_pack",
+      workflowId: "synthetic_requirement_completion_update",
+      businessInput: { candidateDisplayName: "Mark", requirementKind },
+      missingConditions: []
+    });
+  });
+
+  it.each([
+    "这是合成测试数据：Mark 的文件怎么样了？",
+    "这是合成测试数据：Mark 的电脑可能准备好了。",
+    "这是合成测试数据：Mark 的 IT 账号帮我处理一下。",
+    "这是合成测试数据：Mark 的电脑看起来差不多了。"
+  ])("does not mutate an unclear or uncertain Requirement statement: %s", (requestText) => {
+    expect(evaluateCaseIntakeRouting(requestText)).toMatchObject({
+      decision: "CLARIFY",
+      skillId: null,
+      workflowId: null
+    });
+  });
+
+  it("clarifies a completed Requirement statement with no candidate", () => {
+    expect(evaluateCaseIntakeRouting("这是合成测试数据：入职文件已经收齐。")).toMatchObject({
+      decision: "CLARIFY",
+      missingConditions: expect.arrayContaining(["candidateDisplayName"])
+    });
+  });
+
+  it("keeps the Mark Turn A Synthetic Case Create route unchanged", () => {
+    expect(evaluateCaseIntakeRouting(
+      "这是合成测试数据：刚给 Mark 发了一个 Offer，他已经接受。请为 Mark 创建入职案例。"
+    )).toMatchObject({
+      decision: "ROUTE",
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "synthetic_case_create_from_accepted_offer"
+    });
+  });
+
+  it("keeps Existing Handoff Intake Review unchanged", () => {
+    expect(evaluateCaseIntakeRouting("请检查 handoff-001 的入职交接是否完整。")).toMatchObject({
+      decision: "ROUTE",
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "case_intake_candidate"
+    });
+  });
+});

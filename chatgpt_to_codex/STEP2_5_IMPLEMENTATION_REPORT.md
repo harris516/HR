@@ -60,6 +60,16 @@ Full regression after this Hotfix: **19 test files / 311 tests PASS**.
 
 The Hotfix does not modify `SyntheticCaseStore`, SQLite schema/data, `SyntheticMutationGateway`, Capability Gateway, RequestContext v2, Tenant/DataSpace isolation, Team authorization, Principal mapping, Role/Scope enforcement, audit, idempotency, optimistic locking, formal reserved Capabilities, Tool Policy, real-customer-data policy, READY commit behavior, outbound messaging, or external-side-effect policy. It does not modify the server Runtime or start Turn B / Step 3.
 
+## Mark Turn B/C/D Requirement Update Routing Hotfix
+
+The server Turn B request “这是合成测试数据：Mark 的入职文件已经收齐。” was incorrectly treated as an unverified statement requiring `caseRef`, so no Requirement mutation occurred. The root cause was that Task Navigation had no explicit contract for routing a clear synthetic HR manual completion statement to Requirement Tracking.
+
+The existing routing contract now recommends `onboarding_requirement_tracking_pack -> synthetic_requirement_completion_update` only when Synthetic context, a resolved candidate, exactly one P0 Requirement type, and an explicit completion statement are all present. It maps 入职文件 to `DOCUMENTS`, IT 账号 to `IT_ACCOUNT`, and 电脑/办公设备 to `DEVICE`. Business input contains only `candidateDisplayName` and `requirementKind`; scoped Case resolution and optimistic versions remain internal to Runtime/Store.
+
+The statement remains `SYNTHETIC_HR_MANUAL_STATEMENT` with the trusted HR Actor and `evidenceValidationRef = null`; it is not HRIS, ITSM, external validation, formal READY, or a formal business commit. Uncertain language, missing candidate, unclear Requirement, or unclear completion returns `CLARIFY`.
+
+Ten added routing cases cover Turn B/C/D positives, four ambiguous/uncertain negatives, missing candidate, Turn A regression, and Existing Handoff regression. Full regression: **19 test files / 321 tests PASS**. Store, Gateway, SQLite, Tenant/Team isolation, Principal mapping, Audit, Idempotency, optimistic locking, Capability Registry, and Tool Policy remain unchanged.
+
 ## Store and schema changes
 
 - Added `SyntheticBusinessStorePort` for Case create/read/list/resolve and Requirement completion.
@@ -130,10 +140,11 @@ Observed final evidence:
 
 - TypeScript typecheck: PASS
 - Build: PASS
-- Full suite after the Mark Turn A routing Hotfix: **19 test files / 311 tests PASS**
+- Full suite after the Mark Turn B/C/D routing Hotfix: **19 test files / 321 tests PASS**
 - Step 2 baseline: **17 test files / 256 tests PASS**
 - Step 2.5 before the routing Hotfix: **18 test files / 296 tests PASS**
 - Mark Turn A routing Hotfix final baseline: **19 test files / 311 tests PASS**
+- Mark Turn B/C/D routing Hotfix final baseline: **19 test files / 321 tests PASS**
 - Step 2.5 focused state-loop tests: 40 PASS
 - Runtime config validator: PASS
 - Capability Registry validator: PASS; 18 planned, 0 executable, 17 reserved, 0 bindings
@@ -178,7 +189,7 @@ Tests cover:
 | 2.5C-3 Synthetic mutation contracts | PASS | Separate test-only mutation Gateway; formal registry unchanged/closed |
 | 2.5C-4 Skill/tool integration | PASS | Existing intake/tracking Skills and tool names extended; no raw write interface |
 | 2.5C-5 Mark Hero Flow | PASS (local) | Six-turn smoke completes on one persistent truth |
-| 2.5C-6 Security/regression | PASS (local) | Final Hotfix baseline: 19 files / 311 tests; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
+| 2.5C-6 Security/regression | PASS (local) | Final Requirement Routing Hotfix baseline: 19 files / 321 tests; Turn A Hotfix: 19 / 311; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
 | 2.5C-7 Evidence | PASS | This report and reproducible test/smoke commands |
 
 ## Files changed
