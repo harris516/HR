@@ -175,7 +175,7 @@ Documentation:
 - `README.md`
 - `docs/FEISHU_SYNTHETIC_TEST_TOOL.md`
 - `docs/STEP2_SERVER_ROLLOUT.md`
-- `STEP2_IMPLEMENTATION_REPORT.md`
+- `chatgpt_to_codex/STEP2_IMPLEMENTATION_REPORT.md`
 
 ## Unresolved server-only checks
 

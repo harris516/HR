@@ -11,7 +11,7 @@
 
 ## 当前验证
 
-本地验收包含 `pnpm typecheck`、`pnpm build:mvp`、`pnpm test` 与 `pnpm smoke:step2`；最终数量见 `STEP2_IMPLEMENTATION_REPORT.md`。服务器上的插件注册、Skill 发现、Agent 白名单和飞书 Hero Flow 仍须在服务器版 OpenClaw 上重新校验后才能启用。
+本地验收包含 `pnpm typecheck`、`pnpm build:mvp`、`pnpm test` 与 `pnpm smoke:step2`；最终数量见 `chatgpt_to_codex/STEP2_IMPLEMENTATION_REPORT.md`。服务器上的插件注册、Skill 发现、Agent 白名单和飞书 Hero Flow 仍须在服务器版 OpenClaw 上重新校验后才能启用。
 
 ## 服务器安装前的检查与步骤
 

@@ -308,7 +308,7 @@ Run typecheck, focused Step 2 tests, full suite, build, applicable validators/sm
 Step 1 floor: 14 files / 220 tests. Explain any changed/deleted baseline test.
 
 ### 2C-7 Evidence
-Create `STEP2_IMPLEMENTATION_REPORT.md` containing:
+Create `chatgpt_to_codex/STEP2_IMPLEMENTATION_REPORT.md` containing:
 - base/final commit;
 - files changed;
 - six Skills packaged;
