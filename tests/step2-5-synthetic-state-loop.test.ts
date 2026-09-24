@@ -441,4 +441,53 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
       evidenceValidationRef: null
     });
   });
+
+  it("41 omits a missing planned start from the persistent case.list projection", () => {
+    const { databasePath } = database();
+    const created = createCase(databasePath, principal(), "projection-null", "Mark", null)
+      .mutationOutput!.receipt!.case;
+    complete(databasePath, principal(), created.caseRef, "DOCUMENTS", 1);
+    complete(databasePath, principal(), created.caseRef, "IT_ACCOUNT", 2);
+    complete(databasePath, principal(), created.caseRef, "DEVICE", 3);
+
+    const output = runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_workbench_read",
+      requestContext: principal(),
+      businessInput: { pageSize: 20 }
+    });
+    const payload = output.result.stepResults[0]!.executionOutcome!.outputPayload as {
+      items: Array<Record<string, unknown>>;
+    };
+    const item = payload.items.find((candidate) => candidate.caseRef === created.caseRef)!;
+    expect(output.result.status).toBe("COMPLETED");
+    expect(item.caseVersion).toBe(4);
+    expect(Object.prototype.hasOwnProperty.call(item, "plannedStartDateCandidate")).toBe(false);
+    expect(output).toMatchObject({ formalStateChanged: false, externalSideEffect: false });
+
+    const store = open(databasePath);
+    expect(store.getCase(principal(), created.caseRef)).toMatchObject({
+      caseVersion: 4,
+      plannedStartAt: null
+    });
+    store.close();
+  });
+
+  it("42 preserves a valid planned start in the persistent case.list projection", () => {
+    const { databasePath } = database();
+    const plannedStartAt = "2026-10-01T01:00:00.000Z";
+    const created = createCase(databasePath, principal(), "projection-date", "Lisa", plannedStartAt)
+      .mutationOutput!.receipt!.case;
+    const output = runtime(databasePath).run({
+      skillId: "onboarding_status_control_pack",
+      workflowId: "case_workbench_read",
+      requestContext: principal(),
+      businessInput: { pageSize: 20 }
+    });
+    const payload = output.result.stepResults[0]!.executionOutcome!.outputPayload as {
+      items: Array<Record<string, unknown>>;
+    };
+    expect(payload.items.find((candidate) => candidate.caseRef === created.caseRef))
+      .toMatchObject({ plannedStartDateCandidate: plannedStartAt, caseVersion: 1 });
+  });
 });

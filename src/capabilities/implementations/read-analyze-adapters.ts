@@ -149,7 +149,9 @@ const caseList: SyntheticCapabilityAdapter = (context) => {
     caseRef: record.caseRef,
     caseVersion: record.caseVersion,
     displaySubjectRef: record.displaySubjectRef,
-    plannedStartDateCandidate: record.plannedStartDateCandidate,
+    ...(record.plannedStartDateCandidate === undefined ? {} : {
+      plannedStartDateCandidate: record.plannedStartDateCandidate
+    }),
     lifecycleStatus: record.lifecycleStatus,
     suggestedReadiness: record.suggestedReadiness,
     formalReadiness: record.formalReadiness,

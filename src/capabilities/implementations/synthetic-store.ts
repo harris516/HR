@@ -6,7 +6,7 @@ export interface SyntheticCaseRecord {
   caseRef: string;
   caseVersion: number;
   displaySubjectRef: string;
-  plannedStartDateCandidate: string;
+  plannedStartDateCandidate?: string;
   lifecycleStatus: "active";
   workflowStage: "preparation_in_progress";
   suggestedReadiness: "READY" | "AT_RISK";
@@ -387,7 +387,9 @@ export function createPersistentCapabilityView(
     caseRef: item.caseRef,
     caseVersion: item.caseVersion,
     displaySubjectRef: item.candidateDisplayName,
-    plannedStartDateCandidate: item.plannedStartAt ?? "not_provided",
+    ...(item.plannedStartAt === null ? {} : {
+      plannedStartDateCandidate: item.plannedStartAt
+    }),
     lifecycleStatus: "active",
     workflowStage: "preparation_in_progress",
     suggestedReadiness: item.suggestedReadiness === "READY_CANDIDATE" ? "READY" : "AT_RISK",
