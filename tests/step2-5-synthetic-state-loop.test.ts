@@ -322,7 +322,7 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
       workflowId: "synthetic_case_create_from_accepted_offer",
       trustedInvocationId: "skill-audit-fail",
       requestContext: principal(),
-      businessInput: { candidateDisplayName: "Skill 审计失败" }
+      businessInput: { candidateDisplayName: "Skill 审计失败", offerAccepted: true }
     })).toThrowError("SKILL_AUDIT_UNAVAILABLE");
     const store = open(databasePath);
     expect(store.listCases(principal())).toHaveLength(0);
@@ -336,7 +336,7 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
       workflowId: "synthetic_case_create_from_accepted_offer",
       trustedInvocationId: "gateway-audit-fail",
       requestContext: principal(),
-      businessInput: { candidateDisplayName: "Gateway 审计失败" }
+      businessInput: { candidateDisplayName: "Gateway 审计失败", offerAccepted: true }
     })).toThrowError("GATEWAY_AUDIT_UNAVAILABLE");
     const store = open(databasePath);
     expect(store.listCases(principal())).toHaveLength(0);
@@ -350,7 +350,7 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
       workflowId: "synthetic_case_create_from_accepted_offer",
       trustedInvocationId: "execution-audit-fail",
       requestContext: principal(),
-      businessInput: { candidateDisplayName: "执行审计失败" }
+      businessInput: { candidateDisplayName: "执行审计失败", offerAccepted: true }
     })).toThrowError("AUDIT_UNAVAILABLE");
     const store = open(databasePath);
     expect(store.listCases(principal())).toHaveLength(0);

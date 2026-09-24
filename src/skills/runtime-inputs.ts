@@ -20,7 +20,7 @@ export const step2WorkflowInputSchemas = {
   }).strict(),
   synthetic_case_create_from_accepted_offer: z.object({
     candidateDisplayName: z.string().trim().min(1).max(128),
-    offerAccepted: z.literal(true).default(true),
+    offerAccepted: z.literal(true),
     plannedStartAt: z.iso.datetime({ offset: true }).nullable().optional(),
     language: languageSchema
   }).strict(),

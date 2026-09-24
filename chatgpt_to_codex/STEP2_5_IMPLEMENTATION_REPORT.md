@@ -19,6 +19,47 @@ Step 2.5 establishes one persistent SQLite business truth for the P0 synthetic o
 
 State survives later tool calls and new runtime instances. A completed three-item case can produce only `READY_CANDIDATE`; `formalReadinessStatus` remains `null`, confirmation remains `not_confirmed`, and no outbound message or external write occurs.
 
+## Mark Turn A Runtime Routing Hotfix
+
+### Server acceptance failure
+
+The real Feishu Mark Hero Flow Turn A request explicitly stated synthetic test data, an identifiable candidate, an accepted Offer, and a request to create an onboarding Case. The deployed model first called Task Navigation but then selected `onboarding_case_intake_pack -> case_intake_candidate`. It asked for `plannedStartAt`, `handoffRef`, and `expectedSourceVersion` and correctly failed closed without creating a Case.
+
+- Expected Workflow: `synthetic_case_create_from_accepted_offer`
+- Actual Workflow: `case_intake_candidate`
+- Failure class: `LLM_WORKFLOW_ROUTING_MISMATCH`
+- Root cause: the packaged Task Navigation and Case Intake instructions listed both Workflows but did not define their mutually exclusive selection conditions; the Task Navigation tool returned no concrete Workflow recommendation.
+
+### Routing contract correction
+
+- `onboarding_task_navigation_pack` now requires the four-part conjunction Synthetic context + resolved candidate + explicitly accepted Offer + explicit Case-create intent before recommending Synthetic Create. Missing `plannedStartAt` remains Unknown / null and is not a blocker.
+- `onboarding_case_intake_pack` now distinguishes Synthetic Create from Existing Handoff Intake Review. `handoffRef` and `expectedSourceVersion` belong only to the latter.
+- Task Navigation now returns a structured, non-executing `navigationDecision` containing the recommended Skill, Workflow, safe business inputs, or missing conditions for clarification.
+- The Case Intake tool description mirrors the distinction without replacing the Skill routing contract.
+- `offerAccepted: true` is now explicit and required at Tool/runtime ingress. An ambiguous Offer state cannot inherit an accepted default.
+
+### Routing and missing-field acceptance
+
+Fifteen new tests cover:
+
+- the observed Mark wording;
+- Lisa accepted-Offer wording;
+- Chinese “已接受录用” with an unknown start date;
+- English “Offer is accepted / Create an onboarding case” wording;
+- explicit Handoff completeness review;
+- an existing Offer Handoff Intake-draft request;
+- the ambiguous “Mark 的 Offer 处理一下” clarification path;
+- acceptance without `plannedStartAt`, `handoffRef`, or `expectedSourceVersion`;
+- rejection when candidate identity or explicit accepted-Offer assertion is missing;
+- rejection of `offerAccepted=false` and non-Synthetic requests;
+- static alignment of both Skill files, Tool descriptions, and the required Tool schema.
+
+Full regression after this Hotfix: **19 test files / 311 tests PASS**.
+
+### Unchanged deterministic core and security boundary
+
+The Hotfix does not modify `SyntheticCaseStore`, SQLite schema/data, `SyntheticMutationGateway`, Capability Gateway, RequestContext v2, Tenant/DataSpace isolation, Team authorization, Principal mapping, Role/Scope enforcement, audit, idempotency, optimistic locking, formal reserved Capabilities, Tool Policy, real-customer-data policy, READY commit behavior, outbound messaging, or external-side-effect policy. It does not modify the server Runtime or start Turn B / Step 3.
+
 ## Store and schema changes
 
 - Added `SyntheticBusinessStorePort` for Case create/read/list/resolve and Requirement completion.

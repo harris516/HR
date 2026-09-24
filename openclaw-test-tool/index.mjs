@@ -4,6 +4,7 @@ import { createFeishuTestContext, resolveTrustedFeishuPrincipal } from "./lib/mv
 import { SyntheticCaseStore } from "./lib/mvp/synthetic-case-store.js";
 import { createSyntheticReadyCard } from "./lib/mvp/synthetic-ready-card.js";
 import { Step2SyntheticSkillRuntime } from "./lib/skills/step2-runtime.js";
+import { evaluateCaseIntakeRouting } from "./lib/skills/case-intake-routing-contract.js";
 
 const legacyToolName = "aibang_hr_onboarding_test_ready_card";
 const runtimeToolNames = {
@@ -27,7 +28,7 @@ const pageSize = () => Type.Optional(Type.Integer({ minimum: 1, maximum: 50 }));
 const taskNavigationParameters = Type.Object({ requestText: Type.String({ minLength: 1, maxLength: 2000 }) }, { additionalProperties: false });
 const caseIntakeParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("case_intake_candidate"), handoffRef: ref(), expectedSourceVersion: Type.Optional(ref()), language: language() }, { additionalProperties: false }),
-  Type.Object({ workflowId: Type.Literal("synthetic_case_create_from_accepted_offer"), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), offerAccepted: Type.Optional(Type.Literal(true)), plannedStartAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])), language: language() }, { additionalProperties: false })
+  Type.Object({ workflowId: Type.Literal("synthetic_case_create_from_accepted_offer"), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), offerAccepted: Type.Literal(true), plannedStartAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])), language: language() }, { additionalProperties: false })
 ]);
 const requirementTrackingParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("requirement_completion_candidate"), caseRef: ref(), requirementRef: ref(), expectedCaseVersion: Type.Optional(version()), expectedRequirementVersion: Type.Optional(version()) }, { additionalProperties: false }),
@@ -95,7 +96,11 @@ function runtimeTool(tool, { name, description, parameters, skillId, workflowId 
             delete businessInput.workflowId;
             const result = runtime.run({ skillId, workflowId: selectedWorkflowId, requestContext,
               trustedInvocationId: _id, businessInput });
-            return { content: [{ type: "text", text: JSON.stringify(result) }] };
+            const navigationDecision = selectedWorkflowId === "navigation_route_handoff"
+              ? evaluateCaseIntakeRouting(businessInput.requestText)
+              : undefined;
+            return { content: [{ type: "text", text: JSON.stringify({ ...result,
+              ...(navigationDecision === undefined ? {} : { navigationDecision }) }) }] };
           } catch (error) {
             api.logger.warn(`Step 2 Skill runtime stopped: ${error instanceof Error ? error.name : "unknown"}`);
             return { content: [{ type: "text", text: "无法完成该合成入职任务；请核对案例、版本或测试配置。未执行正式状态变更。" }], isError: true };
@@ -128,14 +133,14 @@ export default defineToolPlugin({
   tools: (tool) => [
     runtimeTool(tool, {
       name: runtimeToolNames.taskNavigation,
-      description: "Identify a synthetic onboarding request and return a controlled navigation handoff.",
+      description: "Identify a synthetic onboarding request and return a controlled Skill/workflow recommendation. Synthetic test + resolved candidate + accepted Offer + explicit Case creation routes to synthetic_case_create_from_accepted_offer; a missing plannedStartAt does not block that route.",
       parameters: taskNavigationParameters,
       skillId: "onboarding_task_navigation_pack",
       workflowId: "navigation_route_handoff"
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.caseIntake,
-      description: "Create a persistent synthetic onboarding case from an accepted offer, or return an intake review draft.",
+      description: "Supports two distinct paths: use workflowId=synthetic_case_create_from_accepted_offer for synthetic test data with an accepted Offer and an explicit request to create a Case (plannedStartAt optional); use case_intake_candidate only to review an existing Handoff and produce an Intake draft.",
       parameters: caseIntakeParameters,
       skillId: "onboarding_case_intake_pack",
       workflowId: (params) => params.workflowId
