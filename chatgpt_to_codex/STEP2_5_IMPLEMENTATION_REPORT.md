@@ -130,8 +130,10 @@ Observed final evidence:
 
 - TypeScript typecheck: PASS
 - Build: PASS
-- Full suite: **18 test files / 296 tests PASS**
-- Step 2 baseline retained: 17 files / 256 tests, with 40 Step 2.5 tests
+- Full suite after the Mark Turn A routing Hotfix: **19 test files / 311 tests PASS**
+- Step 2 baseline: **17 test files / 256 tests PASS**
+- Step 2.5 before the routing Hotfix: **18 test files / 296 tests PASS**
+- Mark Turn A routing Hotfix final baseline: **19 test files / 311 tests PASS**
 - Step 2.5 focused state-loop tests: 40 PASS
 - Runtime config validator: PASS
 - Capability Registry validator: PASS; 18 planned, 0 executable, 17 reserved, 0 bindings
@@ -176,7 +178,7 @@ Tests cover:
 | 2.5C-3 Synthetic mutation contracts | PASS | Separate test-only mutation Gateway; formal registry unchanged/closed |
 | 2.5C-4 Skill/tool integration | PASS | Existing intake/tracking Skills and tool names extended; no raw write interface |
 | 2.5C-5 Mark Hero Flow | PASS (local) | Six-turn smoke completes on one persistent truth |
-| 2.5C-6 Security/regression | PASS (local) | 18 files / 296 tests plus validators, smokes, build and plugin checks |
+| 2.5C-6 Security/regression | PASS (local) | Final Hotfix baseline: 19 files / 311 tests; Step 2 baseline: 17 / 256; Step 2.5 pre-Hotfix baseline: 18 / 296; validators, smokes, build and plugin checks PASS |
 | 2.5C-7 Evidence | PASS | This report and reproducible test/smoke commands |
 
 ## Files changed
