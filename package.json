@@ -23,7 +23,8 @@
     "smoke:adapters": "tsx src/cli/smoke-read-analyze-adapters.ts",
     "smoke:drafts": "tsx src/cli/smoke-draft-adapters.ts",
     "smoke:skills": "tsx src/cli/smoke-skill-orchestrators.ts",
-    "smoke:step2": "tsx src/cli/smoke-step2-skill-runtime.ts"
+    "smoke:step2": "tsx src/cli/smoke-step2-skill-runtime.ts",
+    "smoke:step2.5": "tsx src/cli/smoke-step2-5-hero-flow.ts"
   },
   "dependencies": {
     "zod": "4.1.11"
@@ -35,3 +36,4 @@
     "vitest": "3.2.4"
   }
 }
+

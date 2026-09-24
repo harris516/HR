@@ -9,7 +9,7 @@ export interface SyntheticCaseRecord {
   plannedStartDateCandidate: string;
   lifecycleStatus: "active";
   workflowStage: "preparation_in_progress";
-  suggestedReadiness: "AT_RISK";
+  suggestedReadiness: "READY" | "AT_RISK";
   formalReadiness: null;
   confirmationStatus: "pending";
   knowledgeState: "KNOWN";
@@ -365,3 +365,87 @@ export const syntheticCapabilityStore: SyntheticCapabilityStore = {
     reviewerTypeRefs: ["authorized_hr_reviewer", "professional_practice_reviewer"]
   }
 };
+
+/**
+ * Produces the adapter view from the canonical SQLite snapshots. Supplementary
+ * risk/responsibility/artifact fixtures remain synthetic presentation aids only.
+ */
+export function createPersistentCapabilityView(
+  base: SyntheticCapabilityStore,
+  context: { tenantId: string; dataSpaceId: string; actorId: string },
+  cases: readonly import("../../mvp/synthetic-business-store.js").SyntheticCaseSnapshot[],
+  auditEvents: readonly import("../../mvp/synthetic-case-store.js").SyntheticCaseAuditSnapshot[]
+): SyntheticCapabilityStore {
+  const store = structuredClone(base) as SyntheticCapabilityStore;
+  store.tenantId = context.tenantId;
+  store.dataSpaceId = context.dataSpaceId;
+  store.cases = cases.map((item) => ({
+    synthetic: true,
+    tenantId: context.tenantId,
+    dataSpaceId: context.dataSpaceId,
+    authorizedActorIds: [context.actorId],
+    caseRef: item.caseRef,
+    caseVersion: item.caseVersion,
+    displaySubjectRef: item.candidateDisplayName,
+    plannedStartDateCandidate: item.plannedStartAt ?? "not_provided",
+    lifecycleStatus: "active",
+    workflowStage: "preparation_in_progress",
+    suggestedReadiness: item.suggestedReadiness === "READY_CANDIDATE" ? "READY" : "AT_RISK",
+    formalReadiness: null,
+    confirmationStatus: "pending",
+    knowledgeState: "KNOWN",
+    sourceRefs: [item.sourceVersionRef],
+    freshness: "fresh",
+    policyVersionRefs: ["synthetic-mvp-rule-v1"]
+  }));
+  store.requirements = cases.flatMap((item) => item.requirements.map((requirement) => ({
+    tenantId: context.tenantId,
+    dataSpaceId: context.dataSpaceId,
+    authorizedActorIds: [context.actorId],
+    caseRef: item.caseRef,
+    caseVersion: item.caseVersion,
+    requirementRef: requirement.requirementRef,
+    requirementVersion: requirement.version,
+    requirementType: requirement.kind,
+    applicabilityStatus: "applicable" as const,
+    formalStatus: requirement.status,
+    completionCandidateStatus: requirement.status === "completed"
+      ? "COMPLETE_CANDIDATE" as const
+      : "NOT_COMPLETE" as const,
+    criteriaVersionRef: requirement.completionCriteriaRef,
+    evidenceSetVersionRef: requirement.evidenceRefs[0] ?? "evidence-not-provided",
+    freshnessStatus: requirement.freshness,
+    reasonCodes: [],
+    criteriaResultRefs: requirement.status === "completed" ? ["criteria-satisfied"] : [],
+    evidenceValidationRefs: requirement.evidenceValidationRef === null
+      ? []
+      : [requirement.evidenceValidationRef]
+  })));
+  const scoped = <T extends { tenantId: string; dataSpaceId: string; authorizedActorIds: string[] }>(
+    record: T
+  ): T => ({ ...record, tenantId: context.tenantId, dataSpaceId: context.dataSpaceId,
+    authorizedActorIds: [context.actorId] });
+  store.risks = store.risks.map(scoped).filter((record) => cases.some((item) => item.caseRef === record.caseRef));
+  store.observations = store.observations.map(scoped).filter((record) => cases.some((item) => item.caseRef === record.objectRef));
+  store.evidenceLinks = store.evidenceLinks.map(scoped).filter((record) => cases.some((item) => item.caseRef === record.objectRef));
+  store.responsibilities = store.responsibilities.map((record) => ({
+    ...scoped(record), responsibilityScopeRef: `workbox-${context.actorId}`
+  })).filter((record) => cases.some((item) => item.caseRef === record.caseRef));
+  store.artifacts = store.artifacts.map(scoped).filter((record) => cases.some((item) => item.caseRef === record.caseRef));
+  store.auditEvents = auditEvents.map((event) => ({
+    tenantId: context.tenantId,
+    dataSpaceId: context.dataSpaceId,
+    authorizedActorIds: [context.actorId],
+    resourceRef: event.caseRef,
+    auditEventRef: event.eventRef,
+    eventType: event.eventType,
+    actorDisplayRef: event.actorId,
+    resultStatus: "SUCCESS",
+    reasonCodes: [],
+    occurredAt: event.occurredAt,
+    policyVersionRefs: ["synthetic-audit-v1"],
+    redactionApplied: true
+  }));
+  return store;
+}
+

@@ -16,7 +16,9 @@ const dateTimeSchema = z.string().datetime();
 export const skillWorkflowIds = [
   "navigation_route_handoff",
   "case_intake_candidate",
+  "synthetic_case_create_from_accepted_offer",
   "requirement_completion_candidate",
+  "synthetic_requirement_completion_update",
   "case_workbench_read",
   "case_status_inspection",
   "risk_workbox",
@@ -129,3 +131,4 @@ export type SkillRunRequest = z.infer<typeof skillRunRequestSchema>;
 export type SkillStepResult = z.infer<typeof skillStepResultSchema>;
 export type SkillRunResult = z.infer<typeof skillRunResultSchema>;
 export type PracticeHandoffSignal = z.infer<typeof practiceHandoffSignalSchema>;
+

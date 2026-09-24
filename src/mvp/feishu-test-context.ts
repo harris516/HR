@@ -41,7 +41,7 @@ export const syntheticTrustedFeishuPrincipals = [
     activeTeamId: "hr-onboarding-team-001",
     teamMembershipRef: "membership-hr-002-team-001",
     roles: ["onboarding_hr_operations"],
-    scopeGrantRefs: ["scope-mvp-synthetic-team-read"]
+    scopeGrantRefs: ["scope-mvp-synthetic-team-read", "scope-mvp-synthetic-team-write"]
   },
   {
     accountId: "hr-bot-03",
@@ -128,3 +128,4 @@ export function createFeishuTestContext(options: {
     synthetic: true
   };
 }
+

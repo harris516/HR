@@ -17,7 +17,7 @@ export interface SyntheticReadyCardDraft {
   externalSideEffect: false;
   caseRef: string;
   caseVersion: number;
-  plannedStartAt: string;
+  plannedStartAt: string | null;
   evaluationSnapshotDigest: string;
   evaluationAuditRef: string;
   readyEvaluationResult: SyntheticReadyResult;
@@ -28,7 +28,7 @@ export interface SyntheticReadyCardDraft {
     kind: SyntheticRequirementSnapshot["kind"];
     status: SyntheticRequirementSnapshot["status"];
     ownerRef: string;
-    deadlineAt: string;
+    deadlineAt: string | null;
     completionCriteriaRef: string;
     freshness: SyntheticRequirementSnapshot["freshness"];
     evidenceRefs: string[];
@@ -112,3 +112,4 @@ export function createSyntheticReadyCard(
     reviewRequired: true
   };
 }
+

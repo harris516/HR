@@ -68,6 +68,11 @@ const definitions: SkillDefinition[] = [
       ],
       stopOnNonSuccess: true,
       genericToolFallbackAllowed: false
+    }, {
+      workflowId: "synthetic_case_create_from_accepted_offer",
+      capabilityRefs: [],
+      stopOnNonSuccess: true,
+      genericToolFallbackAllowed: false
     }],
     featureEnabled: false,
     runtimeBindingRef: null,
@@ -85,6 +90,11 @@ const definitions: SkillDefinition[] = [
         ref("hr.onboarding.requirement.status.read"),
         ref("hr.onboarding.requirement.completion.evaluate")
       ],
+      stopOnNonSuccess: true,
+      genericToolFallbackAllowed: false
+    }, {
+      workflowId: "synthetic_requirement_completion_update",
+      capabilityRefs: [],
       stopOnNonSuccess: true,
       genericToolFallbackAllowed: false
     }],
@@ -230,3 +240,4 @@ export function getSkillDefinition(skillId: SkillId): SkillDefinition {
 export function getSkillWorkflow(skillId: SkillId, workflowId: SkillWorkflowId) {
   return getSkillDefinition(skillId).workflows.find((workflow) => workflow.workflowId === workflowId);
 }
+

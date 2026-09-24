@@ -6,14 +6,17 @@ import { CapabilityGateway } from "../capabilities/gateway.js";
 import { SyntheticCapabilityExecutor } from "../capabilities/implementations/executor.js";
 import { SyntheticSkillImplementationRegistry } from "../capabilities/implementations/skill-implementation-registry.js";
 import {
+  createPersistentCapabilityView,
   syntheticCapabilityStore,
   type SyntheticCapabilityStore
 } from "../capabilities/implementations/synthetic-store.js";
 import { capabilityRegistry } from "../capabilities/registry.js";
 import type { RequestContext } from "../contracts/navigation.js";
 import type { SkillRunResult } from "../contracts/skill-orchestration.js";
+import { SyntheticCaseStore, type TrustedTeamMembership } from "../mvp/synthetic-case-store.js";
+import { SyntheticMutationGateway, type SyntheticMutationResult } from "../mvp/synthetic-mutation-gateway.js";
 import { SyntheticSkillOrchestrator } from "./orchestrator.js";
-import { step2RuntimeInvocationSchema } from "./runtime-inputs.js";
+import { parseStep2WorkflowInput, step2RuntimeInvocationSchema } from "./runtime-inputs.js";
 import { Step2SkillRequestCompiler } from "./runtime-request-compiler.js";
 import {
   step2SyntheticActivationProfile,
@@ -31,11 +34,15 @@ export interface Step2SkillRuntimeOptions {
     gateway?: boolean;
     execution?: boolean;
   };
+  databasePath?: string;
+  repositoryRoot?: string;
+  trustedTeamMemberships?: readonly TrustedTeamMembership[];
 }
 
 export interface Step2SkillRuntimeResult {
   activationProfileId: string;
   result: SkillRunResult;
+  mutationOutput?: SyntheticMutationResult;
   auditRefs: {
     skill: string[];
     gateway: string[];
@@ -82,6 +89,11 @@ export class Step2SyntheticSkillRuntime {
   readonly #now: () => Date;
   readonly #idFactory: () => string;
   readonly #auditAvailability: NonNullable<Step2SkillRuntimeOptions["auditAvailability"]>;
+  readonly #databaseOptions?: {
+    databasePath: string;
+    repositoryRoot: string;
+    trustedTeamMemberships?: readonly TrustedTeamMembership[];
+  };
 
   constructor(options: Step2SkillRuntimeOptions) {
     if (!options.allowSyntheticTestExecution) {
@@ -93,6 +105,15 @@ export class Step2SyntheticSkillRuntime {
     this.#now = options.now ?? (() => new Date());
     this.#idFactory = options.idFactory ?? randomUUID;
     this.#auditAvailability = options.auditAvailability ?? {};
+    if (options.databasePath !== undefined && options.repositoryRoot !== undefined) {
+      this.#databaseOptions = {
+        databasePath: options.databasePath,
+        repositoryRoot: options.repositoryRoot,
+        ...(options.trustedTeamMemberships === undefined ? {} : {
+          trustedTeamMemberships: options.trustedTeamMemberships
+        })
+      };
+    }
   }
 
   run(input: unknown): Step2SkillRuntimeResult {
@@ -101,6 +122,9 @@ export class Step2SyntheticSkillRuntime {
       invocation.requestContext.synthetic !== this.#profile.syntheticOnly) {
       throw new Error("Step 2 runtime accepts only synthetic test RequestContext v2");
     }
+    const mutationWorkflow = invocation.workflowId === "synthetic_case_create_from_accepted_offer" ||
+      invocation.workflowId === "synthetic_requirement_completion_update";
+    if (mutationWorkflow) return this.#runMutation(invocation);
     const implementations = new SyntheticSkillImplementationRegistry(
       capabilityRegistry.capabilities.filter((entry) =>
         this.#profile.capabilityIds.includes(entry.capabilityId))
@@ -119,10 +143,34 @@ export class Step2SyntheticSkillRuntime {
       now: this.#now,
       idFactory: this.#idFactory
     });
-    const executor = new SyntheticCapabilityExecutor({
+    let persistentStore: SyntheticCaseStore | undefined;
+    let adapterStore = scopeStoreToPrincipal(invocation.requestContext);
+    if (this.#databaseOptions !== undefined) {
+      persistentStore = new SyntheticCaseStore({
+        databasePath: this.#databaseOptions.databasePath!,
+        repositoryRoot: this.#databaseOptions.repositoryRoot!,
+        allowSyntheticTestStorage: true,
+        ...(this.#databaseOptions.trustedTeamMemberships === undefined ? {} : {
+          trustedTeamMemberships: this.#databaseOptions.trustedTeamMemberships
+        }),
+        now: this.#now,
+        auditAvailable: () => this.#auditAvailability.execution ?? true
+      });
+      const cases = persistentStore.listCases(invocation.requestContext);
+      const audits = cases.flatMap((item) => persistentStore!.listAuditEvents(
+        invocation.requestContext, item.caseRef));
+      adapterStore = createPersistentCapabilityView(
+        syntheticCapabilityStore,
+        invocation.requestContext,
+        cases,
+        audits
+      );
+    }
+    try {
+      const executor = new SyntheticCapabilityExecutor({
       implementationRegistry: implementations,
       auditSink: executionAudit,
-      store: scopeStoreToPrincipal(invocation.requestContext),
+      store: adapterStore,
       allowSyntheticTestExecution: true,
       now: this.#now,
       idFactory: this.#idFactory
@@ -147,15 +195,145 @@ export class Step2SyntheticSkillRuntime {
       businessInput: invocation.businessInput
     });
     const result = orchestrator.run(request);
+    if (persistentStore !== undefined && result.status === "COMPLETED") {
+      const parsedInput = invocation.businessInput as Record<string, unknown>;
+      const caseRef = parsedInput.caseRef;
+      if (typeof caseRef === "string") {
+        persistentStore.recordWorkflowEvent(invocation.requestContext, caseRef, invocation.workflowId);
+      }
+    }
+      return {
+        activationProfileId: this.#profile.profileId,
+        result,
+        auditRefs: {
+          skill: skillAudit.events().map((event) => event.auditRef),
+          gateway: gatewayAudit.events().map((event) => event.auditRef),
+          execution: executionAudit.events().map((event) => event.auditRef)
+        },
+        implementationCallCount: executor.implementationCallCount,
+        formalStateChanged: false,
+        outboundMessageSent: false,
+        externalSideEffect: false,
+        realCustomerDataProcessed: false,
+        unsafeToolFallbackCount: 0
+      };
+    } finally {
+      persistentStore?.close();
+    }
+  }
+
+  #runMutation(invocation: ReturnType<typeof step2RuntimeInvocationSchema.parse>): Step2SkillRuntimeResult {
+    if (this.#databaseOptions === undefined || invocation.trustedInvocationId === undefined) {
+      throw new Error("Synthetic mutation requires configured persistent storage and trusted invocation ID");
+    }
+    const businessInput = parseStep2WorkflowInput(invocation.workflowId, invocation.businessInput);
+    const store = new SyntheticCaseStore({
+      databasePath: this.#databaseOptions.databasePath!,
+      repositoryRoot: this.#databaseOptions.repositoryRoot!,
+      allowSyntheticTestStorage: true,
+      ...(this.#databaseOptions.trustedTeamMemberships === undefined ? {} : {
+        trustedTeamMemberships: this.#databaseOptions.trustedTeamMemberships
+      }),
+      now: this.#now,
+      auditAvailable: () => this.#auditAvailability.execution ?? true
+    });
+    try {
+      let payload;
+      if (invocation.workflowId === "synthetic_case_create_from_accepted_offer") {
+        const plannedStartAt = businessInput.plannedStartAt as string | null | undefined;
+        payload = {
+          mutationId: invocation.trustedInvocationId,
+          offerRef: businessInput.offerRef as string,
+          candidateRef: businessInput.candidateRef as string,
+          candidateDisplayName: businessInput.candidateDisplayName as string,
+          ...(plannedStartAt === undefined ? {} : { plannedStartAt }),
+          sourceVersionRef: businessInput.sourceVersionRef as string,
+          scopeType: "TEAM_SHARED" as const,
+          teamId: invocation.requestContext.activeTeamId
+        };
+      } else {
+        const caseRef = businessInput.caseRef as string | undefined;
+        const candidateDisplayName = businessInput.candidateDisplayName as string | undefined;
+        const resolution = store.resolveCase(invocation.requestContext, {
+          ...(caseRef === undefined ? {} : { caseRef }),
+          ...(candidateDisplayName === undefined ? {} : { candidateDisplayName })
+        });
+        if (resolution.status !== "MATCHED" || resolution.case === null) {
+          const denied: SyntheticMutationResult = {
+            decision: "DENY",
+            reasonCode: resolution.status === "AMBIGUOUS" ? "CASE_REFERENCE_AMBIGUOUS" : "CASE_NOT_FOUND",
+            inputDigest: "not-compiled",
+            implementationCallCount: 0
+          };
+          return this.#mutationRuntimeResult(invocation, denied);
+        }
+        payload = {
+          mutationId: invocation.trustedInvocationId,
+          caseRef: resolution.case.caseRef,
+          kind: businessInput.requirementKind as "DOCUMENTS" | "IT_ACCOUNT" | "DEVICE",
+          expectedCaseVersion: businessInput.expectedCaseVersion as number,
+          expectedRequirementVersion: businessInput.expectedRequirementVersion as number,
+          evidenceRef: businessInput.evidenceRef as string,
+          evidenceValidationRef: businessInput.evidenceValidationRef as string,
+          sourceVersionRef: businessInput.sourceVersionRef as string
+        };
+      }
+      const gateway = new SyntheticMutationGateway(store);
+      const mutationWorkflowId = invocation.workflowId as
+        "synthetic_case_create_from_accepted_offer" | "synthetic_requirement_completion_update";
+      const output = gateway.execute({
+        profileId: "STEP2.5-SYNTHETIC-MUTATION-V1",
+        skillId: invocation.skillId as "onboarding_case_intake_pack" | "onboarding_requirement_tracking_pack",
+        workflowId: mutationWorkflowId,
+        capabilityId: mutationWorkflowId === "synthetic_case_create_from_accepted_offer"
+          ? "hr.onboarding.synthetic.case.create"
+          : "hr.onboarding.synthetic.requirement.update",
+        mutationId: invocation.trustedInvocationId,
+        requestContext: invocation.requestContext,
+        payload
+      });
+      return this.#mutationRuntimeResult(invocation, output);
+    } finally {
+      store.close();
+    }
+  }
+
+  #mutationRuntimeResult(
+    invocation: ReturnType<typeof step2RuntimeInvocationSchema.parse>,
+    output: SyntheticMutationResult
+  ): Step2SkillRuntimeResult {
+    const workflowId = invocation.workflowId as
+      "synthetic_case_create_from_accepted_offer" | "synthetic_requirement_completion_update";
+    const now = this.#now().toISOString();
+    const result = {
+      skillRunId: `step25-skill-${this.#idFactory()}`,
+      skillRef: { skillId: invocation.skillId, skillVersion: "1.0.0" },
+      workflowId,
+      taskId: `step25-task-${this.#idFactory()}`,
+      attemptId: `step25-attempt-${this.#idFactory()}`,
+      routeDecisionRef: `step25-route-${this.#idFactory()}`,
+      status: output.decision === "ALLOW" ? "COMPLETED" : "DENIED",
+      stepResults: [],
+      reasonCodes: [],
+      capabilityRequestCount: 1,
+      implementationCallCount: output.implementationCallCount,
+      independentCapabilityAudit: true,
+      formalStateChanged: false,
+      externalSideEffect: false,
+      outboundMessageSent: false,
+      realCustomerDataProcessed: false,
+      unsafeToolFallbackCount: 0,
+      domainCompletionClaimed: false,
+      auditRef: output.receipt?.eventRef ?? null,
+      startedAt: now,
+      completedAt: now
+    } as SkillRunResult;
     return {
-      activationProfileId: this.#profile.profileId,
+      activationProfileId: "STEP2.5-SYNTHETIC-MUTATION-V1",
       result,
-      auditRefs: {
-        skill: skillAudit.events().map((event) => event.auditRef),
-        gateway: gatewayAudit.events().map((event) => event.auditRef),
-        execution: executionAudit.events().map((event) => event.auditRef)
-      },
-      implementationCallCount: executor.implementationCallCount,
+      mutationOutput: output,
+      auditRefs: { skill: [], gateway: [], execution: output.receipt ? [output.receipt.eventRef] : [] },
+      implementationCallCount: output.implementationCallCount,
       formalStateChanged: false,
       outboundMessageSent: false,
       externalSideEffect: false,
@@ -164,3 +342,4 @@ export class Step2SyntheticSkillRuntime {
     };
   }
 }
+

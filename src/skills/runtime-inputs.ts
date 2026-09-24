@@ -18,10 +18,28 @@ export const step2WorkflowInputSchemas = {
     expectedSourceVersion: refSchema.default("ats-offer-v3"),
     language: languageSchema
   }).strict(),
+  synthetic_case_create_from_accepted_offer: z.object({
+    offerRef: refSchema,
+    candidateRef: refSchema,
+    candidateDisplayName: z.string().trim().min(1).max(128),
+    plannedStartAt: z.iso.datetime({ offset: true }).nullable().optional(),
+    sourceVersionRef: refSchema.default("synthetic-offer-v1")
+  }).strict(),
   requirement_completion_candidate: caseInputSchema.extend({
     requirementRef: refSchema,
     expectedRequirementVersion: z.number().int().nonnegative().default(3)
   }).strict(),
+  synthetic_requirement_completion_update: z.object({
+    caseRef: refSchema.optional(),
+    candidateDisplayName: z.string().trim().min(1).max(128).optional(),
+    requirementKind: z.enum(["DOCUMENTS", "IT_ACCOUNT", "DEVICE"]),
+    expectedCaseVersion: z.number().int().positive(),
+    expectedRequirementVersion: z.number().int().positive(),
+    evidenceRef: refSchema.default("synthetic-human-confirmation"),
+    evidenceValidationRef: refSchema.default("synthetic-validation-v1"),
+    sourceVersionRef: refSchema.default("synthetic-update-v1")
+  }).strict().refine((value) => value.caseRef !== undefined || value.candidateDisplayName !== undefined,
+    "caseRef or candidateDisplayName is required"),
   case_workbench_read: z.object({ pageSize: pageSizeSchema }).strict(),
   case_status_inspection: caseInputSchema,
   risk_workbox: z.object({ caseRef: refSchema, pageSize: pageSizeSchema }).strict(),
@@ -40,6 +58,7 @@ export const step2RuntimeInvocationSchema = z.object({
   skillId: skillIdSchema,
   workflowId: skillWorkflowIdSchema,
   requestContext: requestContextSchema,
+  trustedInvocationId: refSchema.optional(),
   businessInput: z.unknown()
 }).strict();
 
@@ -56,3 +75,4 @@ export function parseStep2WorkflowInput(
 ): Record<string, unknown> {
   return step2WorkflowInputSchemas[workflowId].parse(input) as Record<string, unknown>;
 }
+

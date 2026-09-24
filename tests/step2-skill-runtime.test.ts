@@ -49,7 +49,7 @@ describe("Step 2 synthetic Skill runtime activation", () => {
       externalSideEffectAllowed: false
     });
     expect(step2SyntheticActivationProfile.skillIds).toHaveLength(6);
-    expect(step2SyntheticActivationProfile.workflowIds).toHaveLength(12);
+    expect(step2SyntheticActivationProfile.workflowIds).toHaveLength(14);
     expect(step2SyntheticActivationProfile.capabilityIds).toHaveLength(18);
   });
 
@@ -202,3 +202,4 @@ describe("Step 2 controlled Skill execution", () => {
     expect(hr1.activeTeamId).toBe(hr2.activeTeamId);
   });
 });
+

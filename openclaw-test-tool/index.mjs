@@ -25,8 +25,14 @@ const language = () => Type.Optional(Type.String({ minLength: 2, maxLength: 16 }
 const pageSize = () => Type.Optional(Type.Integer({ minimum: 1, maximum: 50 }));
 
 const taskNavigationParameters = Type.Object({ requestText: Type.String({ minLength: 1, maxLength: 2000 }) }, { additionalProperties: false });
-const caseIntakeParameters = Type.Object({ handoffRef: ref(), expectedSourceVersion: Type.Optional(ref()), language: language() }, { additionalProperties: false });
-const requirementTrackingParameters = Type.Object({ caseRef: ref(), requirementRef: ref(), expectedCaseVersion: Type.Optional(version()), expectedRequirementVersion: Type.Optional(version()) }, { additionalProperties: false });
+const caseIntakeParameters = Type.Union([
+  Type.Object({ workflowId: Type.Literal("case_intake_candidate"), handoffRef: ref(), expectedSourceVersion: Type.Optional(ref()), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("synthetic_case_create_from_accepted_offer"), offerRef: ref(), candidateRef: ref(), candidateDisplayName: Type.String({ minLength: 1, maxLength: 128 }), plannedStartAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])), sourceVersionRef: Type.Optional(ref()) }, { additionalProperties: false })
+]);
+const requirementTrackingParameters = Type.Union([
+  Type.Object({ workflowId: Type.Literal("requirement_completion_candidate"), caseRef: ref(), requirementRef: ref(), expectedCaseVersion: Type.Optional(version()), expectedRequirementVersion: Type.Optional(version()) }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("synthetic_requirement_completion_update"), caseRef: Type.Optional(ref()), candidateDisplayName: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })), requirementKind: Type.Union([Type.Literal("DOCUMENTS"), Type.Literal("IT_ACCOUNT"), Type.Literal("DEVICE")]), expectedCaseVersion: Type.Integer({ minimum: 1 }), expectedRequirementVersion: Type.Integer({ minimum: 1 }), evidenceRef: Type.Optional(ref()), evidenceValidationRef: Type.Optional(ref()), sourceVersionRef: Type.Optional(ref()) }, { additionalProperties: false })
+]);
 const statusControlParameters = Type.Union([
   Type.Object({ workflowId: Type.Literal("case_workbench_read"), pageSize: pageSize() }, { additionalProperties: false }),
   Type.Object({ workflowId: Type.Literal("case_status_inspection"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()) }, { additionalProperties: false }),
@@ -78,11 +84,17 @@ function runtimeTool(tool, { name, description, parameters, skillId, workflowId 
               requesterSenderId: toolContext.requesterSenderId,
               trustedPrincipals: config.trustedPrincipals
             });
-            const runtime = new Step2SyntheticSkillRuntime({ allowSyntheticTestExecution: true });
+            const runtime = new Step2SyntheticSkillRuntime({
+              allowSyntheticTestExecution: true,
+              databasePath: config.databasePath,
+              repositoryRoot: config.repositoryRoot,
+              trustedTeamMemberships: config.trustedPrincipals
+            });
             const selectedWorkflowId = typeof workflowId === "function" ? workflowId(params) : workflowId;
             const businessInput = { ...params };
             delete businessInput.workflowId;
-            const result = runtime.run({ skillId, workflowId: selectedWorkflowId, requestContext, businessInput });
+            const result = runtime.run({ skillId, workflowId: selectedWorkflowId, requestContext,
+              trustedInvocationId: _id, businessInput });
             return { content: [{ type: "text", text: JSON.stringify(result) }] };
           } catch (error) {
             api.logger.warn(`Step 2 Skill runtime stopped: ${error instanceof Error ? error.name : "unknown"}`);
@@ -123,17 +135,17 @@ export default defineToolPlugin({
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.caseIntake,
-      description: "Run the synthetic onboarding intake candidate workflow and return an HR-review draft.",
+      description: "Create a persistent synthetic onboarding case from an accepted offer, or return an intake review draft.",
       parameters: caseIntakeParameters,
       skillId: "onboarding_case_intake_pack",
-      workflowId: "case_intake_candidate"
+      workflowId: (params) => params.workflowId
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.requirementTracking,
-      description: "Evaluate one synthetic onboarding requirement as a completion candidate without committing status.",
+      description: "Persist an explicitly requested synthetic requirement completion, or evaluate a completion candidate.",
       parameters: requirementTrackingParameters,
       skillId: "onboarding_requirement_tracking_pack",
-      workflowId: "requirement_completion_candidate"
+      workflowId: (params) => params.workflowId
     }),
     runtimeTool(tool, {
       name: runtimeToolNames.statusControl,
@@ -195,3 +207,4 @@ export default defineToolPlugin({
     }
   })]
 });
+

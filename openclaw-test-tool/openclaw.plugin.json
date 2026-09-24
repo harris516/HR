@@ -2,7 +2,7 @@
   "id": "aibang-hr-onboarding-test",
   "name": "Aibang HR Onboarding Synthetic Skill Runtime",
   "description": "Run controlled synthetic HR onboarding Skills and retain the deprecated Step 1 compatibility tool.",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "categories": ["other"],
   "contracts": {
     "tools": [
@@ -55,3 +55,4 @@
     }
   }
 }
+
