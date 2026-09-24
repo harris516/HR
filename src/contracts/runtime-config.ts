@@ -18,7 +18,7 @@ const runtimeSchema = z.object({
 
 const contractsSchema = z.object({
   identity: z.literal("v0.3"),
-  requestContext: z.literal("v1"),
+  requestContext: z.literal("v2"),
   subjectResolution: z.literal("v0.3"),
   authorization: z.literal("v0.3"),
   sessionMemory: z.literal("v0.3"),

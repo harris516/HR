@@ -18,11 +18,18 @@ describe("runtime configuration safety gate", () => {
   it("accepts the reviewed synthetic test baseline", () => {
     const config = validateRuntimeConfig(copyBaseline());
     expect(config.agent.id).toBe("aibang-hr-onboarding-agent");
+    expect(config.contracts.requestContext).toBe("v2");
     expect(config.contracts.capabilityGateway).toBe("v1");
     expect(config.contracts.readAnalyzeAdapters).toBe("v1");
     expect(config.contracts.draftAdapters).toBe("v1");
     expect(config.bindings.channels).toEqual([]);
     expect(config.enabledBusinessCapabilities).toEqual([]);
+  });
+
+  it("rejects the stale RequestContext v1 contract", () => {
+    const config = copyBaseline();
+    config.contracts.requestContext = "v1";
+    expect(() => validateRuntimeConfig(config)).toThrow(RuntimeConfigurationError);
   });
 
   it("rejects identity drift", () => {

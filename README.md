@@ -23,6 +23,7 @@
 - Read / Analyze Adapters：S3 server verified；13 synthetic test implementations；default runtime disabled
 - Draft Adapters：S4 server verified；5 synthetic test implementations；DRAFT / NOT_SENT only
 - Skill Orchestrators：S5 server verified；6 synthetic Skill contracts；child Capability independent admission/audit
+- Step 2 Skill Runtime：6 个 OpenClaw Skill bundle、6 个高层受控工具、12 条工作流；仅显式 synthetic test activation profile 可执行
 - Security Matrix：S6 server verified；NEG-001—NEG-012 plus version/schema/binding/idempotency isolation
 - Agent Engineering Baseline：10—16 Manifest v1；3 Practice、7 P0 Output、12 Security Control和11 Formal Action均为严格禁用态
 
@@ -58,6 +59,7 @@ pnpm smoke:gateway
 pnpm smoke:adapters
 pnpm smoke:drafts
 pnpm smoke:skills
+pnpm smoke:step2
 pnpm smoke:navigation
 ```
 
@@ -74,6 +76,8 @@ S4已经实现5个Draft Synthetic Adapter。所有输出都经过`DraftArtifactR
 S5已经实现6个合成Skill Orchestrator合同与12条受控Workflow。每个Child Capability都使用独立Request、Gateway Admission、Authorization Decision和Audit；任一步骤拒绝、等待、Review或失败都会停止后续步骤，不继承前一步Allow，也不使用Generic Tool Fallback。Practice路径只生成Handoff Candidate，不创建正式Review或专业决定。
 
 S6已经把NEG-001—NEG-012固化为可执行安全矩阵，覆盖Reserved Side Effect、Tenant/DataSpace与同租户Scope隔离、Cursor/Count/Field泄漏、Readiness注入、Version/Schema、Idempotency、Binding、Audit和Prompt/Tool Injection。所有负向路径保持零正式写入、零发送和零外部副作用。
+
+Step 2 将六个 Skill 打包到 `workspace-template/skills/`，并通过六个可选高层工具进入统一的 synthetic runtime composition root。业务参数先由工作流专用 schema 收敛，再由运行时确定性构造 Capability 请求；模型不能提供身份、授权决定或任意 Capability ID。基础 Capability Registry 仍保持全关闭，只有显式测试激活配置可以把 18 个安全的读取、分析和草稿实现组合进测试运行时。目标 Agent 配置示例使用 `minimal` 工具策略并拒绝通用文件、运行时、网络、消息、浏览器、HTTP 和数据库回退。
 
 ## 云服务器位置
 

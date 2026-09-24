@@ -1,13 +1,27 @@
 {
   "id": "aibang-hr-onboarding-test",
-  "name": "Aibang HR Onboarding Synthetic Test",
-  "description": "Read one synthetic onboarding case and draft a Ready review card.",
-  "version": "0.1.0",
+  "name": "Aibang HR Onboarding Synthetic Skill Runtime",
+  "description": "Run controlled synthetic HR onboarding Skills and retain the deprecated Step 1 compatibility tool.",
+  "version": "0.2.0",
   "categories": ["other"],
   "contracts": {
-    "tools": ["aibang_hr_onboarding_test_ready_card"]
+    "tools": [
+      "aibang_hr_onboarding_task_navigation",
+      "aibang_hr_onboarding_case_intake",
+      "aibang_hr_onboarding_requirement_tracking",
+      "aibang_hr_onboarding_status_control",
+      "aibang_hr_onboarding_coordination",
+      "aibang_hr_onboarding_delivery",
+      "aibang_hr_onboarding_test_ready_card"
+    ]
   },
   "toolMetadata": {
+    "aibang_hr_onboarding_task_navigation": { "optional": true },
+    "aibang_hr_onboarding_case_intake": { "optional": true },
+    "aibang_hr_onboarding_requirement_tracking": { "optional": true },
+    "aibang_hr_onboarding_status_control": { "optional": true },
+    "aibang_hr_onboarding_coordination": { "optional": true },
+    "aibang_hr_onboarding_delivery": { "optional": true },
     "aibang_hr_onboarding_test_ready_card": { "optional": true }
   },
   "activation": { "onStartup": true },

@@ -3,17 +3,101 @@ import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
 import { createFeishuTestContext, resolveTrustedFeishuPrincipal } from "./lib/mvp/feishu-test-context.js";
 import { SyntheticCaseStore } from "./lib/mvp/synthetic-case-store.js";
 import { createSyntheticReadyCard } from "./lib/mvp/synthetic-ready-card.js";
+import { Step2SyntheticSkillRuntime } from "./lib/skills/step2-runtime.js";
 
-const toolName = "aibang_hr_onboarding_test_ready_card";
+const legacyToolName = "aibang_hr_onboarding_test_ready_card";
+const runtimeToolNames = {
+  taskNavigation: "aibang_hr_onboarding_task_navigation",
+  caseIntake: "aibang_hr_onboarding_case_intake",
+  requirementTracking: "aibang_hr_onboarding_requirement_tracking",
+  statusControl: "aibang_hr_onboarding_status_control",
+  coordination: "aibang_hr_onboarding_coordination",
+  delivery: "aibang_hr_onboarding_delivery"
+};
 
-const parameters = Type.Object({
+const legacyParameters = Type.Object({
   caseRef: Type.String({ minLength: 1, maxLength: 128, description: "Synthetic case reference from the test seed." })
 }, { additionalProperties: false });
 
+const ref = () => Type.String({ minLength: 1, maxLength: 128 });
+const version = () => Type.Integer({ minimum: 0 });
+const language = () => Type.Optional(Type.String({ minLength: 2, maxLength: 16 }));
+const pageSize = () => Type.Optional(Type.Integer({ minimum: 1, maximum: 50 }));
+
+const taskNavigationParameters = Type.Object({ requestText: Type.String({ minLength: 1, maxLength: 2000 }) }, { additionalProperties: false });
+const caseIntakeParameters = Type.Object({ handoffRef: ref(), expectedSourceVersion: Type.Optional(ref()), language: language() }, { additionalProperties: false });
+const requirementTrackingParameters = Type.Object({ caseRef: ref(), requirementRef: ref(), expectedCaseVersion: Type.Optional(version()), expectedRequirementVersion: Type.Optional(version()) }, { additionalProperties: false });
+const statusControlParameters = Type.Union([
+  Type.Object({ workflowId: Type.Literal("case_workbench_read"), pageSize: pageSize() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("case_status_inspection"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()) }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("risk_workbox"), caseRef: ref(), pageSize: pageSize() }, { additionalProperties: false })
+]);
+const coordinationParameters = Type.Union([
+  Type.Object({ workflowId: Type.Literal("responsibility_reminder_draft"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("responsibility_escalation_draft"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("practice_review_draft"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false })
+]);
+const deliveryParameters = Type.Union([
+  Type.Object({ workflowId: Type.Literal("day1_ready_card_candidate"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), language: language() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("readiness_revalidation"), caseRef: ref(), expectedCaseVersion: Type.Optional(version()), previousEvaluationRef: ref(), invalidationTriggerRef: ref() }, { additionalProperties: false }),
+  Type.Object({ workflowId: Type.Literal("artifact_center_read"), caseRef: ref(), pageSize: pageSize() }, { additionalProperties: false })
+]);
+
+function isTrustedToolContext(toolContext, trustedPrincipals) {
+  if (toolContext.agentId !== "aibang-hr-onboarding-agent" ||
+    toolContext.messageChannel !== "feishu" || !Array.isArray(trustedPrincipals)) return false;
+  try {
+    resolveTrustedFeishuPrincipal({
+      agentAccountId: toolContext.agentAccountId,
+      requesterSenderId: toolContext.requesterSenderId,
+      trustedPrincipals
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function runtimeTool(tool, { name, description, parameters, skillId, workflowId }) {
+  return tool({
+    name,
+    description,
+    parameters,
+    optional: true,
+    factory({ api, toolContext }) {
+      const config = api.pluginConfig ?? {};
+      if (!isTrustedToolContext(toolContext, config.trustedPrincipals)) return null;
+      return {
+        name,
+        description,
+        parameters,
+        async execute(_id, params) {
+          try {
+            const requestContext = createFeishuTestContext({
+              agentAccountId: toolContext.agentAccountId,
+              requesterSenderId: toolContext.requesterSenderId,
+              trustedPrincipals: config.trustedPrincipals
+            });
+            const runtime = new Step2SyntheticSkillRuntime({ allowSyntheticTestExecution: true });
+            const selectedWorkflowId = typeof workflowId === "function" ? workflowId(params) : workflowId;
+            const businessInput = { ...params };
+            delete businessInput.workflowId;
+            const result = runtime.run({ skillId, workflowId: selectedWorkflowId, requestContext, businessInput });
+            return { content: [{ type: "text", text: JSON.stringify(result) }] };
+          } catch (error) {
+            api.logger.warn(`Step 2 Skill runtime stopped: ${error instanceof Error ? error.name : "unknown"}`);
+            return { content: [{ type: "text", text: "无法完成该合成入职任务；请核对案例、版本或测试配置。未执行正式状态变更。" }], isError: true };
+          }
+        }
+      };
+    }
+  });
+}
+
 export default defineToolPlugin({
   id: "aibang-hr-onboarding-test",
-  name: "Aibang HR Onboarding Synthetic Test",
-  description: "Read one synthetic onboarding case and draft a Ready review card.",
+  name: "Aibang HR Onboarding Synthetic Skill Runtime",
+  description: "Run controlled synthetic HR onboarding Skills and retain the deprecated Step 1 compatibility tool.",
   configSchema: Type.Object({
     trustedPrincipals: Type.Array(Type.Object({
       accountId: Type.String({ pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$" }),
@@ -29,29 +113,61 @@ export default defineToolPlugin({
     databasePath: Type.String({ pattern: "^/" }),
     repositoryRoot: Type.String({ pattern: "^/" })
   }, { additionalProperties: false }),
-  tools: (tool) => [tool({
-    name: toolName,
-    description: "Read a synthetic onboarding case and return a Day-1 Ready suggestion card for HR review. No formal Ready change or proactive message.",
-    parameters,
+  tools: (tool) => [
+    runtimeTool(tool, {
+      name: runtimeToolNames.taskNavigation,
+      description: "Identify a synthetic onboarding request and return a controlled navigation handoff.",
+      parameters: taskNavigationParameters,
+      skillId: "onboarding_task_navigation_pack",
+      workflowId: "navigation_route_handoff"
+    }),
+    runtimeTool(tool, {
+      name: runtimeToolNames.caseIntake,
+      description: "Run the synthetic onboarding intake candidate workflow and return an HR-review draft.",
+      parameters: caseIntakeParameters,
+      skillId: "onboarding_case_intake_pack",
+      workflowId: "case_intake_candidate"
+    }),
+    runtimeTool(tool, {
+      name: runtimeToolNames.requirementTracking,
+      description: "Evaluate one synthetic onboarding requirement as a completion candidate without committing status.",
+      parameters: requirementTrackingParameters,
+      skillId: "onboarding_requirement_tracking_pack",
+      workflowId: "requirement_completion_candidate"
+    }),
+    runtimeTool(tool, {
+      name: runtimeToolNames.statusControl,
+      description: "Read a controlled synthetic onboarding workbench, case status, evidence, audit, or risk view.",
+      parameters: statusControlParameters,
+      skillId: "onboarding_status_control_pack",
+      workflowId: (params) => params.workflowId
+    }),
+    runtimeTool(tool, {
+      name: runtimeToolNames.coordination,
+      description: "Create a synthetic reminder, escalation, or review-request draft without sending it.",
+      parameters: coordinationParameters,
+      skillId: "onboarding_coordination_pack",
+      workflowId: (params) => params.workflowId
+    }),
+    runtimeTool(tool, {
+      name: runtimeToolNames.delivery,
+      description: "Run controlled synthetic readiness, revalidation, or artifact workflows; formal READY remains unchanged.",
+      parameters: deliveryParameters,
+      skillId: "onboarding_delivery_pack",
+      workflowId: (params) => params.workflowId
+    }),
+    tool({
+    name: legacyToolName,
+    description: "Deprecated compatibility-only Step 1 Ready-card tool. Use aibang_hr_onboarding_delivery for new flows.",
+    parameters: legacyParameters,
     optional: true,
     factory({ api, toolContext }) {
       const config = api.pluginConfig ?? {};
-      if (toolContext.agentId !== "aibang-hr-onboarding-agent" ||
-        toolContext.messageChannel !== "feishu" ||
-        !Array.isArray(config.trustedPrincipals)) return null;
-      try {
-        resolveTrustedFeishuPrincipal({
-          agentAccountId: toolContext.agentAccountId,
-          requesterSenderId: toolContext.requesterSenderId,
-          trustedPrincipals: config.trustedPrincipals
-        });
-      } catch {
-        return null;
-      }
+      if (!isTrustedToolContext(toolContext, config.trustedPrincipals)) return null;
       return {
-        name: toolName,
-        description: "Read a synthetic onboarding case and return a Day-1 Ready suggestion card for HR review. No formal Ready change or proactive message.",
-        parameters,
+        name: legacyToolName,
+        description: "Deprecated compatibility-only Step 1 Ready-card tool. Use aibang_hr_onboarding_delivery for new flows.",
+        parameters: legacyParameters,
         async execute(_id, params) {
           let store;
           try {

@@ -16,7 +16,7 @@
   },
   "contracts": {
     "identity": "v0.3",
-    "requestContext": "v1",
+    "requestContext": "v2",
     "subjectResolution": "v0.3",
     "authorization": "v0.3",
     "sessionMemory": "v0.3",

@@ -23,7 +23,7 @@ const skillDefinitionSchema = z.object({
   skillVersion: z.literal("1.0.0"),
   status: z.literal("PLANNED_TEST_STUB"),
   automationCeiling: z.literal("A2_DRAFT"),
-  requiredRequestContextVersion: z.literal("1"),
+  requiredRequestContextVersion: z.literal("2"),
   workflows: z.array(skillWorkflowDefinitionSchema).min(1),
   featureEnabled: z.literal(false),
   runtimeBindingRef: z.null(),
@@ -42,7 +42,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [{
       workflowId: "navigation_route_handoff",
       capabilityRefs: [],
@@ -58,7 +58,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [{
       workflowId: "case_intake_candidate",
       capabilityRefs: [
@@ -78,7 +78,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [{
       workflowId: "requirement_completion_candidate",
       capabilityRefs: [
@@ -97,7 +97,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [
       {
         workflowId: "case_workbench_read",
@@ -131,7 +131,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [
       {
         workflowId: "responsibility_reminder_draft",
@@ -167,7 +167,7 @@ const definitions: SkillDefinition[] = [
     skillVersion: "1.0.0",
     status: "PLANNED_TEST_STUB",
     automationCeiling: "A2_DRAFT",
-    requiredRequestContextVersion: "1",
+    requiredRequestContextVersion: "2",
     workflows: [
       {
         workflowId: "day1_ready_card_candidate",

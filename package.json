@@ -22,7 +22,8 @@
     "smoke:gateway": "tsx src/cli/smoke-capability-gateway.ts",
     "smoke:adapters": "tsx src/cli/smoke-read-analyze-adapters.ts",
     "smoke:drafts": "tsx src/cli/smoke-draft-adapters.ts",
-    "smoke:skills": "tsx src/cli/smoke-skill-orchestrators.ts"
+    "smoke:skills": "tsx src/cli/smoke-skill-orchestrators.ts",
+    "smoke:step2": "tsx src/cli/smoke-step2-skill-runtime.ts"
   },
   "dependencies": {
     "zod": "4.1.11"

@@ -1,0 +1,38 @@
+{
+  "agents": {
+    "entries": {
+      "aibang-hr-onboarding-agent": {
+        "skills": [
+          "onboarding_task_navigation_pack",
+          "onboarding_case_intake_pack",
+          "onboarding_requirement_tracking_pack",
+          "onboarding_status_control_pack",
+          "onboarding_coordination_pack",
+          "onboarding_delivery_pack"
+        ],
+        "tools": {
+          "profile": "minimal",
+          "alsoAllow": [
+            "aibang_hr_onboarding_task_navigation",
+            "aibang_hr_onboarding_case_intake",
+            "aibang_hr_onboarding_requirement_tracking",
+            "aibang_hr_onboarding_status_control",
+            "aibang_hr_onboarding_coordination",
+            "aibang_hr_onboarding_delivery"
+          ],
+          "deny": [
+            "group:fs",
+            "group:runtime",
+            "group:web",
+            "group:messaging",
+            "exec",
+            "browser",
+            "http",
+            "db"
+          ],
+          "elevated": { "enabled": false }
+        }
+      }
+    }
+  }
+}
