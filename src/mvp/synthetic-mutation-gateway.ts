@@ -67,4 +67,3 @@ export class SyntheticMutationGateway {
       inputDigest, implementationCallCount: 1 };
   }
 }
-

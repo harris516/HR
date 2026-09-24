@@ -25,4 +25,3 @@
 7. 将 `workspace-template/AGENTS.md` 与 Agent 工作区的 `AGENTS.md` 做逐项差异检查后同步；该文件允许受控测试回复，但不允许主动外发或真实业务数据。
 
 任何一步失败，停止后续启用。回退优先恢复 pre-cutover 工具白名单或禁用插件；保留合成 SQLite 供诊断，不触碰其他 Agent 的路由与配置。完整顺序见 `docs/STEP2_SERVER_ROLLOUT.md`。
-

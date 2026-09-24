@@ -128,4 +128,3 @@ export function createFeishuTestContext(options: {
     synthetic: true
   };
 }
-

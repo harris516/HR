@@ -75,4 +75,3 @@ export function parseStep2WorkflowInput(
 ): Record<string, unknown> {
   return step2WorkflowInputSchemas[workflowId].parse(input) as Record<string, unknown>;
 }
-

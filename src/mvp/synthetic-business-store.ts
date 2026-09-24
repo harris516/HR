@@ -92,4 +92,3 @@ export interface SyntheticBusinessStorePort {
   listCases(context: RequestContext): SyntheticCaseSnapshot[];
   resolveCase(context: RequestContext, clue: { caseRef?: string; candidateDisplayName?: string }): SyntheticCaseResolution;
 }
-

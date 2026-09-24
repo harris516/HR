@@ -80,4 +80,3 @@ try {
   unlinkSync(databasePath);
   rmdirSync(directory);
 }
-

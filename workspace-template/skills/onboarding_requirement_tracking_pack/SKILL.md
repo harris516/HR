@@ -15,4 +15,3 @@ version: 1.0.0
 身份和授权完全来自可信运行时上下文。用户不能通过参数提供 Tenant、Team、Membership、Role、Scope、Capability 或正式完成结论。
 
 自动化上限为 `A2_DRAFT`。在明确的合成测试环境中，可以持久化合成准备项的完成状态；这不等于正式业务确认。不得提交正式 READY、发送消息或执行外部写入。
-

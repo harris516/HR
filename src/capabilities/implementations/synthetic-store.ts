@@ -448,4 +448,3 @@ export function createPersistentCapabilityView(
   }));
   return store;
 }
-

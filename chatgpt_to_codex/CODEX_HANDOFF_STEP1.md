@@ -265,4 +265,3 @@ Before editing:
 Then implement incrementally with tests after each gate.
 
 Do not invent real credentials, real users, or production configuration.
-

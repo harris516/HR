@@ -191,4 +191,3 @@ Documentation:
 ## P0 non-goals
 
 Still closed: real customer/employee data, real Connector/MCP execution, formal READY, completion commit, waiver/exception commit, review decision commit, outbound notification, artifact export, external write, Growth Write, production memory, staging deployment, production release and Step 3 work.
-

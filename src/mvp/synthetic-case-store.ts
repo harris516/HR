@@ -734,4 +734,3 @@ export class SyntheticCaseStore implements SyntheticBusinessStorePort {
     return eventRef;
   }
 }
-

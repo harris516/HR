@@ -240,4 +240,3 @@ export function getSkillDefinition(skillId: SkillId): SkillDefinition {
 export function getSkillWorkflow(skillId: SkillId, workflowId: SkillWorkflowId) {
   return getSkillDefinition(skillId).workflows.find((workflow) => workflow.workflowId === workflowId);
 }
-

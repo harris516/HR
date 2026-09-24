@@ -131,4 +131,3 @@ export type SkillRunRequest = z.infer<typeof skillRunRequestSchema>;
 export type SkillStepResult = z.infer<typeof skillStepResultSchema>;
 export type SkillRunResult = z.infer<typeof skillRunResultSchema>;
 export type PracticeHandoffSignal = z.infer<typeof practiceHandoffSignalSchema>;
-

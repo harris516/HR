@@ -159,4 +159,3 @@ Tests cover:
 - E0 v2 snapshot/digest freeze after the exact server Runtime/config is accepted.
 
 These checks require separate server rollout authorization. No live Runtime, Gateway, systemd, Feishu credential, server database, route, or other Agent was changed here.
-

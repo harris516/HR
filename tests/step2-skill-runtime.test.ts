@@ -202,4 +202,3 @@ describe("Step 2 controlled Skill execution", () => {
     expect(hr1.activeTeamId).toBe(hr2.activeTeamId);
   });
 });
-

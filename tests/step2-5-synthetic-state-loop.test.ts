@@ -285,4 +285,3 @@ describe("Step 2.5 persistent synthetic business state loop", () => {
     expect(capabilityRegistry.capabilities.some((entry) => entry.capabilityId.includes("synthetic"))).toBe(false);
   });
 });
-
